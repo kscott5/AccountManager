@@ -12,8 +12,10 @@
 	Returns: WindowsLive
 */
 define('app/libs/windowslive', [globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function(wl, $, utils) {
+	var LOG_IN_REQUIRED_ERROR = 'Login required';
+	
 	// jQyuery object
-	var hdrSessionUserCtrl, hdrSessionStatusCtrl, errorInfoCtrl;
+	var hdrSessionUserCtrl, hdrSessionStatusCtrl, isConnected;
 	
 	// WindowsLive
 	function WindowsLive() {
@@ -23,20 +25,12 @@ define('app/libs/windowslive', [globals.windowslive.requireJS.path, 'jquery', 'a
 		
 		hdrSessionUserCtrl = $('#header #session #user');
 		hdrSessionStatusCtrl = $('#header #session #status');
-		errorInfoCtrl = $('#errorInfo');
+		
+		isConnected = false;
 	};
 	
 	// Inherit from object
 	WindowsLive.prototype = new Object();
-	
-	// Private method to display error
-	function displayError(msgPrefix, errObj) {
-		var msg = msgPrefix + ('undefined' !== typeof errObj)? 
-				errObj.error_description: '';
-		
-		utils.logHelper.error(msg);
-		errorInfoCtrl.html(msg);
-	}; // end display Response Error
 	
 	// private
 	function login() {
@@ -48,10 +42,13 @@ define('app/libs/windowslive', [globals.windowslive.requireJS.path, 'jquery', 'a
 		WL.login(
 		).then(
 			function (success) {
+				isConnected = true;
 				loginStatus();
 			},
 			function (failure)	{
-				displayError('Error signing in: ' + failure);
+				// failure = { error: '', error_description: '' }
+				utils.logHelper.debug(failure.error_description);
+				utils.logHelper.appMessage('Error signing in: ' + failure);
 			} // end failure
 		);
 	}; // end login
@@ -66,7 +63,12 @@ define('app/libs/windowslive', [globals.windowslive.requireJS.path, 'jquery', 'a
 
 	// private
 	function getMe() {
-		utils.logHelper.debug('getMe: Getting user basic information');		
+		utils.logHelper.debug('getMe: Getting user basic information');	
+		if(!isConnected) {
+			utils.logHelper.appMessage(LOG_IN_REQUIRED_ERROR);
+			return;
+		}
+		
 		hdrSessionUserCtrl.html('');
 
 		WL.api({
@@ -84,9 +86,14 @@ define('app/libs/windowslive', [globals.windowslive.requireJS.path, 'jquery', 'a
 			    hdrSessionUserCtrl.html(html);
 			},
 			function (failure) {
-				displayError('Error getMe: ', failure);				
+				utils.logHelper.appMessage('Error getMe: ', failure);				
 			} 
 		); 		
+	};
+	
+	WindowsLive.prototype.isConnected = getIsConnected;
+	function getIsConnected() {
+		return isConnected;
 	};
 	
 	WindowsLive.prototype.initialize = initialize;
@@ -103,7 +110,8 @@ define('app/libs/windowslive', [globals.windowslive.requireJS.path, 'jquery', 'a
 				utils.logHelper.debug('Login Status response (async): ' + success.status);
 				
 				switch(success.status) {
-					case 'connected': 					
+					case 'connected': 
+						isConnected = true;
 						hdrSessionStatusCtrl.html('Logout');
 						hdrSessionStatusCtrl.bind('click', logout);
 						break;
@@ -111,6 +119,7 @@ define('app/libs/windowslive', [globals.windowslive.requireJS.path, 'jquery', 'a
 					case 'notConnected':
 					case 'unknown':
 					default:
+						isConnected = false;
 						hdrSessionStatusCtrl.html('Login');
 						hdrSessionStatusCtrl.bind('click', login);			
 						break;
@@ -125,70 +134,59 @@ define('app/libs/windowslive', [globals.windowslive.requireJS.path, 'jquery', 'a
 	
 	// Windows Live API OneDrive
 	// If this gets to large add to separate file
-	WindowsLive.prototype.foldersfiles = (function(){
-		function FoldersFiles() {
-			//Add additional properties here...
-		}; // end FoldersFiles
+	//
+	// http://msdn.microsoft.com/en-us/library/live/hh243648.aspx#folder
+	function FoldersFiles() {
+		//Add additional properties here...
+	}; // end FoldersFiles
 
-		FoldersFiles.prototype = new Object();
-		
-		// Get the top level OneDrive directory 
-		//
-		// Assumption: WL.api will construct the REST Url with
-		//   the access_token...
-		FolderFiles.prototype.getTopLevel = getTopLevel;
-		function getTopLevel() {
-			utils.logHelper.debug('Getting Top Level OneDrive info');
-			WL.api({
-				path: 'me/skydrive', 
-				method: 'GET',
-				body: {}, // NOTHING
-			})
-			.then(
-				function(success) {
-					utils.logHelper.debug('Looping over OneDrive Info');
-				}, // end success
-				function(failure) {
-					displayError('Error getTopLevel', failure);
-				}, // end failure
-			);
-		};
-		
-		FoldersFiles.prototype.downloadFileDigalog = downloadFileDigalog;
-		function downloadFileDigalog() {
-			var wlfd = WL.fileDialog({
-				mode: 'open',
-				select: 'multi'
-			}).then( 
-				function(success) { // Success
-					downloadData(success.data);
-				},
-				function(failure) { // Failure
-					displayError('Error with the file dialog: ', failure);
-				}
-			); // end WL.fileDialog			
-		}; // end downloadFileDialog
-		
-		// private
-		function downloadData(data) {			
-			// Loop over files first
-			for(var i=0; i<data.files.length; i++) {
-				WL.download({
-					path: data.files[i].id
-				}).then( function(failure) {
-					displayError('Error downloading file: ', failure);
-				});
-			} // end for
-			
-			// Loop over folders now..
-			for(var i=0; i<data.folders.length; i++) {
-				// Recursive call to self
-				downloadData(data.folders[i]);	
-			} // end for
-		}; //end download data
-		
-		return new FoldersFiles();
-	}); // end folders and files
+	FoldersFiles.prototype = new Object();
+	
+	// Get the top level OneDrive directory 
+	//
+	// Assumption: WL.api will construct the REST Url with
+	//   the access_token...
+	FoldersFiles.prototype.getTopLevel = getTopLevel;
+	function getTopLevel() {
+		utils.logHelper.debug('Getting Top Level OneDrive info');
+		var results = [];
+
+		WL.api({
+			path: 'me/skydrive', 
+			method: 'GET'
+		})
+		.then(
+			function(success) {
+				utils.logHelper.debug('Looping over OneDrive Info');
+				var data = success.data;
+				utils.logHelper.debu(success);
+				for(var i=0; i<data.length; i++) {
+					var isParent = (data[i].type == 'folder') ||
+								   (data[i].type == 'album');
+								   
+					// TODO: Move this structue to utilities if you plan to include
+					// other library such Google Docs
+					var rd = {
+						id: data[i].id,
+						path: data[i].path,
+						name: data[i].name,							
+						isParent: isParent							
+					};
+					
+					results.push(rd);
+				} // end for
+				
+				utils.logHelper.debug('Found: {0} results'.replace('{0}', results.length));
+			}, // end success
+			function(failure) {
+				utils.logHelper.appMessage('Error getTopLevel', failure);
+			} // end failure
+		);	
+
+		return results;
+	}; // end getTopLevel
+	
+	WindowsLive.prototype.foldersfiles = new FoldersFiles();
 	
 	var windowslive = new  WindowsLive();
 	return windowslive;
