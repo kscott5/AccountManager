@@ -85,24 +85,6 @@ define('app/utilities', ['toastr'], function(toastr) {
 	****************************************************/
 	utils.objectHelper = (function(logHelper) { // 'var logHelper' is define previously above
 	
-		// User Object
-		var User = function() {
-			this.firstName = '';
-			this.lastName = '';
-			this.userName = '';
-			this.email = '';
-			this.password = '';
-			this.passwordConfirmation = '';
-			this.isAuthenticated = false;
-			this.token = '';
-		};
-		
-		// Inherit from Object
-		User.prototype = new Object();
-		function newUser() {
-			return new User();
-		}; // end newUser
-		
 		// Base View Model Object
 		var BaseViewModel = function() {
 			if(arguments.length == 0 || arguments[0].length < 2) {
@@ -147,10 +129,8 @@ define('app/utilities', ['toastr'], function(toastr) {
 			this.keywords = '';
 			this.name = '';
 			
-			this.user = new User();
 			this.app = utils.app;
 			
-			this.error = new SysError();
 			this.results = {}; // use hash to allow dynamic model results
 		} // end BaseModel
 
@@ -162,29 +142,9 @@ define('app/utilities', ['toastr'], function(toastr) {
 			return new BaseModel();
 		}; //end newBaseModel
 		
-		/***************************************************
-		*		Section for common Error functions
-		****************************************************/	
-		// Applicatioin error object
-		var SysError = function(){
-			this.isPresent = false;
-			this.message = '';
-			this.code = '';
-			this.functionName = ''
-		}; // end constructor
-
-		// Inherit from object
-		SysError.prototype = new Object();			
-		
-		function newSysError() {
-			return new SysError();
-		}; // end newSysError
-		
 		return {
 			newBaseViewModel: newBaseViewModel,
 			newBaseModel: newBaseModel,
-			newSysError: newSysError,
-			newUser: newUser,
 		} // NOW...
 	})(utils.logHelper); // end Object Helper	
 			
