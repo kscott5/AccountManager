@@ -1,0 +1,39 @@
+	<h1> Account Manager (Example6)</h1>
+	<br/>
+	<p id="readme" name="readme">
+		*****************************************************<br/>
+		*   Simple self-contain web application to learn <br/>
+		*	KnockoutJS, RequireJS, text and toastr javascript <br/>
+		*	frameworks. <br/>
+		*<br/>
+		* 	In the previous examples, I did the following:<br/>
+		*<br/>
+		*	1) Basic interaction with Windows Live API. After all<br/>
+		*	   the point to starting all this was to manage<br/>
+		*	   multiple online accounts. This is ambious considering<br/>
+		*	   the level of detail I include throughout these <br/>
+		*	   example to help the next developer. But its a goal!<br/>
+		* 	   There are many possibilities!<br/>
+		*<br/>
+		*	Here's what to expect from this example:<br/>
+		*<br/>
+		*   1) Replaced Nginx server with WEBrick. This was a major<br/>
+		*	   undertaken considering installing and configuring<br/>
+		*	   the Ruby and Rails environment. This had to be done<br/>
+		*	   to allow for Windows Live API to POST back to our<br/>
+		* 	   callback page.<br/>
+		*	 2) Intergation of existing javascript libraries into<br/>
+		*		Rails convention<br/>
+		*    3) Syntax changes required for Rails (aka HtmlHelper)<br/>
+		*<br/>
+		*****************************************************<br/>
+	</p>
+	<br/>
+	<br/>
+	 <%= link_to controller: "home", action:"index" do %>
+		<%= image_tag("example6.jpg") %>
+	 <% end %>
+	
+	<br/>
+	<br/>
+	Click  <%= link_to "start", controller: "home", action: "index" %> to run...

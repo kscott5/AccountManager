@@ -1,0 +1,32 @@
+<h1>Navigation Todo List</h1>
+	<ul>
+		<li>Style via css</li>
+		<li>Apply any binding (optional)</li>
+		<li>jQuery menuing (optional)</li>
+	</ul>
+	<br/>
+
+
+	<div id="navigation" name="navigation">
+		<!-- 
+			NOTE: The hash, #name, attached to href attribute
+				  prevents a post back to the server. This is
+				  fine but we still need to post which view we 
+				  need. So add the href value to hidden	form 
+				  field and submit the form.
+				  
+				  Add onclick event to a tag and perform the 
+				  work need.			  
+		-->	
+		
+		<a id="home" name="home" class="navigationItem" href="#home">Home</a>
+				
+		<a id="mail" name="mail" class="navigationItem" href="#mail">Mail</a>
+		
+		<a id="folders" name="folders" class="navigationItem" href="#folders">Folders &amp; Files</a>
+
+		<!-- TODO: Integrate the Ruby link_tag here -->		
+		<a id="readme" name="readme" class="navigationReadItem" href="/home/readme">Read Me</a>	
+	</div>
+
+<br/>

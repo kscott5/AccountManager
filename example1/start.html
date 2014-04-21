@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title data-bind="text: title"></title>
+	<script src="/scripts/jquery-1.11.0.min.js" language="javascript"></script>
+	<script src="/scripts/knockout-3.1.0.debug.js" language="javascript"></script>
+	<script src="/scripts/toastr.js" language="javascript"></script>
+	
+	<script src="/scripts/common.js" language="javascript"></script>
+	<script src="/scripts/viewmodels.js" language="javascript"></script>
+	<script src="/scripts/dataservices.js" language="javascript"></script>
+
+	<link href="/content/acctmgr.css" rel="stylesheet"/>
+	
+	<script type="text/javascript">
+		$(function(){
+			AcctMgrApp.bindModelToContext(AcctMgrApp.SomeViewModel.getModel());
+		});
+	</script>
+</head>
+<body>
+<h2>Model: Information that should live within the head tag</h2>
+<br/>
+	<table style="min-width:400px">
+		<tr><td>App Name:</td><td> <span data-bind="text: appName"/></td></tr>
+		<tr><td>App Version:</td><td> <span data-bind="text: appVersion"/></td></tr>
+		<tr><td>App Contact:</td><td> <span data-bind="text: appContact"/></td></tr>
+		<tr><td>App Email:</td><td> <span data-bind="text: appEmail"/></td></tr>
+		<tr><td>Title:</td><td> <span data-bind="text: title"/></td></tr>
+		<tr><td>Description:</td><td> <span data-bind="text: description"/></td></tr>
+		<tr><td>Keywords:</td><td> <span data-bind="text: keywords"/></td></tr>
+	</table>
+<br/>
+<br/>
+	<h2 >Model: Results Information should live with the body tag</h2>
+	<br/>
+	<table style="min-width:400px">
+		<tr><td>results.moreData:</td><td><span data-bind="text: results.moreData"/></td></tr>
+		<tr><td>results.data:</td>
+			<td>
+				<ul data-bind="foreach: results.data">
+					<li><span data-bind="text: $data.name + '=>' + $data.description"/></li>
+				</ul>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

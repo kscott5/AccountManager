@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="/scripts/jquery-1.11.0.min.js"></script>
+	<script src="/scripts/modernizr-2.6.2.js"></script>
+	
+	<script src="/scripts/angular.js"></script>
+	<script src="/scripts/q.js"></script>
+	<script src="/scripts/breeze.debug.js"></script>
+	<script src="/scripts/breeze.savequeuing.js"></script>
+
+	<!--<script src="//js.live.net/v5.0/wl.debug.js"></script>-->
+	<script src="/scripts/am.js"></script>
+	
+	
+	<link href="/styles/normalize.css" rel="Stylesheet" type="text/css" />
+	<link href="/styles/am.css" rel="Stylesheet" type="text/css" />
+	
+	<script language="javascript" type="text/javascript">
+		$(function(){
+			var wlcfg =  AccountManager.WL.config.create();
+			wlcfg.app_client_id = "0000000040118C8D"; 
+			wlcfg.redirect_url = "wlapicallbk.html"; 
+			wlcfg.ui_name = "signin"; 
+			wlcfg.ui_element = "signin"; 
+			wlcfg.scope = ["wl.signin", "wl.emails", "wl.basic"]; 
+			wlcfg.response_type = "token";
+					
+			AcctMgr.WL.init(wlcfg);
+		});
+	</script>
+</head>
+<body>
+	<h1 id="pageHeader" name="pageHeader">
+	Welcome to simple javascript application
+	</h1>
+	<div id="errorMsg" name="errorMsg">
+	[PLACE HOLDER FOR ERROR MESSAGE]
+	</div>
+	<div id="signin"></div>
+	<section>
+		<div id="userInfo" name="userInfor">
+			<span id="firstName" name="firstName"/>
+			<span id="lastName" name="lastName"/>
+			<span id="emailAddress" name="emailAddress"/>
+		</div>
+	</section>
+	<section>
+	<a href="test.html">Test Page</a>
+	</section>
+	
+	<div data-ng-view></div> <!-- The SPA Views go here -->   
+</body>
+</html>

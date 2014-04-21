@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title data-bind="text: title"></title>
+	<meta name="AppName" data-bind="value: app.name"/>
+	<meta name="AppVersion" data-bind="value: app.version"/>
+	<meta name="AppContact" data-bind="value: app.contact"/>
+	<meta name="AppEmail" data-bind="value: app.email"/>
+	<meta name="Description" data-bind="value: description"/>
+	<meta name="Keywords" data-bind="value: keywords"/>
+	
+  <%= stylesheet_link_tag "toastr.min", media: "all", "data-turbolinks-track" => true %>
+  <%= stylesheet_link_tag "acctmgr", media: "all", "data-turbolinks-track" => true %>
+
+  <!-- 
+		Add options to the end of required parameters, 
+		and use "key"=>"value". If addition options 
+		need seperate by comma.
+		
+		"key"=>"value","key"=>"value","key"=>"value"
+		
+		Welcome to the world of Ruby on Rails...
+  -->
+  <%= javascript_include_tag "globals", media: "all", "data-turbolinks-track" => true %>
+  <%= javascript_include_tag "require-2.1.11", media: "all", "data-turbolinks-track" => true , "data-main" => "/assets/data-main" %>
+  
+</head>
+<body>
+	<%= yield %>
+</body>
+</html>

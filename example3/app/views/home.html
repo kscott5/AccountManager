@@ -1,0 +1,21 @@
+<div id="templateContent" name="templateContent">
+	<h1>Main Content (Body)</h1>
+	<table style="min-width:400px">
+		<tr>
+			<td>results.data:</td>
+			<td>
+				<ul data-bind="foreach: results.data">
+					<li><span data-bind="text: $data.name + '=>' + $data.description"/></li>
+				</ul>
+			</td>
+		</tr>
+		<tr>
+			<td>results.moreData:</td>
+			<td>
+			<ul data-bind="foreach: results.moreData">
+				<li><span data-bind="text: $data.name + '=>' + $data.description"/></li>
+			</ul>
+			</td>
+		</tr>
+	</table>
+</div>

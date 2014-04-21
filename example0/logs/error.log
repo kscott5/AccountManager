@@ -1,0 +1,67 @@
+2014/03/29 12:09:28 [error] 2984#4540: *2 CreateFile() "accountmgr/./styles/am.css" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /styles/am.css HTTP/1.1", host: "localhost", referrer: "http://localhost/default.html"
+2014/03/29 12:09:42 [error] 2984#4540: *2 CreateFile() "accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost"
+2014/03/29 12:10:58 [notice] 4324#4700: signal process started
+2014/03/29 12:12:21 [error] 4532#3608: *2 CreateFile() "accountmgr/./styles/am.css" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /styles/am.css HTTP/1.1", host: "localhost:81", referrer: "http://localhost:81/default.html"
+2014/03/29 12:12:35 [error] 4532#3608: *2 CreateFile() "accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 12:27:00 [error] 4532#3608: *5 CreateFile() "accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 12:27:44 [error] 4532#3608: *4 CreateFile() "accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 12:28:50 [error] 4532#3608: *4 CreateFile() "accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 12:29:16 [error] 4532#3608: *4 CreateFile() "accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 12:29:52 [notice] 3284#868: signal process started
+2014/03/29 13:11:13 [error] 820#1460: *1 CreateFile() "accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 13:11:44 [emerg] 2864#3872: CreateFile() "accountmgr/conf/nginx.conf" failed (2: The system cannot find the file specified)
+2014/03/29 13:12:21 [notice] 4432#5108: signal process started
+2014/03/29 13:21:36 [error] 3292#3268: *1 CreateFile() "/apps/web/accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 13:22:29 [notice] 3336#4972: signal process started
+2014/03/29 13:24:30 [notice] 3924#4684: signal process started
+2014/03/29 15:07:43 [error] 5752#5300: *1 CreateFile() "/apps/web/accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 15:17:14 [notice] 1024#4156: signal process started
+2014/03/29 15:30:27 [error] 5352#5428: *2 CreateFile() "/apps/web/accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 15:33:26 [error] 5352#5428: *4 CreateFile() "/apps/web/accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 15:34:22 [error] 5352#5428: *4 CreateFile() "/apps/web/accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 15:34:37 [error] 5352#5428: *4 CreateFile() "/apps/web/accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 15:35:44 [error] 5352#5428: *11 CreateFile() "/apps/web/accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 15:55:05 [error] 5352#5428: *20 CreateFile() "/apps/web/accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 15:56:00 [error] 5352#5428: *20 CreateFile() "/apps/web/accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 16:11:05 [error] 5352#5428: *42 CreateFile() "/apps/web/accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "127.0.0.1:81"
+2014/03/29 16:18:02 [notice] 3532#5264: signal process started
+2014/03/29 17:22:44 [notice] 2984#3972: signal process started
+2014/03/29 17:25:34 [error] 2316#3740: *1 CreateFile() "/apps/web/accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 17:27:43 [notice] 4492#1856: signal process started
+2014/03/29 17:34:04 [notice] 1844#2312: signal process started
+2014/03/29 17:35:23 [error] 4208#2716: *1 CreateFile() "/apps/web/accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost:81, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 17:35:55 [notice] 4884#3352: signal process started
+2014/03/29 17:37:37 [notice] 3428#3856: signal process started
+2014/03/29 17:41:05 [emerg] 2216#4736: host not found in "acctmgrdev:81" of the "listen" directive in /apps/web/accountmgr/conf/nginx/nginx.conf:38
+2014/03/29 17:41:16 [emerg] 1924#4332: host not found in "acctmgrdev:81" of the "listen" directive in /apps/web/accountmgr/conf/nginx/nginx.conf:38
+2014/03/29 17:41:58 [emerg] 3024#2168: host not found in "acctmgrdev:81" of the "listen" directive in /apps/web/accountmgr/conf/nginx/nginx.conf:38
+2014/03/29 17:42:11 [emerg] 4596#5048: host not found in "acctmgrdev:81" of the "listen" directive in /apps/web/accountmgr/conf/nginx/nginx.conf:38
+2014/03/29 17:44:55 [emerg] 1412#3348: host not found in "acctmgrdev:81" of the "listen" directive in /apps/web/accountmgr/conf/nginx/nginx.conf:38
+2014/03/29 17:47:37 [emerg] 3556#4540: directive "server_name" is not terminated by ";" in /apps/web/accountmgr/conf/nginx/nginx.conf:44
+2014/03/29 17:48:34 [error] 1868#4424: *3 CreateFile() "/apps/web/accountmgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 17:58:32 [notice] 3692#4572: signal process started
+2014/03/29 20:36:32 [emerg] 3460#2084: unexpected "}" in /apps/web/account_mgr/conf/nginx/nginx.conf:47
+2014/03/29 20:37:53 [error] 2224#4764: *31 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/29 23:55:22 [error] 2224#4764: *242 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 00:07:32 [error] 2224#4764: *271 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 00:23:07 [error] 2224#4764: *295 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 00:36:40 [error] 2224#4764: *323 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 00:36:56 [error] 2224#4764: *325 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 02:28:25 [error] 2224#4764: *393 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 02:29:04 [error] 2224#4764: *395 CreateFile() "/apps/web/account_mgr/./test.html" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /test.html HTTP/1.1", host: "localhost:81"
+2014/03/30 02:30:32 [error] 2224#4764: *396 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 02:31:13 [error] 2224#4764: *396 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 02:35:34 [error] 2224#4764: *407 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 03:07:19 [error] 2224#4764: *414 CreateFile() "/apps/web/account_mgr/./scripts/breeze.savingqueuing.js" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /scripts/breeze.savingqueuing.js HTTP/1.1", host: "localhost:81", referrer: "http://localhost:81/"
+2014/03/30 03:08:13 [error] 2224#4764: *414 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 03:17:41 [error] 2224#4764: *422 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 05:45:14 [notice] 5164#5312: signal process started
+2014/03/30 05:47:24 [error] 1856#5952: *9 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 05:48:49 [error] 1856#5952: *18 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 05:50:37 [error] 1856#5952: *19 CreateFile() "/apps/web/account_mgr/./scripts/am.js" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /scripts/am.js HTTP/1.1", host: "localhost:81", referrer: "http://localhost:81/"
+2014/03/30 05:50:38 [error] 1856#5952: *23 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 05:53:54 [error] 1856#5952: *29 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 05:57:43 [error] 1856#5952: *41 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 05:58:37 [error] 1856#5952: *40 CreateFile() "/apps/web/account_mgr/./favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:81"
+2014/03/30 11:58:06 [notice] 6036#512: signal process started
+2014/03/30 12:00:50 [notice] 4900#5588: signal process started

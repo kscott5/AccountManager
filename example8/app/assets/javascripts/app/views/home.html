@@ -1,0 +1,51 @@
+<div id="templateContent" name="templateContent">
+	<h1> Account Manager (Example8)</h1>
+	<br/>
+	<p id="readme" name="readme">
+		Simple self-contain web application to learn <br/>
+		KnockoutJS, RequireJS, text and toastr javascript <br/>
+		frameworks. <br/>
+		
+		In the previous examples, I did the following:
+		<ul>
+			<li> Complete OAuth2 flow with Windows Live (WL) API</li>
+			<li> Refactoring of the windowslive.js file </li>
+			<li> Access the user's basic WL info</li>
+			<li> Configure DEBUGGING in global.js for logging</li>
+		</ul>
+		
+		<br />
+		Here's what to expect from this example:<br/>
+		<ul>
+			<li>
+			   Access Folders &amp; Files with Windows Live (WL) API
+			 </li>
+			 <li>
+				Add note regarding WL API documentation
+			 <li/>
+		</ul>
+
+		<br/>
+		<br/>
+	</p>
+	<br />
+	<table style="min-width:400px">
+	<tr>
+		<td>results.data:</td>
+		<td>
+			<ul data-bind="foreach: results.data">
+				<li><span data-bind="text: $data.name + '=>' + $data.description"/></li>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<td>results.moreData:</td>
+		<td>
+		<ul data-bind="foreach: results.moreData">
+			<li><span data-bind="text: $data.name + '=>' + $data.description"/></li>
+		</ul>
+		</td>
+	</tr>
+</table>
+
+</div>

@@ -1,0 +1,9 @@
+#readme {
+	text-align: left;
+	width: 425px;
+	display: inline-block;
+};
+
+a.navigationItem.* {
+	color: blue;
+};
