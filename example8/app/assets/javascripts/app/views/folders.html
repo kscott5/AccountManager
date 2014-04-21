@@ -1,12 +1,9 @@
 <div id="templateContent" name="templateContent">
-	<h1>Folder Template Todo List</h1>
-	<ul>
-		<li>Add any html</li>
-		<li>Apply styles via css</li>
-		<li>Apply any binding tags</li>
-		<li>Create javascipt using _base.js (optional)</li>
-		<li>Use convention over configuration. (*REQUIRED*)</li>
+	<ul data-bind="foreach: results.data">
+		<li>
+			<span id="ffid" name="ffid" data-bind="text: id"></span>
+			<span id="ffname" name="ffname" data-bind="text: name"></span>
+			<span id="ffisParent" name="ffisParent" data-bind="text: isParent"></span>
+		</li>
 	</ul>
-	<br/>
-
 </div>

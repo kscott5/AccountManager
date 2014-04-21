@@ -26,9 +26,10 @@ define('app/models/folders', ['app/utilities'], function(utils) {
 		var self = arguments[0];
 						
 		self.model = new FoldersModel(self.config);
-		
-		// TODO: Add data to self.results.data
-		utils.logHelper.warning('Folders View Model Initialize Not Implemented');
+
+		requirejs(globals.require.config, ['app/manager'], function(manager) {;		
+			self.model.results.data = manager.library.foldersfiles.getTopLevel();			
+		});		
 	} //end initCallback
 			
 	// Called during the saving of ViewModel
