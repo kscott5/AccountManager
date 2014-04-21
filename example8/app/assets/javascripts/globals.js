@@ -75,7 +75,7 @@ globals.require = (function(){
 				
 				// Directory for .js scripts that wrap
 				// third party APIs such as Windows Live API
-				libs: 'app/libs',				
+				libs: 'app/libs',
 			}, // end paths
 		} // end config
 	};	// return NOW...
