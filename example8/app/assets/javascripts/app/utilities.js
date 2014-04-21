@@ -17,7 +17,7 @@ define('app/utilities', ['toastr'], function(toastr) {
 			name : 'Account Manager',
 			contact : 'Karega Scott',
 			email : 'dev_ks@outlook.com',
-			url : 'http=//ksacctmgr.com'
+			url : 'http://ksacctmgr.com'
 		},
 	};
 	
@@ -35,7 +35,7 @@ define('app/utilities', ['toastr'], function(toastr) {
 		
 		LogHelper.prototype.debug = debug;
 		function debug(msg, title) {
-			if('undefined' != typeof DEBUGGING) {
+			if('boolean' == typeof DEBUGGING && DEBUGGING) {
 				console.debug(msg);
 			}
 		}
@@ -43,7 +43,7 @@ define('app/utilities', ['toastr'], function(toastr) {
 		// Attach function to display error	
 		LogHelper.prototype.error = error;
 		function error(msg, title) {
-			if('undefined' != typeof DEBUGGING) {
+			if('boolean' == typeof DEBUGGING && DEBUGGING) {
 				console.error(msg);
 			} else {
 				toastr.error(msg, title, this.overrideOption);
@@ -53,7 +53,7 @@ define('app/utilities', ['toastr'], function(toastr) {
 		// Attach function to display info	
 		LogHelper.prototype.info = info;
 		function info(msg, title) {
-			if('undefined' != typeof DEBUGGING) {
+			if('boolean' == typeof DEBUGGING && DEBUGGING) {
 				console.info(msg);
 			} else {
 				toastr.info(msg, title, this.overrideOption);
@@ -70,12 +70,22 @@ define('app/utilities', ['toastr'], function(toastr) {
 		LogHelper.prototype.warning = warning;
 		LogHelper.prototype.warn = warning;
 		function warning(msg, title) {
-			if('undefined' != typeof DEBUGGING) {
+			if('boolean' == typeof DEBUGGING && DEBUGGING) {
 				console.warn(msg);
 			} else {
 				toastr.warning(msg, title, this.overrideOption);
 			}
 		} // end warning
+	
+		LogHelper.prototype.appMessage = appMessage;
+		function appMessage(msgPrefix, msgObj) {
+			var msg = msgPrefix + (('undefined' !== typeof msgObj && 
+					'undefined' !== typeof msgObj.error_description)? 
+					msgObj.error_description: '');
+			
+			debug(msg);
+			document.getElementById('errorInfo').innerHTML = msg;
+		}; // end appMessage
 	
 		return new LogHelper(); // NOW...
 	})(toastr); // end LogHelper
