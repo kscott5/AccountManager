@@ -37,7 +37,9 @@ define('app/manager', ['jquery','ko', 'app/utilities', 'app/libs/windowslive'],
 	var Manager = function() {
 		this.app = utils.app;
 		this.logHelper = utils.logHelper;
+		this.library = wl; // TODO: Allow selection of the library later
 	} // end Manager Constructor
+	
 	
 	// Attach methods
 	Manager.prototype.navigateToView = navigateToView;
@@ -51,6 +53,8 @@ define('app/manager', ['jquery','ko', 'app/utilities', 'app/libs/windowslive'],
 	// REMEMBER: Convention over 
 	//					Configuration
 	function navigateToView() {
+		utils.logHelper.appMessage(''); // clear it
+	
 		var viewName = (arguments[0] || 'home').replace('#','').trim();
 				
 		// At this point server should have pick up the
@@ -74,8 +78,12 @@ define('app/manager', ['jquery','ko', 'app/utilities', 'app/libs/windowslive'],
 		// with call the callback function. But it will...
 		//
 		// Review /scripts/globals.js to understand what html, helper and model
-		requirejs(cfg, deps,  function(viewHtml, viewHelper, viewModel) {			
-				
+		//
+		// NOTES: http://requirejs.org/docs/1.0/docs/api.html#jsfiles
+		//    If you want  to load some JavaScript files, use the require() API.
+		//    If there is already a require() in the page, you can use the requireJS()
+		//    to access the RequireJS API for the loading scripts
+		require(cfg, deps,  function(viewHtml, viewHelper, viewModel) {						
 			// Load html content into there containers
 			$("#content").html(viewHtml);
 
@@ -128,25 +136,24 @@ define('app/manager', ['jquery','ko', 'app/utilities', 'app/libs/windowslive'],
 		return ko.mapping.toJS(data);
 	} // end deserializeResults
 	
-	
+
 	// private
 	// Knockout cleanNode removes all binds even those 
 	// not set by their library. 
 	function applyMyBinds() {
 		wl.initialize();
 		
-		$('.navigationItem').bind("click", function() {		
-			manager.navigateToView($(this).attr('href'));
-			return true;
+		// NOTE: Hide the wl variable. 
+		$('.navigationItem').bind('click', function() {	
+			if(manager.library.isConnected()) {
+				manager.navigateToView($(this).attr('href'));
+				return true;
+			}
+			
+			return false;
 		});
 	}; // applyMyBinds
-	
-	
-	// private
-	function initFooter() {
-		//Nothing to do
-	};
-	
+			
 	var manager = new Manager();
 	
 	// Create new Manager
