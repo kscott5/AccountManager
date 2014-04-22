@@ -5,6 +5,7 @@ class HomeController < ApplicationController
   
   # Single Page Application (SPA)
   def index
+
   end # index
   
   # The Windows Live API regarding the callback .html does go into
