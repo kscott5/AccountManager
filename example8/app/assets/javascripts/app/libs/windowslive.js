@@ -40,6 +40,7 @@ define('app/libs/windowslive', [globals.windowslive.requireJS.path, 'jquery', 'a
 		WL.init(globals.windowslive.initConfig);
 				
 		WL.login(
+			// scope is required but defaults to WL.init for values
 		).then(
 			function (success) {
 				isConnected = true;
@@ -152,14 +153,13 @@ define('app/libs/windowslive', [globals.windowslive.requireJS.path, 'jquery', 'a
 		var results = [];
 
 		WL.api({
-			path: 'me/skydrive', 
+			path: 'me/skydrive/files', // Gets all folders, albums, files and photos
 			method: 'GET'
 		})
 		.then(
 			function(success) {
 				utils.logHelper.debug('Looping over OneDrive Info');
 				var data = success.data;
-				utils.logHelper.debu(success);
 				for(var i=0; i<data.length; i++) {
 					var isParent = (data[i].type == 'folder') ||
 								   (data[i].type == 'album');
@@ -169,19 +169,21 @@ define('app/libs/windowslive', [globals.windowslive.requireJS.path, 'jquery', 'a
 					var rd = {
 						id: data[i].id,
 						path: data[i].path,
-						name: data[i].name,							
+						name: data[i].name,	
+						type: data[i].type,
+						link: data[i].link,
 						isParent: isParent							
 					};
 					
 					results.push(rd);
-				} // end for
-				
-				utils.logHelper.debug('Found: {0} results'.replace('{0}', results.length));
+				} // end for				
 			}, // end success
 			function(failure) {
 				utils.logHelper.appMessage('Error getTopLevel', failure);
 			} // end failure
 		);	
+
+		utils.logHelper.debug('Found: {0} results'.replace('{0}', results.length));
 
 		return results;
 	}; // end getTopLevel

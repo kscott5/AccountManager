@@ -83,17 +83,19 @@ define('app/manager', ['jquery','ko', 'app/utilities', 'app/libs/windowslive'],
 		//    If you want  to load some JavaScript files, use the require() API.
 		//    If there is already a require() in the page, you can use the requireJS()
 		//    to access the RequireJS API for the loading scripts
-		require(cfg, deps,  function(viewHtml, viewHelper, viewModel) {						
-			// Load html content into there containers
-			$("#content").html(viewHtml);
+		require(cfg, deps,  function(viewHtml, viewHelper, viewModel) {
+			$(function(){
+				// Load html content into there containers
+				$("#content").html(viewHtml);
 
-			currentViewModel = viewModel;
-			
-			// load view results else default to home
-			loadViewResults();
-			
-			// Execute the scripts for the 
-			eval(viewHelper);				
+				currentViewModel = viewModel;
+				
+				// load view results else default to home
+				loadViewResults();
+				
+				// Execute the scripts for the 
+				eval(viewHelper);				
+			});
 		});
 	}; // end navigateToView
 	

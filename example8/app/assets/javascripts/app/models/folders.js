@@ -29,7 +29,9 @@ define('app/models/folders', ['app/utilities'], function(utils) {
 
 		requirejs(globals.require.config, ['app/manager'], function(manager) {;		
 			self.model.results.data = manager.library.foldersfiles.getTopLevel();			
-		});		
+		});	
+		
+		utils.logHelper.debug(self.model.results.data);
 	} //end initCallback
 			
 	// Called during the saving of ViewModel

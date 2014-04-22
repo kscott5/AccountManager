@@ -1,9 +1,9 @@
 <div id="templateContent" name="templateContent">
 	<ul data-bind="foreach: results.data">
-		<li>
-			<span id="ffid" name="ffid" data-bind="text: id"></span>
-			<span id="ffname" name="ffname" data-bind="text: name"></span>
-			<span id="ffisParent" name="ffisParent" data-bind="text: isParent"></span>
+		<li>		 
+			<a data-bind="href: $data.link" target="_blank">
+				<span id="ffname" name="ffname" data-bind="text: $data.name"/>
+			</a>			
 		</li>
 	</ul>
 </div>
