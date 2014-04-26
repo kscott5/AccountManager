@@ -1,0 +1,28 @@
+<div id="templateContent" name="templateContent">
+	<h1> Account Manager (Example9)</h1>
+	<p id="readme" name="readme">
+		Simple self-contain web application to learn <br/>
+		KnockoutJS, RequireJS, text and toastr javascript <br/>
+		frameworks. <br/>		
+	</p>
+	<br />
+	<table style="min-width:400px">
+	<tr>
+		<td>results.data:</td>
+		<td>
+			<ul data-bind="foreach: results.data">
+				<li><span data-bind="text: $data.name + '=>' + $data.description"/></li>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<td>results.moreData:</td>
+		<td>
+		<ul data-bind="foreach: results.moreData">
+			<li><span data-bind="text: $data.name + '=>' + $data.description"/></li>
+		</ul>
+		</td>
+	</tr>
+</table>
+
+</div>

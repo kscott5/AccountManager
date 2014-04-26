@@ -1,0 +1,4 @@
+/**
+	Terms javascript file 
+*/
+
