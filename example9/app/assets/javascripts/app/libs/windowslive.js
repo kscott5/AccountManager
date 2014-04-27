@@ -13,8 +13,8 @@
 */
 define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function(wl, $, utils) {
 	// WindowsLive
+	// NOTE: Microsoft executes its methods asynchronously.
 	function WindowsLive() {		
-		WL.init(globals.windowslive.initConfig);
 		this.name = 'WindowsLive';
 		this.description = 'Windows Live API for Outlook and OneDrive';
 		this.isConnected = false;		
@@ -23,66 +23,93 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 	// Inherit from object
 	WindowsLive.prototype = new Object();
 
+	// Refresh the status of the 
+	WindowsLive.prototype.refresh = refresh;
+	function refresh() {		
+		// Switch button status
+		$('#header #session #user').html(''); // Clear welcoming message
+		$('#header #session #status').html('Login');
+		$('#header #session #status').bind('click', manager.login);
+		
+		if(manager.library.isConnected) {		
+			// Switch button status
+			manager.library.getUser(); // provide the welcoming message		
+			$('#header #session #status').html('Logout');
+			$('#header #session #status').bind('click', manager.logout);
+		}
+	};
+	
+	// Sign the current user into Windows Live
 	WindowsLive.prototype.login = login;
 	function login() {
-		// initialize
+		// Must be call before other WL.{method} calls
 		WL.init(globals.windowslive.initConfig);
-				
+		
+		utils.logHelper.appMessage('Attempting to sign you in...');
 		WL.login(
 			// scope is required but defaults to WL.init for values
 		).then(
-			function (success) {
+			function (success) {				
+				utils.logHelper.clear('');
 				// Manager is global and the only way to 
-				// update the isConnected property
-				manager.library.isConnected = true;
+				// update the isConnected property				
+				manager.library.isConnected = true;				
+				manager.library.refresh();
+				
+				// Document.location.hash allows use to return
+				// to the requested view when login was requested
+				manager.navigateToView(document.location.hash); 
 			},
 			function (failure)	{
-			console.debug(failure);
-				utils.logHelper.appMessage('Error signing in: ' + failure.error_description);
+				console.debug(failure);
+				utils.logHelper.appMessage('Sign-in attempt failed...');
 			} // end failure
-		);		
-		
-		// Manager is called for consistency
-		return manager.library.isConnected;
+		);				
 	}; // end login
 
+	// Sign the current user out of Windows Live
 	WindowsLive.prototype.logout = logout;
 	function logout() {
+		// Must be call before other WL.{method} calls
+		WL.init(globals.windowslive.initConfig);
+
 		WL.logout()
 			.then(
 				function(success) {
 					// Manager is global and the only way to 
 					// update the isConnected property
-					manager.library.isConnected = false;					
+					manager.library.isConnected = false;
+					manager.library.refresh();
+					manager.navigateToView();	// GO HOME...
 				},
 				function(failure) {
-					// DO NOTHING
+					// TODO: send admin message
 				}
-		); // end
-		
-		// Manager is called for consistency
-		return !manager.library.isConnected;
+		); // end		
 	}; // end logout	
 
+	// Get the user basic information 
 	WindowsLive.prototype.getUser = getUser;
 	function getUser() {
-		var promise = WL.api({
+		// Must be call before other WL.{method} calls
+		WL.init(globals.windowslive.initConfig);
+
+		WL.api({
                 path: "me",
                 method: "GET"
-            }).then(
-                function (response) {
-					this.user = {};
-					user.name = response.name;
-					user.first_name = response.first_name;
-					user.last_name = response.last_name;
-					user.email = response.emails.preferred;
+        }).then(
+                function (success) {
+					// Available values success.first_name, success.last_name
+					
+					$('#header #session #user').html(
+						'Welcome back <span id=\"fullname\" name=\"fullname\">{0}</span>!'
+						.replace('{0}', success.name|| success.emails.preferred));			
                 },
-                function (responseFailed) {
-					this.user = {};
+                function (failed) {
+					// TODO: send admin message
+					utils.logHelper.appMessage('Please update your Microsoft Outlook profile information');
                 }
-            );
-			
-		return promise.user;
+        );
 	}; // end getUser
 	
 	// Windows Live API OneDrive
@@ -104,6 +131,9 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 	FoldersFiles.prototype.getTopLevel = getTopLevel;
 	function getTopLevel() {
 		var results = [];
+		
+		// Must be call before other WL.{method} calls
+		WL.init(globals.windowslive.initConfig);
 
 		WL.api({
 			path: 'me/skydrive/files', // Gets all folders, albums, files and photos

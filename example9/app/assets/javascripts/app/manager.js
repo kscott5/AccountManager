@@ -62,23 +62,22 @@ define(['jquery', 'ko', 'app/utilities', 'app/libs/windowslive'],
 		// Use the hash in case the page was bookmarked
 		manager.navigateToView(document.location.hash);
 	};
-		
+	
+	// Login user into selected library
 	Manager.prototype.login = login;
 	function login() {
 		utils.logHelper.debug('Manager login');
-		if(manager.library.login()) {
-			manager.navigateToView(document.href.hash);
-		}
+		manager.library.login();
 	};
 	
+	// Log user out current library
 	Manager.prototype.logout = logout;
 	function logout() {
 		utils.logHelper.debug('Manager logout');
-		if(manager.library.logout()) {
-			manager.navigateToView(document.href.hash);
-		}
+		manager.library.logout();
 	};
 	
+	// Change the user library
 	Manager.prototype.libraryChanged = libraryChanged;
 	function libraryChanged() {	
 		var libName = $(this).val();
@@ -101,6 +100,8 @@ define(['jquery', 'ko', 'app/utilities', 'app/libs/windowslive'],
 	function applyDOMBindings() {
 		ko.cleanNode(rootNode); // clear it
 
+		manager.library.refresh();
+		
 		$('.navigationItem').bind('click', function() {	
 			manager.navigateToView($(this).attr('href'));
 			return true;
@@ -112,18 +113,10 @@ define(['jquery', 'ko', 'app/utilities', 'app/libs/windowslive'],
 		// NOTE: be carefully not to attach the actual function,
 		//       manager.libraryChanged() will cause infinite loop
 		$('#library').bind('change', manager.libraryChanged);
-				
-		if(manager.library.isConnected) {
-			var user = manager.library.getUser();
-			
-			$('#header #session #user').html(
-				'Welcome back <span id=\"fullname\" name=\"fullname\">{0}</span>!'
-				.replace('{0}', user.fullname));
-			
-			$('#header #session #status').html('Logout');
-			$('#header #session #status').bind('click', manager.logout);
-		} else {
-			$('#header #session #user').html('')
+		
+		// Required for initialization purposes
+		// First page access...
+		if(!manager.library.isConnected) {
 			$('#header #session #status').html('Login');
 			$('#header #session #status').bind('click', manager.login);
 		}
@@ -143,22 +136,18 @@ define(['jquery', 'ko', 'app/utilities', 'app/libs/windowslive'],
 		var viewName = (hash || 'home').replace('#','').trim();
 		manager.logHelper.debug('Manager navigateToView('+viewName+')');
 		
-		// TODO: WHY AM I DOING THIS?????
-		//
-		// At this point server should have pick up the
-		// Windows Live API Verification Code
-		// http://msdn.microsoft.com/en-us/library/ff749592.aspx
-		viewName = (viewName == 
-			globals.windowslive.wl_callback_hash)? 'home' : viewName;
-			
 		applyDOMBindings();
 		
 		var deps = getDependenciesArray(viewName);
 		
 		// Reset the internal loader's state
 		for(var i=0; i<deps.length; i++) {
-			try { require.undef(deps[i]);} catch(e) {manager.logHelper.error(e);}
-		}
+			try { 
+				require.undef(deps[i]);
+			} catch(e) {
+				manager.logHelper.error('NavigateToView reset internal require state: ' + e);
+			} //end try-catch
+		} //end for
 		
 		// Use requireJS to load the view's dependencies
 		// This is load asyc, so you can predict when it
