@@ -129,7 +129,7 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 		this.name = 'OneDrive';
 		this.description = 'Windows Live - OneDrive';
 	}; // end FoldersFiles
-unnecessary 
+
 	FoldersFiles.prototype = new Object();
 	
 	// Get the top level OneDrive directory 
