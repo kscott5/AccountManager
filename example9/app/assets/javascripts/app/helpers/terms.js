@@ -1,4 +1,0 @@
-/**
-	Terms javascript file 
-*/
-

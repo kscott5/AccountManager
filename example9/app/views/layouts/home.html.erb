@@ -9,6 +9,10 @@
 	<meta name="Description" data-bind="value: description"/>
 	<meta name="Keywords" data-bind="value: keywords"/>
 	
+  <!--
+	The use of the application files for css and javascript would be better but
+	timing is an issue. Also coffee script and other rails gems would be better.
+  -->
   <%= stylesheet_link_tag "toastr.min", media: "all", "data-turbolinks-track" => true %>
   <%= stylesheet_link_tag "acctmgr", media: "all", "data-turbolinks-track" => true %>
 
@@ -27,6 +31,8 @@
 </head>
 <body>
 	<div id="errorInfo" name="errorInfo"></div>
+	<div id="dialog" name="dialog"></div>
+	
 	<br/>
 	<%= yield %>
 </body>

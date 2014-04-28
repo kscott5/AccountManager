@@ -10,7 +10,7 @@
 	<tr>
 		<td>results.data:</td>
 		<td>
-			<ul data-bind="foreach: results.data">
+			<ul data-bind="foreach: model.data">
 				<li><span data-bind="text: $data.name + '=>' + $data.description"/></li>
 			</ul>
 		</td>
@@ -18,7 +18,7 @@
 	<tr>
 		<td>results.moreData:</td>
 		<td>
-		<ul data-bind="foreach: results.moreData">
+		<ul data-bind="foreach: model.moreData">
 			<li><span data-bind="text: $data.name + '=>' + $data.description"/></li>
 		</ul>
 		</td>

@@ -14,7 +14,6 @@
 define([globals.googleapi.requireJS.path, 'jquery', 'app/utilities'], function(ga, $, utils) {
 	// Google
 	function GoogleApi() {		
-		WL.init(globals.windowslive.initConfig);
 		this.name = 'GoogleApi';
 		this.description = 'Google API for Gmail and Google Docs';
 		this.isConnected = false;		
@@ -23,30 +22,44 @@ define([globals.googleapi.requireJS.path, 'jquery', 'app/utilities'], function(g
 	// Inherit from object
 	GoogleApi.prototype = new Object();
 
+	// Refresh the status of the 
+	GoogleApi.prototype.refresh = refresh;
+	function refresh() {
+		utils.logHelper.debug('GoogleApi refresh');
+		
+		// Switch button status
+		$('#header #session #user').html(''); // Clear welcoming message
+		$('#header #session #status').html('Login');
+		$('#header #session #status').bind('click', manager.library.login);
+		
+		if(manager.library.isConnected) {		
+			// Switch button status
+			manager.library.getUser(); // provide the welcoming message		
+			$('#header #session #status').html('Logout');
+			$('#header #session #status').bind('click', manager.library.logout);
+		}
+	};
+
 	GoogleApi.prototype.login = login;
 	function login() {
 		utils.logHelper.error('GoogleApi login not implemented')
-		return manager.library.isConnected;
+
 	}; // end login
 
 	GoogleApi.prototype.logout = logout;
 	function logout() {
 		utils.logHelper.error('GoogleApi logout not implemented')
-		// Manager is called for consistency
-		return !manager.library.isConnected;
+
 	}; // end logout	
 
 	GoogleApi.prototype.getUser = getUser;
 	function getUser() {		
-		var user = {};
 		utils.logHelper.error('GoogleApi get user not implemented')
-		return user;
+
 	}; // end getUser
 	
-	// Windows Live API OneDrive
+	// Google API Docs
 	// If this gets to large add to separate file
-	//
-	// http://msdn.microsoft.com/en-us/library/live/hh243648.aspx#folder
 	function FoldersFiles() {
 		//Add additional properties here...
 		this.name = 'Docs';
@@ -60,11 +73,17 @@ define([globals.googleapi.requireJS.path, 'jquery', 'app/utilities'], function(g
 	// Assumption: WL.api will construct the REST Url with
 	//   the access_token...
 	FoldersFiles.prototype.getTopLevel = getTopLevel;
-	function getTopLevel() {
+	function getTopLevel(viewModel) {
 		var results = [];
 		
 		utils.logHelper.error('GoogleApi get top level not implemented')
 		
+		viewModel.model.data = dataArr;
+		viewModel.asyncLoadComplete = true; // Must be set to void reload when calling navigateToView
+				
+		// Pass the data now that we have...
+		manager.navigateToView(document.location.hash, viewModel);
+
 		return results;
 	}; // end getTopLevel
 	

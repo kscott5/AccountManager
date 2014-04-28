@@ -11,32 +11,25 @@
 	Returns: ViewModel
 */
 define(['app/utilities'], function(utils) {	
-	var TermsModel = function() {
+	var Terms = function() {
 		// page meta data
 		this.title = 'Account Manager: terms';
 		this.description = 'Account Manager terms page. Self containing web app to help with...';
 		this.keywords = 'KnockoutJS, MVVM, requiredJS, javascript, jQuery, Ruby on Rails, prototype, OO';
 		
-		this.results = {};
+		this.loginRequired = false;
+		
+		this.model = {};
 		this.app = utils.app;
 	}; 
 	
-	TermsModel.prototype = new Object();
-	var TermsViewModel = function() {
-		this.loginRequired = false;
-		this.model = new TermsModel();
-	};		
-	TermsViewModel.prototype = new Object();
-	
-	TermsViewModel.prototype.loadModelData = loadModelData;
+	Terms.prototype = new Object();
+	Terms.prototype.loadModelData = loadModelData;
 	function loadModelData() {
-		this.model.results.data = {};
+		this.model = {};
 	} //end loadModelData
 			
-	// Required for use when binding to HTML elements.
-	// It helps avoid the this keyword reference when
-	// binding to HTML element events
-	var viewModel =  new TermsViewModel();
+	var viewModel =  new Terms();
 
 	return viewModel; // NOW..
 }); // end Terms View Model

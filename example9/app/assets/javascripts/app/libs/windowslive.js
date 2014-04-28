@@ -26,22 +26,25 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 	// Refresh the status of the 
 	WindowsLive.prototype.refresh = refresh;
 	function refresh() {		
+	   utils.logHelper.debug('WindowsLive refresh');
+	   
 		// Switch button status
 		$('#header #session #user').html(''); // Clear welcoming message
 		$('#header #session #status').html('Login');
-		$('#header #session #status').bind('click', manager.login);
+		$('#header #session #status').bind('click', manager.library.login);
 		
 		if(manager.library.isConnected) {		
 			// Switch button status
 			manager.library.getUser(); // provide the welcoming message		
 			$('#header #session #status').html('Logout');
-			$('#header #session #status').bind('click', manager.logout);
+			$('#header #session #status').bind('click', manager.library.logout);
 		}
 	};
 	
 	// Sign the current user into Windows Live
 	WindowsLive.prototype.login = login;
 	function login() {
+		utils.logHelper.debug('WindowsLive login');
 		// Must be call before other WL.{method} calls
 		WL.init(globals.windowslive.initConfig);
 		
@@ -70,16 +73,21 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 	// Sign the current user out of Windows Live
 	WindowsLive.prototype.logout = logout;
 	function logout() {
+		utils.logHelper.debug('WindowsLive logout');
+				
 		// Must be call before other WL.{method} calls
 		WL.init(globals.windowslive.initConfig);
 
+		// HUGE delay when execute this Promise, 10+ seconds
 		WL.logout()
 			.then(
 				function(success) {
+					utils.logHelper.debug('WindowsLive logout complete');
+		
 					// Manager is global and the only way to 
 					// update the isConnected property
 					manager.library.isConnected = false;
-					manager.library.refresh();
+										
 					manager.navigateToView();	// GO HOME...
 				},
 				function(failure) {
@@ -91,6 +99,7 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 	// Get the user basic information 
 	WindowsLive.prototype.getUser = getUser;
 	function getUser() {
+		utils.logHelper.debug('WindowsLive get user');
 		// Must be call before other WL.{method} calls
 		WL.init(globals.windowslive.initConfig);
 
@@ -107,7 +116,6 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
                 },
                 function (failed) {
 					// TODO: send admin message
-					utils.logHelper.appMessage('Please update your Microsoft Outlook profile information');
                 }
         );
 	}; // end getUser
@@ -121,58 +129,66 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 		this.name = 'OneDrive';
 		this.description = 'Windows Live - OneDrive';
 	}; // end FoldersFiles
-
+unnecessary 
 	FoldersFiles.prototype = new Object();
 	
 	// Get the top level OneDrive directory 
-	//
-	// Assumption: WL.api will construct the REST Url with
-	//   the access_token...
+	// The WL.api executes async, so we need to 
+	// provide load the viewModel with data
 	FoldersFiles.prototype.getTopLevel = getTopLevel;
-	function getTopLevel() {
-		var results = [];
+	function getTopLevel(viewModel) {
+		utils.logHelper.debug('WindowsLive get top level folders and files');
 		
 		// Must be call before other WL.{method} calls
 		WL.init(globals.windowslive.initConfig);
 
+		var path = (viewModel && viewModel.pathId)? viewModel.pathId : 'me/skydrive';
 		WL.api({
-			path: 'me/skydrive/files', // Gets all folders, albums, files and photos
+			path: path + '/files', // Gets all items associated with this path id
 			method: 'GET'
 		})
 		.then(
 			function(success) {
+				dataArr = [];
+				
 				var data = success.data;
 				for(var i=0; i<data.length; i++) {
 					var isParent = (data[i].type == 'folder') ||
 								   (data[i].type == 'album');
-								   
-					// TODO: Move this structue to utilities if you plan to include
-					// other library such Google Docs
-					var rd = {
+					
+					var link = (!isParent)? data[i].link : '#folders/'.concat(data[i].id);
+					
+					var item = {
 						id: data[i].id,
 						path: data[i].path,
 						name: data[i].name,	
 						type: data[i].type,
-						link: data[i].link,
-						isParent: isParent							
+						link: link,
+						click: function() { 							
+							manager.navigateToView(this.link); 
+							return true;
+						},
+						isParent: isParent
 					};
 					
-					results.push(rd);
-				} // end for				
+					dataArr.push(item);
+				} // end for
+
+				viewModel.model.data = dataArr;
+				viewModel.asyncLoadComplete = true; // Must be set to void reload when calling navigateToView
+				
+				// Pass the data now that we have...
+				manager.navigateToView(document.location.hash, viewModel);
 			}, // end success
 			function(failure) {
 				utils.logHelper.appMessage('Error getTopLevel', failure);
 			} // end failure
 		);	
-
-		utils.logHelper.debug('Found: {0} results'.replace('{0}', results.length));
-
-		return results;
 	}; // end getTopLevel
-	
+		
 	WindowsLive.prototype.foldersfiles = new FoldersFiles();
 	
-	var IMAP = function() {
+	function IMAP() {
 		this.name = 'Outlook';
 		this.description = 'Windows Live - Outlook';
 	};

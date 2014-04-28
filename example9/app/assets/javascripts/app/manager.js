@@ -13,8 +13,7 @@
 	Returns: Manager
 */
 define(['jquery', 'ko', 'app/utilities', 'app/libs/windowslive'], 
-	function($,ko,utils,defaultLibrary) {
-	
+	function($,ko,utils,defaultLibrary) {	
 	// rootNode to document root <HTML></HTML>. This allows me to
 	// provide UI binding throughout the entire xml document
 	var rootNode = window.document.documentElement;
@@ -25,7 +24,6 @@ define(['jquery', 'ko', 'app/utilities', 'app/libs/windowslive'],
 		// load view html and script via requireJS
 		return  [
 			'text!app/views/{0}.html'.replace('{0}', viewName),// parameter mapping = viewHtml 
-			'text!app/helpers/{0}.js'.replace('{0}', viewName), // parameter mapping = viewHelper 
 			'app/models/{0}'.replace('{0}', viewName) // parameter mapping = viewModel
 		];
 	}; // end getDependenciesArray
@@ -36,8 +34,35 @@ define(['jquery', 'ko', 'app/utilities', 'app/libs/windowslive'],
 		this.logHelper = utils.logHelper;
 		this.library = defaultLibrary; // windowslive
 	} // end Manager Constructor
+	
 
 	Manager.prototype = new Object();
+	
+	// Show a modal dialog. Useful when executing
+	// asynchronous javascript method
+	Manager.prototype.openDialog = openDialog;
+	function openDialog(title, html) {
+		manager.logHelper.debug('Openning dialog...');
+		$('#dialog').html(html);
+		$('#dialog').dialog(
+			{
+				title: title,
+				modal: true,
+				resizable: false,
+				width: 200,
+				height: 200,
+				position : { my: 'center', at: 'center', of: window}
+			}
+		);
+	};
+	
+	// Close a modal dialog
+	Manager.prototype.closeDialog = closeDialog;
+	function closeDialog() {
+		manager.logHelper.debug('Closing dialog...');
+		$('#dialog').html('');
+		$('#dialog').dialog().close();
+	};
 	
 	// Attach methods
 	Manager.prototype.navigateToView = navigateToView;
@@ -47,7 +72,7 @@ define(['jquery', 'ko', 'app/utilities', 'app/libs/windowslive'],
 		manager.logHelper.debug('Manager initialize');		
 		
 		// NOTE: DO NOT ADD ANY jquery .bind() calls here
-		//       add to applyDOMBindings()
+		//       add to applyDOMBindingsFirst()
 		
 		$('#library').empty();
 		var selected = false;
@@ -63,41 +88,25 @@ define(['jquery', 'ko', 'app/utilities', 'app/libs/windowslive'],
 		manager.navigateToView(document.location.hash);
 	};
 	
-	// Login user into selected library
-	Manager.prototype.login = login;
-	function login() {
-		utils.logHelper.debug('Manager login');
-		manager.library.login();
-	};
-	
-	// Log user out current library
-	Manager.prototype.logout = logout;
-	function logout() {
-		utils.logHelper.debug('Manager logout');
-		manager.library.logout();
-	};
-	
 	// Change the user library
 	Manager.prototype.libraryChanged = libraryChanged;
 	function libraryChanged() {	
 		var libName = $(this).val();
 		var dep = 'app/libs/{0}'.replace('{0}', libName);
+		var cfg = globals.require.config;
 		
 		manager.logHelper.debug('Manager library changed - ' + libName);
 				
-		require( [dep], function(library) {
+		require(cfg, [dep], function(library) {
 			manager.library = library;
 			manager.navigateToView(document.location.hash);
 		});
 	};
 	
-	function refreshView() {
-	};
-	
 	// NOTE: When ko.clearNode is called it removes ALL
 	//       bindings. This function was created to ensure 
 	//       jquery bindings are apply at correct time
-	function applyDOMBindings() {
+	function applyDOMBindingsFirst() {
 		ko.cleanNode(rootNode); // clear it
 
 		manager.library.refresh();
@@ -113,82 +122,69 @@ define(['jquery', 'ko', 'app/utilities', 'app/libs/windowslive'],
 		// NOTE: be carefully not to attach the actual function,
 		//       manager.libraryChanged() will cause infinite loop
 		$('#library').bind('change', manager.libraryChanged);
-		
-		// Required for initialization purposes
-		// First page access...
-		if(!manager.library.isConnected) {
-			$('#header #session #status').html('Login');
-			$('#header #session #status').bind('click', manager.login);
-		}
 	};
 	
 	// 1) Determines which view to show
-	// 2) Locates all its dependencies:
-	//      header, footer, navigation, etc..
-	// 3) Injects the dependencies into shell
-	// 4) Then binds data results to everything
+	// 2) Injects the dependencies into shell
+	// 3) Then binds data results to everything
 	//
 	// REMEMBER: Convention over 
 	//					Configuration
-	function navigateToView(hash) {
+	function navigateToView(hash, optionalViewModel) {
 		manager.logHelper.clear();
 	
-		var viewName = (hash || 'home').replace('#','').trim();
+		// extract only the value of hash
+		// Ex. viewName = folder for the following expression
+		//     #folder/1235-dffgs-546gf-hkldkvfk
+		var viewName = (hash || 'home').replace('#','').trim().split('/')[0];
 		manager.logHelper.debug('Manager navigateToView('+viewName+')');
 		
-		applyDOMBindings();
-		
+		// Get the configuration to use and dependencies to load
+		var cfg = globals.require.config;
 		var deps = getDependenciesArray(viewName);
-		
-		// Reset the internal loader's state
-		for(var i=0; i<deps.length; i++) {
-			try { 
-				require.undef(deps[i]);
-			} catch(e) {
-				manager.logHelper.error('NavigateToView reset internal require state: ' + e);
-			} //end try-catch
-		} //end for
 		
 		// Use requireJS to load the view's dependencies
 		// This is load asyc, so you can predict when it
 		// with call the callback function. But it will...
-		//
-		// Review /scripts/globals.js to understand what html, helper and model
 		//
 		// NOTES: http://requirejs.org/docs/1.0/docs/api.html#jsfiles
 		//    If you want  to load some JavaScript files, use the require() API.
 		//    If there is already a require() in the page, you can use the requireJS()
 		//    THIS IS BS cause they both reference the same object.
 		//    to access the RequireJS API for the loading scripts
-		require(deps, 
-			function(viewHtml, viewHelper, viewModel) {
-				// Load html content into there containers
-				$("#content").html(viewHtml);
-				
-				if(viewModel.loginRequired && !manager.library.isConnected) {
-					manager.logHelper.appMessage('Login required');
-				} else {
-					viewModel.loadModelData();
-				}
-				
-				// Get model from arguments
-				var model = viewModel.model;
-								
-				// Make results observable
-				model.results = serializeResults(model.results);
-						
-				// bind mappedData to view NOW...
-				ko.applyBindings(model ,rootNode);
-				
-				// Execute the scripts for the 
-				eval(viewHelper);
+		require(cfg, deps, function(viewHtml, viewModel) {
+			$(function() {
+					applyDOMBindingsFirst();
+			
+					// Optional View Model used for async javascript execution
+					// It has a property called asyncLoadComplete when set
+					// to true prevents loading the data again
+					// This happens internal to the optional view model and
+					// the library it used to pull the data it needs.
+					viewModel = optionalViewModel || viewModel;
+					
+					// Load html content into there containers
+					$("#content").html(viewHtml);
+					
+					if(viewModel.loginRequired && !manager.library.isConnected) {
+						manager.logHelper.appMessage('Login required');
+					} else {
+						viewModel.loadModelData();
+					}
+									
+					// Make results observable
+					var koModelBinding = serializeResults(viewModel);
+							
+					// bind mappedData to view NOW...
+					ko.applyBindings(koModelBinding ,rootNode);
+				});
 			},
 			function(err) {
 				// This would be a good place to notify system administrator 
 				// of view that don't exists but are requested frequently...
 				$("#content").html('<h1>The view you requested doesn\'t exists</h1>');
 				var failedId = err.requireModules && err.requireModules[0];
-				manager.logHelper.appMessage('Unable to navigate to requested view.');
+				manager.logHelper.appMessage('Unable to navigate to requested view.' + (failedId || ''));
 		});
 	}; // end navigateToView
 	

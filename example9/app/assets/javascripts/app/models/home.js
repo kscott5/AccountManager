@@ -13,38 +13,32 @@
 */
 define(['app/utilities'], function(utils) {
 	
-	var HomeModel = function() {
+	var Home = function() {
 		// page meta data
 		this.title = 'Account Manager: Home';
 		this.description = 'Account Manager Home page. Self containing web app to help with...';
 		this.keywords = 'KnockoutJS, MVVM, requiredJS, javascript, jQuery, Ruby on Rails, prototype, OO';
 		
-		this.results = {};
+		this.loginRequired = false;
+		
+		this.model = {};
 		this.app = utils.app;
 	};
 
 	// Inherit from BaseModel object
-	HomeModel.prototype = new Object();
-	var HomeViewModel = function() {
-		this.loginRequired = false;
-		this.model = new HomeModel();
-	};
-	
-	// Inherit from object
-	HomeViewModel.prototype = new Object();
-
-	HomeViewModel.prototype.loadModelData = loadModelData;
+	Home.prototype = new Object();
+	Home.prototype.loadModelData = loadModelData;
 	function loadModelData() {
-		var results = {};		
-		results.data = getServerData();
-		results.moreData = [ 
+		var model = {};		
+		model.data = getServerData();
+		model.moreData = [ 
 			{name: 'app/utilities', description: 'javascript library that provides basic app functionality'},
 			{name: 'app/manager', description: 'javascript library that controls navigation'},
 			{name: 'app/viewmodels', description: 'javscript library that creates model for the view using REST api and KnockoutJS'},
 			{name: 'app/views', description: 'folder that contains your convention over configuration'},
 		];
 				
-		this.model.results = results;
+		this.model = model;
 	} //end loadModelData
 	
 	// Private function
@@ -59,10 +53,7 @@ define(['app/utilities'], function(utils) {
 		return data;
 	} // end getServerData
 
-	// Required for use when binding to HTML elements.
-	// It helps avoid the this keyword reference when
-	// binding to HTML element events	
-	var viewModel = new HomeViewModel();
+	var viewModel = new Home();
 	
 	return viewModel; // NOW..
 }); // end define Home View Model

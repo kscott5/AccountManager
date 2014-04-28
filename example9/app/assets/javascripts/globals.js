@@ -64,14 +64,10 @@ globals.require = (function(){
 				// following string view the html page content
 				//
 				//		text!app/views/home.html
-				//		text!app/helpers/home.js
 				//		text!app/models/home.js
 				//
-				// NOTE: Header, Footer and Navigation could support
-				//	     this same structure, but at this time there
-				//		 was no need. They DO NOT have a helper or model
 				text: (DEBUGGING)? 'libs/plugins/text': 'https://some_cdn_url/text.js',
-
+				
 				// Directory for .js application manager file
 				// which provides dynamic loading of views,
 				// models and helpers
@@ -96,5 +92,5 @@ globals.require = (function(){
 			}, // end paths
 		} // end config
 	};	// return NOW...
-	
 })(); // end require
+

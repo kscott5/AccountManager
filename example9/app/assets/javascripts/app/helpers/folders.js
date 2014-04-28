@@ -1,3 +1,0 @@
-/**
-	Base javascript file 
-*/
