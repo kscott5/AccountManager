@@ -154,6 +154,9 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 				
 				var data = success.data;
 				for(var i=0; i<data.length; i++) {
+					// Note: This is where you would negotiate with client to determine
+					// which fields to use for each library and how they map to your
+					// application
 					var isParent = (data[i].type == 'folder') ||
 								   (data[i].type == 'album');
 					
@@ -174,7 +177,7 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 					
 					dataArr.push(item);
 				} // end for
-
+		
 				viewModel.model.data = dataArr;
 				viewModel.asyncLoadComplete = true; // Must be set to void reload when calling navigateToView
 				
@@ -194,6 +197,10 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 		this.description = 'Windows Live - Outlook';
 	};
 	IMAP.prototype = new Object();
+	IMAP.prototype.getMessage = getMessages;
+	function getMessages() {
+		utils.logHelper.appMessage('Windows Live - Outlook not implement');
+	};
 	
 	WindowsLive.prototype.imap = new IMAP();
 	

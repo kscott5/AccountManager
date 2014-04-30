@@ -101,28 +101,78 @@ define([globals.googleapi.requireJS.path, 'jquery', 'app/utilities'], function(g
 	function FoldersFiles() {
 		//Add additional properties here...
 		this.name = 'Drive';
-		this.description = 'Google API - Drive';		
+		this.description = 'Google API - Drive';
 	}; // end FoldersFiles
 
 	FoldersFiles.prototype = new Object();
 	
 	// Get the top level Docs directory 
 	//
-	// Assumption: WL.api will construct the REST Url with
-	//   the access_token...
 	FoldersFiles.prototype.getTopLevel = getTopLevel;
 	function getTopLevel(viewModel) {
-		var results = [];
+		utils.logHelper.debug('Google API get top level');
 		
-		utils.logHelper.error('Google API get top level not implemented')
-		
-		viewModel.model.data = dataArr;
-		viewModel.asyncLoadComplete = true; // Must be set to void reload when calling navigateToView
-				
-		// Pass the data now that we have...
-		manager.navigateToView(document.location.hash, viewModel);
+		var filter = { 
+			folderId: viewModel.pathId || 'root',
+			sort: 'mimeType' // THIS DOESN'T WORK!!!
+		};
+	
+		// Must tell Google API to load the Drive v2 api
+		gapi.client.load('drive', 'v2', function() {
+	
+			// Promise object
+			gapi.client.drive.children.list(filter).execute(function(results){
+				if(results && results.items) {
+					var dataArr = [];
+					
+					// This items are unordered. It would be nice to include sort options
+					// on call to api or utilize underscore.js sortedIndex function
+					var data = results.items;					
+					for(var i=0; i<data.length; i++) {
+						// Reset filter
+						filter = { 
+							fileId: data[i].id
+						};
+						
+						// This is an asynchronous call
+						gapi.client.drive.files.get(filter).execute(function(result) {
+							// Note: This is where you would negotiate with client to determine
+							// which fields to use for each library and how they map to your
+							// application
 
-		return results;
+							// search end of string
+							var isParent = result.mimeType.match(/.folder\b/) != null;
+							var link = (!isParent)? result.alternateLink : '#folders/'.concat(result.id);
+							
+							var item = {
+								id: result.id,
+								path: result.alternateLink,  
+								name: result.title,	
+								type: result.mimeType,
+								link: link,
+								click: function() { 							
+									manager.navigateToView(this.link); 
+									return true;
+								},
+								isParent: isParent
+							}; // end item
+							
+							
+							dataArr.push(item);
+		
+							// WHY? Asynchronous should match
+							if(data.length == dataArr.length) {
+								viewModel.model.data = dataArr;
+								viewModel.asyncLoadComplete = true; // Must be set to void reload when calling navigateToView
+								
+								// Pass the data now that we have...
+								manager.navigateToView(document.location.hash, viewModel);
+							} // end if
+						}); // end gapi.client.drive.files execution
+					} // end for					
+				} // end if
+			}); // end gapi.client.drive.children.list execution
+		});
 	}; // end getTopLevel
 	
 	GoogleApi.prototype.foldersfiles = new FoldersFiles();
@@ -132,7 +182,11 @@ define([globals.googleapi.requireJS.path, 'jquery', 'app/utilities'], function(g
 		this.description = 'Google - Mail';
 	};
 	IMAP.prototype = new Object();
-	
+	IMAP.prototype.getMessage = getMessages;
+	function getMessages() {
+		utils.logHelper.appMessage(Google - Mail not implement');
+	};
+
 	GoogleApi.prototype.imap = new IMAP();
 	
 	var googleapi = new  GoogleApi();

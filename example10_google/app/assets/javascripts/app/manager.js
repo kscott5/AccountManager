@@ -12,8 +12,8 @@
 	Module Id: manager
 	Returns: Manager
 */
-define(['jquery', 'ko', 'app/utilities', 'app/libs/windowslive'], 
-	function($,ko,utils,defaultLibrary) {	
+define(['jquery', 'jqueryUI', 'ko', 'app/utilities', 'app/libs/windowslive'], 
+	function($, jQueryUI, ko,utils,defaultLibrary) {	
 	// rootNode to document root <HTML></HTML>. This allows me to
 	// provide UI binding throughout the entire xml document
 	var rootNode = window.document.documentElement;
@@ -29,40 +29,69 @@ define(['jquery', 'ko', 'app/utilities', 'app/libs/windowslive'],
 	}; // end getDependenciesArray
 	
 	// Defines Manager as function
-	var Manager = function() {
+	var Manager = function() {		
 		this.app = utils.app;
 		this.logHelper = utils.logHelper;
 		this.library = defaultLibrary; // windowslive
+		this.dialogIsOpen = false;
 	} // end Manager Constructor
 	
-
 	Manager.prototype = new Object();
-	
 	// Show a modal dialog. Useful when executing
 	// asynchronous javascript method
 	Manager.prototype.openDialog = openDialog;
 	function openDialog(title, html) {
-		manager.logHelper.debug('Openning dialog...');
-		$('#dialog').html(html);
-		$('#dialog').dialog(
-			{
-				title: title,
-				modal: true,
-				resizable: false,
-				width: 200,
-				height: 200,
-				position : { my: 'center', at: 'center', of: window}
-			}
-		);
+		if(!manager.dialogIsOpen) {
+			manager.logHelper.debug('Openning dialog...');
+			$('#dialog').html(html);
+			$('#dialog').dialog(
+				{
+					title: title,
+					modal: true,
+					resizable: false,
+					width: 200,
+					height: 200,
+					position : { my: 'center', at: 'center', of: window}
+				}
+			); // end dialog
+			
+			manager.dialogIsOpen = true;
+		} // end if
 	};
 	
 	// Close a modal dialog
 	Manager.prototype.closeDialog = closeDialog;
 	function closeDialog() {
-		manager.logHelper.debug('Closing dialog...');
-		$('#dialog').html('');
-		$('#dialog').dialog().close();
+		if(manager.dialogIsOpen) {
+			manager.logHelper.debug('Closing dialog...');
+			$('#dialog').html('');
+			$('#dialog').dialog().close();
+			manager.dialogIsOpen = false;
+		}
 	};
+	
+	// FUN STUFF... Design Patterns
+	// Lets make manager observable
+	Manager.prototype.addListener = addListener;
+	function addListener(eventType, eventName, callback) {		
+		switch(eventType.toLowerCase()) {
+			case 'library':
+				break;
+			default:
+				utils.logHelper.debug('Manager add listener doesn\'t support ' + eventType + ' eventType');
+				return;
+		}
+		
+		// FUN STUFF... Design Pattern Observable
+		// Whose observable...
+		switch(eventName.toLowerCase()) {
+			case 'changed':				
+				$(this).on('changed.'+eventType, callback);
+				break;
+			default:
+				utils.logHelper.debug('Manager add listener doesn\'t support ' + eventName + ' eventName');
+		} // end switch
+	}; // end addListener
 	
 	// Attach methods
 	Manager.prototype.navigateToView = navigateToView;
@@ -99,6 +128,11 @@ define(['jquery', 'ko', 'app/utilities', 'app/libs/windowslive'],
 				
 		require(cfg, [dep], function(library) {
 			manager.library = library;
+
+			// FUN STUFF Design Pattern Observable
+			// Whose observing...
+			$(manager).trigger('changed.library');
+			
 			manager.navigateToView(document.location.hash);
 		});
 	};

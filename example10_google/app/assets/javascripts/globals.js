@@ -66,6 +66,7 @@ globals.require = (function(){
 			baseUrl: '/assets/',
 			paths: {
 				jquery: (DEBUGGING)? 'libs/jquery-1.11.0': 'https://some_cdn_url/jquery-1.11.0.js',
+				jqueryUI: (DEBUGGING)? 'libs/jquery-ui-1.10.4.custom' : 'libs/jquery-ui-1.10.4.custom.min',
 				ko: (DEBUGGING)? 'libs/knockout-3.1.0.debug': 'https://some_cdn_url/knockout-3.1.0.js', 
 				toastr: (DEBUGGING)? 'libs/toastr': 'https://some_cdn_url/toastr.min.js', 
 								

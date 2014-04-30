@@ -13,18 +13,29 @@
 */
 define(['app/utilities'], function(utils) {	
 	function Folders() {
-		// page meta data
-		this.title = 'Account Manager: Folders';
-		this.description = 'Account Manager Folders page. Self containing web app to help with...';
-		this.keywords = 'KnockoutJS, MVVM, requiredJS, javascript, jQuery, Ruby on Rails, prototype, OO';
-		this.app = utils.app;
-		this.loginRequired = true;
-		this.pathId = '';
-		this.asyncLoadComplete = false;
+		var self = this;
 		
-		this.model = {
+		// page meta data
+		self.title = 'Account Manager: Folders';
+		self.description = 'Account Manager Folders page. Self containing web app to help with...';
+		self.keywords = 'KnockoutJS, MVVM, requiredJS, javascript, jQuery, Ruby on Rails, prototype, OO';
+		self.app = utils.app;
+		self.loginRequired = true;
+		self.pathId = '';
+		self.asyncLoadComplete = false;
+		self.model = {		
 			description: manager.library.foldersfiles.description,
 		};
+		
+		// Observe change
+		manager.addListener('library', 'changed', function() {
+			utils.logHelper.debug('Folders recieved library changed event');
+			self.model = {
+				description: manager.library.foldersfiles.description,
+			}
+			self.asynLoadComplete = false;
+			self.pathId = '';
+		});
 	} // end Folders
 	
 	Folders.prototype = new Object();
@@ -33,6 +44,7 @@ define(['app/utilities'], function(utils) {
 		if(!this.asyncLoadComplete) {
 			// Determine if we are pulling data for a sub folder
 			var hashParts = document.location.hash.replace('#','').trim().split('/');
+			this.pathId = '';
 			if(hashParts.length > 1) {
 				// Subfolder identifier
 				this.pathId = hashParts[hashParts.length-1];
