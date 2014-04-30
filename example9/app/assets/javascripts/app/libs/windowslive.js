@@ -11,6 +11,7 @@
 	http://msdn.microsoft.com/en-us/library/live/hh826543.aspx#javascript
 	Returns: WindowsLive
 */
+
 define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function(wl, $, utils) {
 	// WindowsLive
 	// NOTE: Microsoft executes its methods asynchronously.
