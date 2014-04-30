@@ -9,7 +9,7 @@
 		utilities:	javascript library for general use
 		
 	Module Id: mail
-	Returns: ViewModel
+	Returns: ViewModel 
 */
 define(['app/utilities'], function(utils) {	
 	var Mail = function() {
