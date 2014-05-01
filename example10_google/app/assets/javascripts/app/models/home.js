@@ -19,14 +19,15 @@ define(['app/utilities'], function(utils) {
 		this.description = 'Account Manager Home page. Self containing web app to help with...';
 		this.keywords = 'KnockoutJS, MVVM, requiredJS, javascript, jQuery, Ruby on Rails, prototype, OO';
 		
-		this.loginRequired = false;
-		
 		this.model = {};
 		this.app = utils.app;
 	};
 
-	// Inherit from BaseModel object
-	Home.prototype = new Object();
+	Home.prototype.isLoginRequired = isLoginRequired;
+	function isLoginRequired() {
+		return false;
+	};
+	
 	Home.prototype.loadModelData = loadModelData;
 	function loadModelData() {
 		var model = {};		
@@ -39,6 +40,9 @@ define(['app/utilities'], function(utils) {
 		];
 				
 		this.model = model;
+		
+		// Notify observers
+		$(this).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(this));
 	} //end loadModelData
 	
 	// Private function

@@ -1,8 +1,15 @@
 // Remove comment for app console information
 var DEBUGGING = true; // Comment for production
 
+var manager = {};
 var globals = {};
-globals.libraries = [];
+
+// add listener constants
+globals.ACCOUNT_MANAGER_CHANGED_LISTENER = 'change.am_libary';
+globals.ACCOUNT_MANAGER_CLICK_LISTENER = 'click.am_status';
+globals.LOGIN_COMPLETE_LISTENER = 'complete.am_login';
+globals.LOGOUT_COMPLETE_LISTENER = 'complete.am_logout';
+globals.VIEWMODEL_LOAD_COMPLETE_LISTENER = 'complete.am_viewmodel';
 
 if(DEBUGGING) {
 	globals.host_uri = 'http://ksacctmgr.com';
@@ -12,9 +19,13 @@ if(DEBUGGING) {
 
 // Configuration for Windows Live API
 globals.windowslive = (function(){
-	globals.libraries.push({value: 'windowslive', text: 'Microsoft'}); //Convention over configuration - Key represent javascript file windowslive.js
-	
 	return {
+		description: 'Microsoft Windows Live API for access Profile, OneDrive and Mail',
+		text: 'Microsoft',
+		value: 'windowslive',
+		folderLinkName: 'OneDrive',
+		imapLinkName: 'Outlook',
+		
 		initConfig : {
 			logging: true,
 			client_id : '0000000048117D67', 			
@@ -37,10 +48,14 @@ globals.windowslive = (function(){
 })(); // end globals.windowslive
 
 // Configuration for Google+ API
-globals.googleapi = (function(){
-	globals.libraries.push({value: 'googleapi', text: 'Google'}); //Convention over configuration - Key represent javascript file googleapi.js
-	
+globals.googleapi = (function(){	
 	return {
+		description: 'Google API for accessing Profile, Drive and Mail',
+		text: 'Google',
+		value: 'googleapi',
+		folderLinkName: 'Drive',
+		imapLinkName: 'GMail',
+		
 		initConfig : { //https://developers.google.com/+/web/signin/reference#signin-tag-attributes
 			'clientid': '1082334669557-rlki04e4u64eg249mvirs8vsgl4ug99h.apps.googleusercontent.com',
 			'cookiepolicy': globals.host_uri,
@@ -56,6 +71,11 @@ globals.googleapi = (function(){
 		}, // end requireJS
 	}; // return windowslive NOW...
 })(); // end globals.windowslive
+
+// Library available for selection
+globals.libraries = [];
+globals.libraries.push({value: globals.windowslive.value, text: globals.windowslive.text}); //Convention over configuration - Key represent javascript file windowslive.js
+globals.libraries.push({value: globals.googleapi.value, text: globals.googleapi.text}); //Convention over configuration - Key represent javascript file googleapi.js
 
 
 // RequireRJ helper

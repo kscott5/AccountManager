@@ -5,9 +5,7 @@
 	You could still see network traffic with good browser plugin.
 	
 	http://requirejs.org/docs/api.html#jsfiles
-*/
-var manager = {};
-	
+*/	
 // NOTES: http://requirejs.org/docs/1.0/docs/api.html#jsfiles
 //    If you want  to load some JavaScript files, use the require() API.
 //    If there is already a require() in the page, you can use the requireJS()

@@ -20,25 +20,24 @@ define(['app/utilities'], function(utils) {
 		self.description = 'Account Manager Mail page. Self containing web app to help with...';
 		self.keywords = 'KnockoutJS, MVVM, requiredJS, javascript, jQuery, Ruby on Rails, prototype, OO';
 		self.app = utils.app;
-		self.loginRequired = true;
-		
-		self.model = {
-			description: manager.library.imap.description
-		};
-		
-		// Observe change
-		manager.addListener('library', 'changed', function() {
-			utils.logHelper.debug('Mail recieved library changed event');
-			self.model = {
-				description: manager.library.imap.description,
-			};
-		});
+				
+		self.model = {};				
 	}; 
-	
-	Mail.prototype = new Object();
+
+	Mail.prototype.isLoginRequired = isLoginRequired;
+	function isLoginRequired() {
+		return true;
+	};
+		
 	Mail.prototype.loadModelData = loadModelData;
-	function loadModelData() {		
-		manager.library.imap.getMessage();
+	function loadModelData() {
+	
+		manager.library.imap.getMessage(
+			// Notify observers 
+			// NOTE: This should occur within getMessage IIF api asynchronous
+			//$(this).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(this));
+		);
+		
 	}; //end loadModelData
 			
 	var viewModel =  new Mail();

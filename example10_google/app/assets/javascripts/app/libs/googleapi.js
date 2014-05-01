@@ -12,75 +12,31 @@
 	Returns: GoogleApi
 */
 define([globals.googleapi.requireJS.path, 'jquery', 'app/utilities'], function(ga, $, utils) {
-	// Google
+	// GoogleApi
+	// NOTE: Google Api executes its methods asynchronously.
 	function GoogleApi() {		
-		this.name = 'Google API';
-		this.description = 'Google API for Gmail and Drive';
-		this.isConnected = false;
-	};
-	
-	// Inherit from object
-	GoogleApi.prototype = new Object();
+		this.name = globals.googleapi.text;
+		this.value = globals.googleapi.value;
+		this.description = globals.googleapi.description
 
-	// Refresh the status of the 
-	GoogleApi.prototype.refresh = refresh;
-	function refresh() {
-		utils.logHelper.debug('Google API refresh');
-		
-		// Switch button status
-		$('#header #session #user').html(''); // Clear welcoming message
-		$('#header #session #status').html('Login');
-		$('#header #session #status').bind('click', manager.library.login);
-		
-		if(manager.library.isConnected) {		
-			// Switch button status
-			manager.library.getUser(); // provide the welcoming message		
-			$('#header #session #status').html('Logout');
-			$('#header #session #status').bind('click', manager.library.logout);
-		}
+		this.imapLinkName = globals.googleapi.imapLinkName;
+		this.folderLinkName = globals.googleapi.folderLinkName;
 	};
 
-	GoogleApi.prototype.login = login;
-	function login() {
-		utils.logHelper.debug('Google API login');
-		var authResults = arguments[0] || {};
-		if(typeof authResults['status'] != 'undefined' && authResults['status']['signed_in']) {
-			utils.logHelper.clear('');
-
-			// Manager is global and the only way to 
-			// update the isConnected property				
-			manager.library.isConnected = true;				
-			manager.library.refresh();
-			
-			// Document.location.hash allows use to return
-			// to the requested view when login was requested
-			manager.navigateToView(document.location.hash); 
-		} else if(typeof authResults['error'] != 'undefined' || typeof authResults.message != 'undefined') {
-			console.debug(authResults['error'] || authResults.message);
-			utils.logHelper.appMessage('Sign-in attempt failed...');
-		} else {
-			// Need to add callback first
-			globals.googleapi.initConfig.callback = manager.library.login;
-			gapi.auth.signIn(globals.googleapi.initConfig);
-		}
-	}; // end login
-
-	GoogleApi.prototype.logout = logout;
-	function logout() {
-		utils.logHelper.debug('Google API logout')
-		
-		// Google API uses the same callback function initiate with
-		// the signin function...
-		//
-		// https://developers.google.com/+/web/signin/sign-out
-		gapi.auth.signOut();
-	}; // end logout	
-
+	// Get the user basic information 
 	GoogleApi.prototype.getUser = getUser;
 	function getUser() {
+		utils.logHelper.debug('Google API get user');
+		
+		// Do we have a user?
+		if(typeof __googleApiUser != 'undefined' || !__googleApiLoggedIn) {
+			return __googleApiUser;
+		}
+		
 		// Review the APIs under Google Developers Console
 		// methods are asynchronous 
 		gapi.client.load('plus', 'v1', function() {
+			utils.logHelper.debug('Google api client executing get user asynchronously');
 			
 			var request = gapi.client.plus.people.get( {'userId' : 'me'} );
 			request.execute( function(results) {
@@ -89,22 +45,74 @@ define([globals.googleapi.requireJS.path, 'jquery', 'app/utilities'], function(g
 				  return;
 				}
 				
-				$('#header #session #user').html(
-					'Welcome back <span id=\"fullname\" name=\"fullname\">{0}</span>!'
-					.replace('{0}', results.displayName));					
+				__googleApiUser = {
+					fullname: results.displayName,
+					email: results.email,
+				};
+				
+				__googleApiLoggedIn = true;
+				
+				// Notify any observers
+				$(manager.library).trigger(globals.LOGIN_COMPLETE_LISTENER, [__googleApiUser]);
 			});
 		});
 	}; // end getUser
 	
+	// Add as method to prevent external changes
+	GoogleApi.prototype.isLoggedIn = isLoggedIn;
+	function isLoggedIn() {
+		return __googleApiLoggedIn;
+	}; // end isLoggedIn
+
+	GoogleApi.prototype.login = login;
+	function login(results) {
+		utils.logHelper.debug('Google API login');
+		//var authResults = arguments[0] || {};
+		
+		if(typeof results.status != 'undefined' && results.status.signed_in) {
+			utils.logHelper.clear('');
+			__googleApiLoggedIn = true;
+			getUser(); // triggers login complete
+			return;
+		} // end status signed_in
+		
+		if(typeof results.error != 'undefined') {
+			// https://developers.google.com/+/web/signin/sign-out
+			if(results.error == 'user_signed_out') {
+				manager.library.user = {};
+				__googleApiLoggedIn = false;
+				
+				// Notify any observers
+				$(manager.library).trigger(globals.LOGOUT_COMPLETE_LISTENER);
+			} // end user_signed_out
+
+			utils.logHelper.debug('Google login results error: ' + results.error);
+			return;
+		} // end error
+		
+		// Need to add callback first
+		globals.googleapi.initConfig.callback = manager.library.login;
+		gapi.auth.signIn(globals.googleapi.initConfig);
+	
+	}; // end login
+
+	GoogleApi.prototype.logout = logout;
+	function logout() {
+		utils.logHelper.debug('Google API logout will call login per documentation')
+		
+		// Google API uses the same callback function initiate with
+		// the signin function. 
+		//
+		// __googleApiLoggedIn flag is update in login()
+		//
+		// https://developers.google.com/+/web/signin/sign-out
+		gapi.auth.signOut();
+	}; // end logout	
+
 	// Google API Docs
 	// If this gets to large add to separate file
 	function FoldersFiles() {
-		//Add additional properties here...
-		this.name = 'Drive';
-		this.description = 'Google API - Drive';
 	}; // end FoldersFiles
-
-	FoldersFiles.prototype = new Object();
 	
 	// Get the top level Docs directory 
 	//
@@ -113,17 +121,22 @@ define([globals.googleapi.requireJS.path, 'jquery', 'app/utilities'], function(g
 		utils.logHelper.debug('Google API get top level');
 		
 		var filter = { 
-			folderId: viewModel.pathId || 'root',
+			folderId: viewModel.getId() || 'root',
 			sort: 'mimeType' // THIS DOESN'T WORK!!!
 		};
 	
+		// clear data array
+		viewModel.model.data = [];
+		
 		// Must tell Google API to load the Drive v2 api
 		gapi.client.load('drive', 'v2', function() {
 	
 			// Promise object
 			gapi.client.drive.children.list(filter).execute(function(results){
-				if(results && results.items) {
-					var dataArr = [];
+				if(results && results.items) {				
+					// Required for first call to api. Its used to store data 
+					// references only. There is NO META DATA PRESENT YET!!!!
+					var dataArr = []; 
 					
 					// This items are unordered. It would be nice to include sort options
 					// on call to api or utilize underscore.js sortedIndex function
@@ -158,15 +171,17 @@ define([globals.googleapi.requireJS.path, 'jquery', 'app/utilities'], function(g
 							}; // end item
 							
 							
-							dataArr.push(item);
+							dataArr.push(item); // Add item
 		
-							// WHY? Asynchronous should match
+							// WHY? Because this process is asynchronous. 
+							//
+							// 1) Make api call to get data references, no meta data
+							// 2) Make api call to get reference meta data
+							//
+							// SHOULD ALWAYS MATCH (Google is there another way?)
 							if(data.length == dataArr.length) {
 								viewModel.model.data = dataArr;
-								viewModel.asyncLoadComplete = true; // Must be set to void reload when calling navigateToView
-								
-								// Pass the data now that we have...
-								manager.navigateToView(document.location.hash, viewModel);
+								$(viewModel).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(viewModel));
 							} // end if
 						}); // end gapi.client.drive.files execution
 					} // end for					
@@ -175,20 +190,21 @@ define([globals.googleapi.requireJS.path, 'jquery', 'app/utilities'], function(g
 		});
 	}; // end getTopLevel
 	
-	GoogleApi.prototype.foldersfiles = new FoldersFiles();
-	
 	var IMAP = function() {
-		this.name = 'GMail';
-		this.description = 'Google - Mail';
-	};
-	IMAP.prototype = new Object();
-	IMAP.prototype.getMessage = getMessages;
-	function getMessages() {
-		utils.logHelper.appMessage(Google - Mail not implement');
 	};
 
+	IMAP.prototype.getMessage = getMessages;
+	function getMessages() {
+		utils.logHelper.appMessage('Google - Mail not implement');
+	};
+
+	GoogleApi.prototype.foldersfiles = new FoldersFiles();	
 	GoogleApi.prototype.imap = new IMAP();
 	
+	var __googleApiLoggedIn = false;
+	var __googleApiUser = undefined;
+	
 	var googleapi = new  GoogleApi();
+	
 	return googleapi;
 });

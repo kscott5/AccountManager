@@ -17,16 +17,21 @@ define(['app/utilities'], function(utils) {
 		this.description = 'Account Manager privacy page. Self containing web app to help with...';
 		this.keywords = 'KnockoutJS, MVVM, requiredJS, javascript, jQuery, Ruby on Rails, prototype, OO';
 		
-		this.loginRequired = false;
-		
 		this.model = {};
 		this.app = utils.app;
 	}; 
 	
-	Privacy.prototype = new Object();
+	Privacy.prototype.isLoginRequired = isLoginRequired;
+	function isLoginRequired() {
+		return false;
+	};
+
 	Privacy.prototype.loadModelData = loadModelData;
 	function loadModelData() {
 		this.model = {};
+		
+		// Notify observers
+		$(this).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(this));
 	} //end loadModelData
 			
 	var viewModel =  new Privacy();

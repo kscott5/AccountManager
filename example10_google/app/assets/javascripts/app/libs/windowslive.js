@@ -12,34 +12,56 @@
 	Returns: WindowsLive
 */
 
-define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function(wl, $, utils) {
+define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function(wl, $, utils) {	
 	// WindowsLive
 	// NOTE: Microsoft executes its methods asynchronously.
 	function WindowsLive() {		
-		this.name = 'WindowsLive';
-		this.description = 'Windows Live API for Outlook and OneDrive';
-		this.isConnected = false;		
-	};
-	
-	// Inherit from object
-	WindowsLive.prototype = new Object();
-
-	// Refresh the status of the 
-	WindowsLive.prototype.refresh = refresh;
-	function refresh() {		
-	   utils.logHelper.debug('WindowsLive refresh');
-	   
-		// Switch button status
-		$('#header #session #user').html(''); // Clear welcoming message
-		$('#header #session #status').html('Login');
-		$('#header #session #status').bind('click', manager.library.login);
+		this.name = globals.windowslive.text;
+		this.value = globals.windowslive.value;
+		this.description = globals.windowslive.description
 		
-		if(manager.library.isConnected) {		
-			// Switch button status
-			manager.library.getUser(); // provide the welcoming message		
-			$('#header #session #status').html('Logout');
-			$('#header #session #status').bind('click', manager.library.logout);
+		this.imapLinkName = globals.windowslive.imapLinkName;
+		this.folderLinkName = globals.windowslive.folderLinkName;
+	};
+
+	// Get the user basic information 
+	WindowsLive.prototype.getUser = getUser;
+	function getUser() {
+		utils.logHelper.debug('WindowsLive get user');
+		
+		if(typeof __windowsLiveUser != 'undefined' || !__windowsLiveLoggedIn) {
+			return  __windowsLiveUser;
 		}
+		
+		// Must be call before other WL.{method} calls
+		WL.init(globals.windowslive.initConfig);
+
+		WL.api({
+                path: "me",
+                method: "GET"
+        }).then(
+			function (success) {			
+				__windowsLiveUser = {
+					fullname: success.name,
+					email: success.emails.preferred,
+					// Available values success.first_name, success.last_name
+				};
+				
+				__windowsLiveLoggedIn = true;
+				
+				// Notify any observers
+				$(manager.library).trigger(globals.LOGIN_COMPLETE_LISTENER, __windowsLiveUser);
+			},
+			function (failed) {
+				// TODO: send admin message
+			}
+        );
+	}; // end getUser
+
+	// Add as method to prevent external changes
+	WindowsLive.prototype.isLoggedIn = isLoggedIn;
+	function isLoggedIn() {
+		return __windowsLiveLoggedIn;
 	};
 	
 	// Sign the current user into Windows Live
@@ -49,20 +71,13 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 		// Must be call before other WL.{method} calls
 		WL.init(globals.windowslive.initConfig);
 		
-		utils.logHelper.appMessage('Attempting to sign you in...');
 		WL.login(
 			// scope is required but defaults to WL.init for values
 		).then(
-			function (success) {				
+			function (success) {
 				utils.logHelper.clear('');
-				// Manager is global and the only way to 
-				// update the isConnected property				
-				manager.library.isConnected = true;				
-				manager.library.refresh();
-				
-				// Document.location.hash allows use to return
-				// to the requested view when login was requested
-				manager.navigateToView(document.location.hash); 
+				__windowsLiveLoggedIn = true;				
+				getUser(); // triggers login complete
 			},
 			function (failure)	{
 				console.debug(failure);
@@ -75,21 +90,28 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 	WindowsLive.prototype.logout = logout;
 	function logout() {
 		utils.logHelper.debug('WindowsLive logout');
-				
+		utils.logHelper.appMessage('Logging out - FIX THE DELAY: <span id="timer" name="timer" count="0"></span>');
+		
+		var interval = setInterval("eval(\"var count = parseInt($('#timer').attr('count'))+1; $('#timer').attr('count', count); $('#timer').html(count);\")", 1000);
+		
 		// Must be call before other WL.{method} calls
 		WL.init(globals.windowslive.initConfig);
-
+		
 		// HUGE delay when execute this Promise, 10+ seconds
 		WL.logout()
 			.then(
 				function(success) {
 					utils.logHelper.debug('WindowsLive logout complete');
 		
-					// Manager is global and the only way to 
-					// update the isConnected property
-					manager.library.isConnected = false;
-										
-					manager.navigateToView();	// GO HOME...
+					__windowsLiveLoggedIn = false;
+					manager.library.user = {};
+
+					
+					
+					clearInterval(interval);
+					
+					// Notify any observers
+					$(manager.library).trigger(globals.LOGOUT_COMPLETE_LISTENER);
 				},
 				function(failure) {
 					// TODO: send admin message
@@ -97,42 +119,13 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 		); // end		
 	}; // end logout	
 
-	// Get the user basic information 
-	WindowsLive.prototype.getUser = getUser;
-	function getUser() {
-		utils.logHelper.debug('WindowsLive get user');
-		// Must be call before other WL.{method} calls
-		WL.init(globals.windowslive.initConfig);
-
-		WL.api({
-                path: "me",
-                method: "GET"
-        }).then(
-                function (success) {
-					// Available values success.first_name, success.last_name
-					
-					$('#header #session #user').html(
-						'Welcome back <span id=\"fullname\" name=\"fullname\">{0}</span>!'
-						.replace('{0}', success.name|| success.emails.preferred));			
-                },
-                function (failed) {
-					// TODO: send admin message
-                }
-        );
-	}; // end getUser
-	
 	// Windows Live API OneDrive
 	// If this gets to large add to separate file
 	//
 	// http://msdn.microsoft.com/en-us/library/live/hh243648.aspx#folder
 	function FoldersFiles() {
-		//Add additional properties here...
-		this.name = 'OneDrive';
-		this.description = 'Windows Live - OneDrive';
 	}; // end FoldersFiles
 
-	FoldersFiles.prototype = new Object();
-	
 	// Get the top level OneDrive directory 
 	// The WL.api executes async, so we need to 
 	// provide load the viewModel with data
@@ -143,7 +136,8 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 		// Must be call before other WL.{method} calls
 		WL.init(globals.windowslive.initConfig);
 
-		var path = (viewModel && viewModel.pathId)? viewModel.pathId : 'me/skydrive';
+		var path = viewModel.getId() || 'me/skydrive';
+		
 		WL.api({
 			path: path + '/files', // Gets all items associated with this path id
 			method: 'GET'
@@ -168,7 +162,8 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 						name: data[i].name,	
 						type: data[i].type,
 						link: link,
-						click: function() { 							
+						click: function() { 
+							// Required to allow folder traversal
 							manager.navigateToView(this.link); 
 							return true;
 						},
@@ -178,32 +173,33 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 					dataArr.push(item);
 				} // end for
 		
+				// Add the data to the model
 				viewModel.model.data = dataArr;
-				viewModel.asyncLoadComplete = true; // Must be set to void reload when calling navigateToView
 				
-				// Pass the data now that we have...
-				manager.navigateToView(document.location.hash, viewModel);
+				// Notify any observers
+				$(viewModel).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(viewModel));
 			}, // end success
 			function(failure) {
 				utils.logHelper.appMessage('Error getTopLevel', failure);
 			} // end failure
 		);	
 	}; // end getTopLevel
-		
-	WindowsLive.prototype.foldersfiles = new FoldersFiles();
-	
-	function IMAP() {
-		this.name = 'Outlook';
-		this.description = 'Windows Live - Outlook';
+
+	var IMAP = function() {
 	};
-	IMAP.prototype = new Object();
+
 	IMAP.prototype.getMessage = getMessages;
 	function getMessages() {
 		utils.logHelper.appMessage('Windows Live - Outlook not implement');
 	};
 	
+	WindowsLive.prototype.foldersfiles = new FoldersFiles();
 	WindowsLive.prototype.imap = new IMAP();
 	
+	var __windowsLiveLoggedIn = false;
+	var __windowsLiveUser = undefined;
+	
 	var windowslive = new  WindowsLive();
+	
 	return windowslive;
 });

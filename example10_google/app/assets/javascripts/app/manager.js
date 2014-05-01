@@ -12,11 +12,45 @@
 	Module Id: manager
 	Returns: Manager
 */
-define(['jquery', 'jqueryUI', 'ko', 'app/utilities', 'app/libs/windowslive'], 
-	function($, jQueryUI, ko,utils,defaultLibrary) {	
+define(['jquery', 'jqueryUI', 'ko', 'app/utilities'], 
+	function($, jQueryUI, ko,utils) {	
 	// rootNode to document root <HTML></HTML>. This allows me to
 	// provide UI binding throughout the entire xml document
 	var rootNode = window.document.documentElement;
+
+	// Handler for login complete
+	function loginComplete(event, data) {
+		manager.logHelper.debug('Manager received login complete');
+		manager.navigateToView(document.location.hash);
+	}; // end loginComplete
+	
+	// Change to the user selected library
+	function setUserSelectLibrary(libraryName) {	
+		var dep = 'app/libs/{0}'.replace('{0}', libraryName);
+		var cfg = globals.require.config;
+		
+		if(typeof manager.library != 'undefined' && manager.library.value != libraryName) {
+			manager.logHelper.debug('Manager library changing to ' + libraryName);
+			// Prevents manager from observing multiple libraries
+			manager.removeListener(manager.library, globals.LOGIN_COMPLETE_LISTENER);
+			manager.removeListener(manager.library, globals.LOGOUT_COMPLETE_LISTENER);
+		} // end if
+		
+		require(cfg, [dep], function(library) {
+			manager.library = library;
+
+			// Allows manager to observe changes in library
+			manager.addListener(manager.library, globals.LOGIN_COMPLETE_LISTENER, loginComplete);
+			manager.addListener(manager.library, globals.LOGOUT_COMPLETE_LISTENER, logoutComplete);	
+			
+			manager.navigateToView(document.location.hash);
+		}); // end require
+	}; // end setUserSelectLibrary
+
+	// Handler for logout complete
+	function logoutComplete(event) {
+		manager.navigateToView(document.location.hash);
+	}; // end logoutComplete
 	
 	// Get dependencies array for requireJS
 	function getDependenciesArray(viewName) {
@@ -27,135 +61,113 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities', 'app/libs/windowslive'],
 			'app/models/{0}'.replace('{0}', viewName) // parameter mapping = viewModel
 		];
 	}; // end getDependenciesArray
+
+	// NOTE: When ko.clearNode is called it removes ALL
+	//       bindings. This function was created to ensure 
+	//       jquery bindings are apply at correct time
+	function applyDOMBindings() {
+		manager.logHelper.debug('Manager apply DOM bindings');
+		ko.cleanNode(rootNode); // clear it
+
+		// turn change off and on
+		$('#library').off(globals.ACCOUNT_MANAGER_CHANGED_LISTENER);
+		$('#library').on(globals.ACCOUNT_MANAGER_CHANGED_LISTENER, manager.libraryChanged);
+		
+		// turn clicks off before on
+		$('.navigationItem').off(globals.ACCOUNT_MANAGER_CLICK_LISTENER);
+		$('.navigationItem').on(globals.ACCOUNT_MANAGER_CLICK_LISTENER, function() {	
+			manager.navigateToView($(this).attr('href'));
+			return true;
+		});
+		
+		// update the links using library
+		$('a[href=#mail]').text(manager.library.imapLinkName);
+		$('a[href=#folders]').text(manager.library.folderLinkName);
 	
+		// turn click off before on
+		$('#header #session #status').off('click');
+		if(manager.library.isLoggedIn()) {
+			var data = manager.library.getUser();
+			$('#header #session #user').html(
+				'Welcome back <span id=\"fullname\" name=\"fullname\">{0}</span>!'
+				.replace('{0}', data.fullname || data.email));
+
+			$('#header #session #status').html('Logout');
+			$('#header #session #status').on(globals.ACCOUNT_MANAGER_CLICK_LISTENER, manager.library.logout);
+		} else {
+			$('#header #session #user').html('');
+			
+			$('#header #session #status').html('Login');
+			$('#header #session #status').on(globals.ACCOUNT_MANAGER_CLICK_LISTENER, manager.library.login);
+		} // end is connected check
+	}; // end applyBindings
+		
 	// Defines Manager as function
 	var Manager = function() {		
 		this.app = utils.app;
 		this.logHelper = utils.logHelper;
-		this.library = defaultLibrary; // windowslive
-		this.dialogIsOpen = false;
-	} // end Manager Constructor
+		this.library = undefined;
+	} // end Manager Constructor	
 	
-	Manager.prototype = new Object();
-	// Show a modal dialog. Useful when executing
-	// asynchronous javascript method
-	Manager.prototype.openDialog = openDialog;
-	function openDialog(title, html) {
-		if(!manager.dialogIsOpen) {
-			manager.logHelper.debug('Openning dialog...');
-			$('#dialog').html(html);
-			$('#dialog').dialog(
-				{
-					title: title,
-					modal: true,
-					resizable: false,
-					width: 200,
-					height: 200,
-					position : { my: 'center', at: 'center', of: window}
-				}
-			); // end dialog
-			
-			manager.dialogIsOpen = true;
-		} // end if
-	};
-	
-	// Close a modal dialog
-	Manager.prototype.closeDialog = closeDialog;
-	function closeDialog() {
-		if(manager.dialogIsOpen) {
-			manager.logHelper.debug('Closing dialog...');
-			$('#dialog').html('');
-			$('#dialog').dialog().close();
-			manager.dialogIsOpen = false;
-		}
-	};
-	
-	// FUN STUFF... Design Patterns
-	// Lets make manager observable
-	Manager.prototype.addListener = addListener;
-	function addListener(eventType, eventName, callback) {		
-		switch(eventType.toLowerCase()) {
-			case 'library':
-				break;
-			default:
-				utils.logHelper.debug('Manager add listener doesn\'t support ' + eventType + ' eventType');
-				return;
-		}
-		
-		// FUN STUFF... Design Pattern Observable
-		// Whose observable...
-		switch(eventName.toLowerCase()) {
-			case 'changed':				
-				$(this).on('changed.'+eventType, callback);
-				break;
-			default:
-				utils.logHelper.debug('Manager add listener doesn\'t support ' + eventName + ' eventName');
-		} // end switch
-	}; // end addListener
-	
-	// Attach methods
-	Manager.prototype.navigateToView = navigateToView;
-	
+	// Initialize manager 
 	Manager.prototype.initialize = initialize;
 	function initialize() {
-		manager.logHelper.debug('Manager initialize');		
-		
-		// NOTE: DO NOT ADD ANY jquery .bind() calls here
-		//       add to applyDOMBindingsFirst()
-		
+		// One time initialization of libraries
 		$('#library').empty();
-		var selected = false;
 		$(globals.libraries).each(function() {
 			var option = document.createElement('option');
 			option.text = this.text; 
 			option.value = this.value;
-			$(option).attr('selected', (!selected)? selected=true: false);
+			$(option).attr('selected', globals.windowslive.value == this.value);
 			$('#library').append(option);
 		});
-		
-		// Use the hash in case the page was bookmarked
-		manager.navigateToView(document.location.hash);
+			
+		// default to windows live library
+		setUserSelectLibrary(globals.windowslive.value);
 	};
+	
+	// FUN STUFF... Design Patterns observable
+	// Adds listener
+	Manager.prototype.addListener = addListener;
+	function addListener(listener, listenerName, callback) {
+	
+		switch(listenerName) {
+			case globals.ACCOUNT_MANAGER_CLICK_LISTENER:
+			case globals.LOGIN_COMPLETE_LISTENER:
+			case globals.LOGOUT_COMPLETE_LISTENER:
+			case globals.VIEWMODEL_LOAD_COMPLETE_LISTENER:
+				$(listener).on(listenerName, callback);
+				break;
+				
+			default:
+				throw new Error('Manager add listener doesn\'t support ' + listenerName);
+		} // end switch
+		
+	}; // end addListener
+	
+	// Removes listener
+	Manager.prototype.removeListener = removeListener;
+	function removeListener(listener, listenerName, callback) {
+	
+		switch(listenerName) {
+			case globals.ACCOUNT_MANAGER_CLICK_LISTENER:
+			case globals.LOGIN_COMPLETE_LISTENER:
+			case globals.LOGOUT_COMPLETE_LISTENER:
+			case globals.VIEWMODEL_LOAD_COMPLETE_LISTENER:
+				$(listener).off(listenerName, callback);
+				break;
+				
+			default:
+				throw new Error('Manager remove listener doesn\'t support ' + listenerName);
+		} // end switch
+
+	}; // end removeListener
 	
 	// Change the user library
 	Manager.prototype.libraryChanged = libraryChanged;
 	function libraryChanged() {	
-		var libName = $(this).val();
-		var dep = 'app/libs/{0}'.replace('{0}', libName);
-		var cfg = globals.require.config;
-		
-		manager.logHelper.debug('Manager library changed - ' + libName);
-				
-		require(cfg, [dep], function(library) {
-			manager.library = library;
-
-			// FUN STUFF Design Pattern Observable
-			// Whose observing...
-			$(manager).trigger('changed.library');
-			
-			manager.navigateToView(document.location.hash);
-		});
-	};
-	
-	// NOTE: When ko.clearNode is called it removes ALL
-	//       bindings. This function was created to ensure 
-	//       jquery bindings are apply at correct time
-	function applyDOMBindingsFirst() {
-		ko.cleanNode(rootNode); // clear it
-
-		manager.library.refresh();
-		
-		$('.navigationItem').bind('click', function() {	
-			manager.navigateToView($(this).attr('href'));
-			return true;
-		});
-	
-		$('a[href=#mail]').text(manager.library.imap.name);
-		$('a[href=#folders]').text(manager.library.foldersfiles.name);
-		
-		// NOTE: be carefully not to attach the actual function,
-		//       manager.libraryChanged() will cause infinite loop
-		$('#library').bind('change', manager.libraryChanged);
+		// Facade or wrap required to allow event handling
+		setUserSelectLibrary($(this).val());
 	};
 	
 	// 1) Determines which view to show
@@ -164,9 +176,14 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities', 'app/libs/windowslive'],
 	//
 	// REMEMBER: Convention over 
 	//					Configuration
-	function navigateToView(hash, optionalViewModel) {
+	Manager.prototype.navigateToView = navigateToView;
+	function navigateToView(hash) {
 		manager.logHelper.clear();
-	
+		
+		// Must be first to ensure bindings aren't overwritten
+		// when we call ko.applyBindings below...
+		applyDOMBindings();
+
 		// extract only the value of hash
 		// Ex. viewName = folder for the following expression
 		//     #folder/1235-dffgs-546gf-hkldkvfk
@@ -188,29 +205,30 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities', 'app/libs/windowslive'],
 		//    to access the RequireJS API for the loading scripts
 		require(cfg, deps, function(viewHtml, viewModel) {
 			$(function() {
-					applyDOMBindingsFirst();
-			
-					// Optional View Model used for async javascript execution
-					// It has a property called asyncLoadComplete when set
-					// to true prevents loading the data again
-					// This happens internal to the optional view model and
-					// the library it used to pull the data it needs.
-					viewModel = optionalViewModel || viewModel;
-					
-					// Load html content into there containers
-					$("#content").html(viewHtml);
-					
-					if(viewModel.loginRequired && !manager.library.isConnected) {
+					// Prevent loading model data if login required
+					if(viewModel.isLoginRequired() && !manager.library.isLoggedIn()) {
 						manager.logHelper.appMessage('Login required');
+						$('#content').html('<h1>Login required</h1>');
 					} else {
-						viewModel.loadModelData();
-					}
-									
-					// Make results observable
-					var koModelBinding = serializeResults(viewModel);
+					
+						// Observer the viewModel
+						manager.addListener(viewModel, globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, function(event, data) {
+
+							manager.logHelper.debug('Manager received viewmodel load complete');
 							
-					// bind mappedData to view NOW...
-					ko.applyBindings(koModelBinding ,rootNode);
+							// Load html content into there containers
+							$("#content").html(viewHtml);
+												
+							// bind mappedData to view NOW...
+							ko.applyBindings(viewModel ,rootNode);
+						
+							// Stop observing this viewModel to prevent multiple listeners
+							manager.removeListener(viewModel, globals.VIEWMODEL_LOAD_COMPLETE_LISTENER);
+						});
+						
+						viewModel.loadModelData();
+					} // end if
+		
 				});
 			},
 			function(err) {
@@ -222,30 +240,16 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities', 'app/libs/windowslive'],
 		});
 	}; // end navigateToView
 	
-	// Converts the data into Knockout observable object
-	// data: JSON object 
-	function serializeResults() {
-		if(arguments.length == 0) {
-			var errMsg = 'Missing parameter data (JSON)';
-			throw new Error(errMsg);
+	// Use knockout to convert the object to json
+	// before creating a jQuery plain object
+	Manager.prototype.toPlainObject = toPlainObject;
+	function toPlainObject(o) {		
+		if(typeof o == 'undefined' && typeof o != 'object' && typeof o != 'boolean' && typeof o != 'string') {
+			throw new Error('Manager can not create event for  o typeof ' + typeof o);
 		}
-		
-		return arguments[0];
-		//return ko.mapping.fromJS(data);
-	} // end serializeResults
-	
-	
-	// Converts the data into server-side JSON
-	// data: observable Knockout object 
-	function deserializeResults() {
-		if(arguments.length == 0) {
-			var errMsg = 'Missing parameter data (JSON)';
-			throw new Error(errMsg);
-		}
-		
-		var data = arguments[0];
-		return ko.mapping.toJS(data);
-	} // end deserializeResults
+				
+		return ko.toJS(o);
+	} // end toPlainObject
 	
 	// Required for use when binding to HTML elements.
 	// It helps avoid the this keyword reference when

@@ -16,16 +16,22 @@ define('model/_base', ['app/utilities'], function(utils) {
 		this.title = 'Account Manager: _base';
 		this.description = 'Account Manager _base page. Self containing web app to help with...';
 		this.keywords = 'KnockoutJS, MVVM, requiredJS, javascript, jQuery, Ruby on Rails, prototype, OO';
-		
-		this.loginRequired = false;
-		
+			
 		this.model = {};
 		this.app = utils.app;
 	};
-	_Base.prototype = new Object();
+
+	_Base.prototype.isLoginRequired = isLoginRequired;
+	function isLoginRequired() {
+		return false;
+	};
+	
 	_Base.prototype.loadModelData = loadModelData;
 	function loadModelData() {
 		this.model = {};
+		
+		// Notify observers
+		$(this).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(this));
 	};
 	
 	var viewModel = new _BaseModel();

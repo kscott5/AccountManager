@@ -20,42 +20,37 @@ define(['app/utilities'], function(utils) {
 		self.description = 'Account Manager Folders page. Self containing web app to help with...';
 		self.keywords = 'KnockoutJS, MVVM, requiredJS, javascript, jQuery, Ruby on Rails, prototype, OO';
 		self.app = utils.app;
-		self.loginRequired = true;
-		self.pathId = '';
-		self.asyncLoadComplete = false;
-		self.model = {		
-			description: manager.library.foldersfiles.description,
-		};
 		
-		// Observe change
-		manager.addListener('library', 'changed', function() {
-			utils.logHelper.debug('Folders recieved library changed event');
-			self.model = {
-				description: manager.library.foldersfiles.description,
-			}
-			self.asynLoadComplete = false;
-			self.pathId = '';
-		});
+		self.model = {};		
 	} // end Folders
+
+	Folders.prototype.getId = getId;
+	function getId() {
+		// Determine if we are pulling data root or a subfolder
+		var hashParts = document.location.hash.replace('#','').trim().split('/');
+		if(hashParts.length > 1)
+			return hashParts[hashParts.length-1]; // Subfolder id
+		else
+			return '';		
+	};
 	
-	Folders.prototype = new Object();
+	Folders.prototype.isLoginRequired = isLoginRequired;
+	function isLoginRequired() {
+		return true;
+	};
+		
 	Folders.prototype.loadModelData = loadModelData;
 	function loadModelData() {
-		if(!this.asyncLoadComplete) {
-			// Determine if we are pulling data for a sub folder
-			var hashParts = document.location.hash.replace('#','').trim().split('/');
-			this.pathId = '';
-			if(hashParts.length > 1) {
-				// Subfolder identifier
-				this.pathId = hashParts[hashParts.length-1];
-			}
-			manager.library.foldersfiles.getTopLevel(this);
-			return;
-		} 
+		utils.logHelper.debug('Folders loading model data');
 		
-		this.asyncLoadComplete = false;
-		this.pathId = '';
-	} //end loadModelData
+		manager.library.foldersfiles.getTopLevel(this
+		
+			// Notify observers 
+			// NOTE: This occur within getTopLevel because api asynchronous
+			//$(this).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(this));
+
+		);		
+	}; //end loadModelData
 	
 	// Required for use when binding to HTML elements.
 	// It helps avoid the this keyword reference when
