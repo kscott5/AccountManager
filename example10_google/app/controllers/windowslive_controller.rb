@@ -1,7 +1,22 @@
 require 'rest-client'
-require 'json' #http://www.ruby-doc.org/stdlib-2.0.0/libdoc/json/rdoc/JSON.html
+require 'json'
+
+require 'customnet/imap'
+
+# PROBLEM_SSL_CONNECT_ERROR
+require 'openssl'
+require 'openssl-extensions'
+
+require 'net/imap'
 require 'customnet/imap' #convention over configuration 
 
+# NOTE: I install the lastest version of rails 4.1.0 but 
+#       after reviewing the release notes for 4.1.0 and looking
+#       what I'm trying to accomplished it does make since.
+#       It wouldn't help fix the OpenSSL issue so no need.
+#
+#       GEMFile and GEMFile.lock are currently set to 4.0.4.
+#
 class WindowsliveController < ApplicationController 
   layout 'windowslive'
 	
@@ -103,9 +118,23 @@ class WindowsliveController < ApplicationController
 	render nothing: true if profile.nil?
 	
 	email = profile['emails']['preferred']
+
+	CustomNet::IMAP.debug = true
 	
-	imap = CustomNet::IMAP.new('imap-mail.outlook.com', :port => 993, :ssl => true, :verify => false)
-	
+	# NOTE: Ruby self is similar to static 
+	# Add custom authenticator to IMAP first
+	CustomNet::IMAP.add_authenticator 'XOAUTH2', CustomNet::IMAP::XOAuth2Authenticator
+
+	# PROBLEM_SSL_CONNECT_ERROR
+	# SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed
+	#
+	# SOLUTION_SSL_CONNECT_ERROR (review the imap.rb file helps too)
+	# 1) gem install openssl-extensions
+	# 2) require 'openssl' and 'openssl-extensions'
+	# 3) hash the :ssl parameter with :verify_mode => OpenSSL::VERIFY_NONE
+	# 4) :verify => false
+	imap = CustomNet::IMAP.new('imap-mail.outlook.com', {:port => 993, :ssl => {:verify_mode => OpenSSL::SSL::VERIFY_NONE}}, :verify => false)
+		  
 	# Uses custom Authenticator 
 	imap.authenticate('XOAUTH2', email, accessToken)
 	
@@ -121,7 +150,7 @@ class WindowsliveController < ApplicationController
 		# http://tools.ietf.org/html/rfc3501#page-49
 		envelope = imap.fetch(message_id, "ENVELOPE")[0]
 	
-		envelopes.push(evelope)
+		envelopes.push(envelope)
 	end #seach
 	
 	render json: envelopes.to_json, layout: false

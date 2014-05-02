@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+# Gemfiles explained http://bundler.io/v1.3/gemfile.html
+
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.0.4'
 
@@ -44,6 +46,9 @@ end
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
+# NOTE: These are rails dependencies for this app.
 gem 'rest-client'
 gem 'oauth2'
+gem 'openssl-extensions'
+
 gem 'activesupport'
