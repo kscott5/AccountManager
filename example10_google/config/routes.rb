@@ -15,7 +15,7 @@ Example6::Application.routes.draw do
   #
   # NOTE: using the 'only:' attribute to restrict the verb control and action mapping.
   resources :home, only: [:index, :wlcbk]
-  resources :windowslive, only: [:callback, :refresh, :inbox, :getAccessToken, :getMe]
+  resources :windowslive, only: [:callback, :refresh, :inbox]
   resources :googleapi, only: [:callback]
   
   # Example resource route with options:
@@ -71,8 +71,6 @@ Example6::Application.routes.draw do
   get 'windowslive/callback'
   get 'windowslive/refresh'
   get 'windowslive/inbox'
-  get 'windowslive/getAccessToken'
-  get 'windowslive/getMe'
   
   get 'googleapi/callback'
   

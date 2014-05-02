@@ -1,4 +1,6 @@
 require 'rest-client'
+require 'json' #http://www.ruby-doc.org/stdlib-2.0.0/libdoc/json/rdoc/JSON.html
+require 'customnet/imap' #convention over configuration 
 
 class WindowsliveController < ApplicationController 
   layout 'windowslive'
@@ -84,21 +86,25 @@ class WindowsliveController < ApplicationController
   
   # Refresh the authentication token using Windows Live API
   def refresh
+	render json: 'not implemented', layout: false
   end #refresh
   
   # Windows Live API (IMAP - inbox)
+  #
+  # http://ruby-doc.org/stdlib-1.9.3/libdoc/net/imap/rdoc/Net/IMAP.html
   #
   # I know error handling is important. There's alot to put together 
   # for new Ruby on Rails users
   def inbox
 	accessToken = getAccessToken
-	email = getEmail
+	render nothing: true if accessToken.nil?
 	
-	if accessToken.nil? or email.nil?
-		return #Should I return some message?
-	end
+	profile = getMe(accessToken)
+	render nothing: true if profile.nil?
 	
-	imap = CustomNet::IMAP.new('imap-mail.outlook.com', :port => 993, :ssl => true)
+	email = profile['emails']['preferred']
+	
+	imap = CustomNet::IMAP.new('imap-mail.outlook.com', :port => 993, :ssl => true, :verify => false)
 	
 	# Uses custom Authenticator 
 	imap.authenticate('XOAUTH2', email, accessToken)
@@ -106,36 +112,43 @@ class WindowsliveController < ApplicationController
 	# Prep read-only view 
 	imap.examine('INBOX') 
 	
+	envelopes = []; # initialize array
+	
 	# Retrieve unread message
 	imap.search(['UNSEEN']).each do |message_id|
-		# TODO: create list of message to return
+	
+		# Get information (to,from,subject,message_id,etc...) 
+		# http://tools.ietf.org/html/rfc3501#page-49
+		envelope = imap.fetch(message_id, "ENVELOPE")[0]
+	
+		envelopes.push(evelope)
 	end #seach
+	
+	render json: envelopes.to_json, layout: false
   end #inbox
   
   
   #private
-	def getAccessToken
-		if cookies['wl_auth'].nil?
-			return ''
-		end
+  def getAccessToken
+	return '' if cookies['wl_auth'].nil?
 
-		# Get current wl_auth cookie values
-		wl_authCookieValues = cookies['wl_auth']
+	# Get current wl_auth cookie values
+	wl_authCookieValues = cookies['wl_auth']
+	
+	wl_authHash = Rack::Utils.parse_query(wl_authCookieValues)
 		
-		wl_authHash = Rack::Utils.parse_query(wl_authCookieValues)
-		
-		logger.debug(wl_authHash['access_token'])
-		
-		# TODO: Parse the cookie values (currently stored as querystring)
-		render json: wl_authHash['access_token']
-		wl_authHash['access_token']
-	end #getAuthToken
+	#render json: wl_authHash['access_token']
+	wl_authHash['access_token'] #return
+  end #getAuthToken
 
-  def getMerails
-	accessToken = getAccessToken
-	resp = RestClient.get 'https://apis.live.net/v5.0/me?access_token='<< accessToken
-	render json: resp
-	return JSON.parse(resp)
-  end #me
+  def getMe(accessToken)
+	resp = RestClient.get 'https://apis.live.net/v5.0/me', { :params => {:access_token => accessToken}}
+	
+	# allows  respHash['emails']['preferred'] access
+	respHash = JSON.parse(resp)
+	
+	respHash  # return
+	#render json: resp
+  end #getMe
 	
 end #WindowsLiveController
