@@ -70,8 +70,8 @@ Example6::Application.routes.draw do
   
   get 'windowslive/callback'
   get 'windowslive/refresh'
-  get 'windowslive/mailbox'
-  get 'windowslive/mailbox/:id' => 'windowslive#message'
+  get 'windowslive/mailbox/:name/:command' => 'windowslive#mailbox'
+  get 'windowslive/mailbox/:name/:messageid' => 'windowslive#message'
   
   get 'googleapi/callback'
   

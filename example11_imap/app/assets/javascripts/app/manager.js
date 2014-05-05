@@ -170,6 +170,9 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities'],
 		setUserSelectLibrary($(this).val());
 	};
 	
+	// NOTE: To make this into a viewer with header and footer
+	//       open new target _blank and then call navigate to view.
+	//
 	// 1) Determines which view to show
 	// 2) Injects the dependencies into shell
 	// 3) Then binds data results to everything
@@ -239,6 +242,13 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities'],
 				manager.logHelper.appMessage('Unable to navigate to requested view.' + (failedId || ''));
 		});
 	}; // end navigateToView
+
+	// Navigate to viewer (No headers and footers)
+	Manager.prototype.navigateToViewer = navigateToViewer;
+	function navigateToViewer(url) {
+		utils.logHelper.debug('Manager navigate to viewer('+url+')');
+		window.open(url);
+	};
 	
 	// Use knockout to convert the object to json
 	// before creating a jQuery plain object

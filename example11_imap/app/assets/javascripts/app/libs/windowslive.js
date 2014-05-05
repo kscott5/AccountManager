@@ -206,9 +206,10 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 	// considering IMAP service is what I created. But you never know...
 	IMAP.prototype.getMessages = getMessages;
 	function getMessages(mailboxName,searchCommand) {
-		var url = '/'+globals.windowslive.value+'/mailbox';
+		utils.logHelper.debug('WindowsLive getMessages({mailboxName},{searchCommand}');
+		var url = '/'+globals.windowslive.value+'/mailbox/inbox/unseen';
 		
-		// TODO: Use constants and function to validate data options
+		// TODO: Use dropdown list for these options 1 for mailboxes and 2 for search commands
 		var data = {
 			mailboxName:  mailboxName || 'INBOX', 
 			searchCommand: searchCommand || 'UNSEEN'
@@ -217,38 +218,20 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 		var promise = {
 			id: globals.windowslive.value,
 			then: function(doneCallback, errorCallback) {	
-				$.getJSON(url, data, function(response) {
-					var results = {
-						viewMessages: false,
-						messages: [],
-						error: undefined
-					};
+				$.getJSON(url, function(response) {
+					var results = createMessageResults(true, [], response.error);
 
-					if(response && response.length > 0 && response[0].attr) {
-						results.viewMessages = true;
-						
+					if(response && response.length > 0) {
 						for(var i=0; i<response.length; i++) {
-							var attr = response[i].attr;
-							var msg = {
-								senderName: attr.ENVELOPE.sender[0].name,
-								senderEmail: attr.ENVELOPE.sender[0].mailbox+'@'+
-											 attr.ENVELOPE.sender[0].host,
-								subject: attr.ENVELOPE.subject,
-								date: attr.ENVELOPE.date,
-								id: attr.ENVELOPE.message_id,
-								link: '#mail/'+globals.windowslive.value+'/'+attr.ENVELOPE.message_id,
-								click: function() {
-									manager.navigateToView(document.location.hash);
-									return true;
-								} // end click
-							}; // end msg
-							
+							msg = createMessageFromResponse(response[i]);
 							results.messages.push(msg);
 						} // end for	
 						
+						utils.logHelper.debug('WindowsLive getMessages done: '+results.messages.length+' emails');
+						
 						doneCallback(results);
 					} else {		
-						results.error = response;
+						utils.logHelper.debug('WindowsLive getMessages error: '+results);
 						
 						errorCallback(results);
 					} // end if
@@ -259,19 +242,67 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 		return promise;
 	}; // end getMessages
 	
+	// Package the results for view binding
+	function createMessageResults(viewingAllMessges, messages, error) {
+		var results = {
+			viewMessages: viewingAllMessges,
+			messages: messages,
+			error: error
+		};
+
+		return results;
+	}; // end createMessageResults
+	
+	// Create a hash map of message from the server response
+	function createMessageFromResponse(response) {
+		if(!response || !response.attr) return {};
+		
+		var seqno = response.seqno;
+		var attr = response.attr;
+		var date = new Date(attr.ENVELOPE.date);
+		var msg = {
+			senderName: attr.ENVELOPE.sender[0].name,
+			senderEmail: attr.ENVELOPE.sender[0].mailbox+'@'+
+						 attr.ENVELOPE.sender[0].host,
+			subject: attr.ENVELOPE.subject,
+			date: date.toDateString(),
+			id: attr.ENVELOPE.message_id,
+			
+			// controller = home, action: viewer, hash parts client-side only
+			link: 'home/viewer#mail/'+globals.windowslive.value+'/inbox/'+seqno,
+			click: function() {
+				manager.navigateToViewer($(this).attr('href'));
+				return false;
+			}, // end click
+			body: attr.ENVELOPE['BODY[]']
+		}; // end msg
+		
+		return msg;
+	}; // end createMessageFromResponse
+	
 	// Get single email message from server
 	IMAP.prototype.getMessage = getMessage;
-	function getMessage() {
-	
+	function getMessage(id) {
+		utils.logHelper.debug('WindowsLive get message');
 		var promise = {
 			then: function(doneCallback, errorCallback) {							
+		
+				if(!id || !id.messageId || id.libraryId != globals.windowslive.value) {
+					utils.logHelper.debug('WindowsLive get message id: ' + $.JSON.parse(id));
+					errorCallback({viewMessages: false, message: undefined, error: 'Invalid parameter for get message'});
+					return;
+				}
+
+				// REST call windowslive/mailbox/:name/:id
+				var url = globals.windowslive.value+'/mailbox/'+id.mailbox+'/'+id.messageId;
 				$.getJSON(url, function(response) {
-					var msg = {};
+					var msg = createMessageFromResponse(response);
+					var results = createMessageResults(false, msg, response.error);
 					
-					if(!response) {
-						errorCallback({viewMessages: false, message: msg});
-					} else {
-						errorCallback({viewMessages: false, message: msg, error: response});
+					if(!response && !response.error) {
+						doneCallback(results);
+					} else {					
+						errorCallback(results);
 					}
 				}); // end $.getJSON
 			} // end then

@@ -21,7 +21,7 @@ as should any project over a few iteration.
 
 1) Promise object 
 2) Outlook IMAP integration
-
+3) Prefilter on REST service (authenticated user)
 ;-)
 
 

@@ -27,7 +27,7 @@ define(['app/utilities'], function(utils) {
 		var hashParts = document.location.hash.replace("#",'').split('/');
 		if(hashParts > 1) {
 			// Id for library message
-			return { libraryId: hashParts[1], messageId: hashParts[2] };
+			return { libraryId: hashParts[1], mailbox: hashParts[2], messageId: hashParts[3] };
 		}
 		
 		// Get library messages

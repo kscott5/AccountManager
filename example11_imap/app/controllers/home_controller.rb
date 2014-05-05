@@ -5,4 +5,9 @@ class HomeController < ApplicationController
   def index
   end # index
   
+  # Viewer is just that. No header or footers available
+  def viewer
+	render
+  end # viewer
+  
  end # HomeController

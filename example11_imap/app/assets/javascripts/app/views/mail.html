@@ -9,24 +9,23 @@
 					<td><span id="subject" name="subject">Subject</span></td>
 				</tr>
 			</thead>
-			<tbody>
-				<tr id="message" name="message" data-bind="foreach: model.data.messages">
-					<td><span id="date" name="date" data-bind="$data.date"></span></td>
+			<tbody data-bind="foreach: model.data.messages">
+				<tr id="message" name="message">
+					<td><span id="date" name="date" data-bind="text: $data.date"></span></td>
 					<td>
 						<a href="#" id="messageTo" name="messageTo" data-bind="attr: {href: 'mailto:'+$data.senderEmail}">
-							<span id="sender" name="sender" data-bind="data.senderName"></span>
+							<span id="sender" name="sender" data-bind="text: $data.senderName"></span>
 						</a>
 					</td>
 					<td>
 						<a href="#" id="messageId" name="messageId" data-bind="attr: {href: $data.link}, click: $data.click">
-							<span id="subject" name="subject" data-bind="$data.subject"></span>
+							<span id="subject" name="subject" data-bind="text: $data.subject"></span>
 						</a>
 					</td>
 				</tr>
 			</tbody>
 		</table>
 	<!-- /ko -->
-	
 	<!-- ko ifnot: model.data.viewMessages -->
 		<div id="from" name="from" data-bind:"model.data.from">
 		</div>

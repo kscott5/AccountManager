@@ -19,7 +19,7 @@ require 'customnet/imap' #convention over configuration
 #
 class WindowsliveController < ApplicationController 
   layout 'windowslive'
-	
+
   # The Windows Live API regarding the callback .html does go into
   # great details regarding what you should do with this page.
   # However, through review the actual wl.debug.js library file
@@ -111,6 +111,9 @@ class WindowsliveController < ApplicationController
   # I know error handling is important. There's alot to put together 
   # for new Ruby on Rails users
   def mailbox
+	boxname = params[:name].capitalize  # ex. INBOX, JUNK or any other mailbox that's created
+	command = params[:command].capitalize # UNSEEN, SEEN, RECENT or any other command
+	
 	accessToken = getAccessToken	
 	profile = getMe(accessToken)
 	return render json: 'Access Denied'.to_json, layout: false if accessToken.nil? or profile.nil?
@@ -137,35 +140,34 @@ class WindowsliveController < ApplicationController
 	imap.authenticate('XOAUTH2', email, accessToken)
 	
 	# Prep read-only view 
-	imap.examine('INBOX')  # TODO: use params[:mailboxName]
+	imap.examine(boxname)
 	
 	envelopes = []; # initialize array
-	
-	#command = if params[:searchCommand].nil? 'UNSEEN' else params[:searchCommand].to_a
-	
+		
 	# Retrieve unread message
-	imap.search(['UNSEEN']).each do |message_id| # TODO: use params[:searchCommand]
+	imap.search(command).each do |message_id,uid| # TODO: use params[:searchCommand]
 	
 		# Get information (to,from,subject,message_id,etc...) 
 		# http://tools.ietf.org/html/rfc3501#page-49
 		envelope = imap.fetch(message_id, "ENVELOPE")[0]
-	
+		
 		envelopes.push(envelope)
 	end #seach
 	
-	render json: 'NO_DATA'.to_json, layout: false if envelopes.length == 0
+	render json: '{\'error\': \'NO_DATA\'}'.to_json, layout: false if envelopes.length == 0
 	render json: envelopes.to_json, layout: false if envelopes.length > 0
   end #mailbox
   
   def message
-	messageId = params[:messageId]
+	mailbox = params[:name]
+	messageId = params[:messageid]
 	accessToken = getAccessToken	
 	profile = getMe(accessToken)
-	return render json: 'Access Denied'.to_json, layout: false if messageId.nil? or accessToken.nil? or profile.nil?
+	return render json: 'Access Denied'.to_json, layout: false if mailbox.nil? or messageId.nil? or accessToken.nil? or profile.nil?
 	
 	email = profile['emails']['preferred']
 
-	CustomNet::IMAP.debug = false
+	CustomNet::IMAP.debug = true
 	
 	# NOTE: Ruby self is similar to static 
 	# Add custom authenticator to IMAP first
@@ -183,12 +185,18 @@ class WindowsliveController < ApplicationController
 		  
 	# Uses custom Authenticator 
 	imap.authenticate('XOAUTH2', email, accessToken)
-		
-	# Retrieve the full message
-	envelope = imap.fetch(messageId, "FULL")
 	
-	render json: 'NO_DATA'.to_json, layout: false if envelopes.nil?
-	render json: envelope.to_json, layout: false if not envelopes.nil?
+	imap.examine(mailbox.capitalize)
+	
+	# Retrieve the following message information
+	#   ENVELOPE structure (to, from, cc, bcc,etc...)
+	#	BODY.PEEK but never marks it as seen (UTF8 decode)
+	#		[] empty is the entire message
+	#       TEXT body only
+	envelope = imap.fetch(messageId.to_i, ['ENVELOPE', 'BODY.PEEK[]'] )
+	
+	render json: '{\'error\': \'NO_DATA\'}'.to_json, layout: false if envelope.nil?
+	render json: envelope.to_json, layout: false if not envelope.nil?
   end # message
 
   #private
