@@ -203,9 +203,13 @@ define([globals.googleapi.requireJS.path, 'jquery', 'app/utilities'], function(g
 	};
 
 	IMAP.prototype.getMessage = getMessages;
-	function getMessages(messageType) {
+	function getMessages(id) {
 		utils.logHelper.appMessage('Google - Mail not implement');
 		
+		var promise = getMessage(id);
+		if(promise != null)
+			return promise;
+			
 		var promise = {
 			then: function(doneCallback, errorCallback) {
 				var msgs = [];
@@ -219,10 +223,11 @@ define([globals.googleapi.requireJS.path, 'jquery', 'app/utilities'], function(g
 		return promise;
 	};
 
-		// Get single email message from server
-	IMAP.prototype.getMessage = getMessage;
-	function getMessage() {
-	
+	// Get single email message from server
+	function getMessage(id) {
+		if(!id.messageId)
+			return null;
+			
 		var promise = {
 			then: function(doneCallback, errorCallback) {							
 				$.getJSON(url, function(response) {

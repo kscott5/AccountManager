@@ -167,7 +167,7 @@ class WindowsliveController < ApplicationController
 	
 	email = profile['emails']['preferred']
 
-	CustomNet::IMAP.debug = true
+	CustomNet::IMAP.debug = false
 	
 	# NOTE: Ruby self is similar to static 
 	# Add custom authenticator to IMAP first
@@ -195,7 +195,7 @@ class WindowsliveController < ApplicationController
 	#       TEXT body only
 	envelope = imap.fetch(messageId.to_i, ['ENVELOPE', 'BODY.PEEK[]'] )
 	
-	render json: '{\'error\': \'NO_DATA\'}'.to_json, layout: false if envelope.nil?
+	render json: '{\'error\': \'NO_DATA\'}'.to_json, layout: false if envelope.nil? 
 	render json: envelope.to_json, layout: false if not envelope.nil?
   end # message
 

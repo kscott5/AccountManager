@@ -23,15 +23,34 @@ define(['app/utilities'], function(utils) {
 	}; 
 
 	// Get the identifier for the view model
+	Mail.prototype.getId = getId;
 	function getId() {
-		var hashParts = document.location.hash.replace("#",'').split('/');
-		if(hashParts > 1) {
-			// Id for library message
-			return { libraryId: hashParts[1], mailbox: hashParts[2], messageId: hashParts[3] };
-		}
+		var id = { 
+			libraryId: manager.library.value, 
+			mailbox: 'inbox', // review IMAP rfc spec
+			command: 'unseen', // review IMAP rfc spec 
+			messageId: null,
+			toString: function() {
+				return 'id: {library: '+this.libraryId+', '+
+					   'mailbox: '+this.mailbox+', '+
+					   'command: '+this.command+', '+
+					   'messageId: '+this.messageId+
+					   '}';
+			}};
 		
-		// Get library messages
-		return { libraryId: manager.library.value, messageId: ''};
+		// This are the two formats that need parsing
+	    // home#mail
+		// home/viewer#mail/{library}/{mailbox}/{mailboxName}/{id}
+		var hashParts = document.location.hash.split('#');
+		if(hashParts.length > 1) {
+			mailParts = hashParts[1].split('/');
+			if(mailParts.length == 5) {
+				id.messageId = mailParts[4];
+			}
+		} // end if
+		
+		utils.logHelper.debug('Mail get id complete for ' + id );
+		return id;
 	}; // end getId
 	
 	Mail.prototype.isLoginRequired = isLoginRequired;
@@ -44,12 +63,9 @@ define(['app/utilities'], function(utils) {
 		var self = this;
 		var promise = {};
 		var id = getId();
+		utils.logHelper.debug('Mail id: ' + id);
 		
-		if(!id.messageId) {		
-			promise = manager.library.imap.getMessages();
-		} else {
-			promise = manager.library.imap.getMessage();
-		}
+			promise = manager.library.imap.getMessages(id);
 		
 		promise.then(
 			function(success) {

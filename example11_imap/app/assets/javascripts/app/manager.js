@@ -20,7 +20,15 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities'],
 
 	// Handler for login complete
 	function loginComplete(event, data) {
-		manager.logHelper.debug('Manager received login complete');
+		manager.logHelper.debug('Manager received login complete data='+ data);
+		var data = manager.library.getUser();
+			
+		if(data != null) {
+			$('#header #session #user').html(
+				'Welcome back <span id=\"fullname\" name=\"fullname\">{0}</span>!'
+				.replace('{0}', data.fullname || data.email));
+		}
+			
 		manager.navigateToView(document.location.hash);
 	}; // end loginComplete
 	
@@ -60,6 +68,7 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities'],
 			'text!app/views/{0}.html'.replace('{0}', viewName),// parameter mapping = viewHtml 
 			'app/models/{0}'.replace('{0}', viewName) // parameter mapping = viewModel
 		];
+		
 	}; // end getDependenciesArray
 
 	// NOTE: When ko.clearNode is called it removes ALL
@@ -87,16 +96,9 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities'],
 		// turn click off before on
 		$('#header #session #status').off('click');
 		if(manager.library.isLoggedIn()) {
-			var data = manager.library.getUser();
-			$('#header #session #user').html(
-				'Welcome back <span id=\"fullname\" name=\"fullname\">{0}</span>!'
-				.replace('{0}', data.fullname || data.email));
-
 			$('#header #session #status').html('Logout');
 			$('#header #session #status').on(globals.ACCOUNT_MANAGER_CLICK_LISTENER, manager.library.logout);
 		} else {
-			$('#header #session #user').html('');
-			
 			$('#header #session #status').html('Login');
 			$('#header #session #status').on(globals.ACCOUNT_MANAGER_CLICK_LISTENER, manager.library.login);
 		} // end is connected check
@@ -181,6 +183,7 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities'],
 	//					Configuration
 	Manager.prototype.navigateToView = navigateToView;
 	function navigateToView(hash) {
+		manager.logHelper.debug('Manager navigateToView('+document.location.href+')');
 		manager.logHelper.clear();
 		
 		// Must be first to ensure bindings aren't overwritten
@@ -191,7 +194,8 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities'],
 		// Ex. viewName = folder for the following expression
 		//     #folder/1235-dffgs-546gf-hkldkvfk
 		var viewName = (hash || 'home').replace('#','').trim().split('/')[0];
-		manager.logHelper.debug('Manager navigateToView('+viewName+')');
+		
+		manager.logHelper.debug('Manager navigateToView parsed view name: '+viewName+')');
 		
 		// Get the configuration to use and dependencies to load
 		var cfg = globals.require.config;
@@ -245,9 +249,22 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities'],
 
 	// Navigate to viewer (No headers and footers)
 	Manager.prototype.navigateToViewer = navigateToViewer;
-	function navigateToViewer(url) {
-		utils.logHelper.debug('Manager navigate to viewer('+url+')');
-		window.open(url);
+	function navigateToViewer(viewTitle, viewUrl) {
+		var width = 525, height = 525;
+		utils.logHelper.debug('Manager navigate to viewer [title: '+viewTitle+', url: '+viewUrl+']');
+		
+		var features = [
+                "width=" + width,
+                "height=" + height,
+                //"top=" + top,
+                //"left=" + left,
+                "status=no",
+                "resizable=yes",
+                "toolbar=no",
+                "menubar=no",
+                "scrollbars=yes"];
+
+		window.open(viewUrl, viewTitle, features.join(' '));
 	};
 	
 	// Use knockout to convert the object to json

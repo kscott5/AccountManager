@@ -14,7 +14,7 @@ Example6::Application.routes.draw do
   #   resources :products
   #
   # NOTE: using the 'only:' attribute to restrict the verb control and action mapping.
-  resources :home, only: [:index, :wlcbk]
+  resources :home, only: [:index, :viewer, :wlcbk]
   resources :windowslive, only: [:callback, :refresh, :mailbox, :message]
   resources :googleapi, only: [:callback]
   
@@ -66,12 +66,13 @@ Example6::Application.routes.draw do
   #       Verb to Controller#Action
   #       Mapped verbs are: get, post, patch, put, delete
   get 'home/index'
+  get 'home/viewer'
   get 'home' => 'home#index'
   
   get 'windowslive/callback'
   get 'windowslive/refresh'
   get 'windowslive/mailbox/:name/:command' => 'windowslive#mailbox'
-  get 'windowslive/mailbox/:name/:messageid' => 'windowslive#message'
+  get 'windowslive/:name/view/:messageid' => 'windowslive#message'
   
   get 'googleapi/callback'
   

@@ -29,7 +29,7 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 	function getUser() {
 		utils.logHelper.debug('WindowsLive get user');
 		
-		if(typeof __windowsLiveUser != 'undefined' || !__windowsLiveLoggedIn) {
+		if(__windowsLiveUser != null) {
 			return  __windowsLiveUser;
 		}
 		
@@ -45,15 +45,17 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 					fullname: success.name,
 					email: success.emails.preferred,
 					// Available values success.first_name, success.last_name
+					toString: function() {
+						return 'user {fullanme: '+this.fullname+', email: '+this.email+'}';
+					}
 				};
-				
-				__windowsLiveLoggedIn = true;
 				
 				// Notify any observers
 				$(manager.library).trigger(globals.LOGIN_COMPLETE_LISTENER, __windowsLiveUser);
 			},
 			function (failed) {
-				// TODO: send admin message
+				// Notify any observers
+				$(manager.library).trigger(globals.LOGIN_COMPLETE_LISTENER, __windowsLiveUser);
 			}
         );
 	}; // end getUser
@@ -61,7 +63,14 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 	// Add as method to prevent external changes
 	WindowsLive.prototype.isLoggedIn = isLoggedIn;
 	function isLoggedIn() {
-		return __windowsLiveLoggedIn;
+		WL.init(globals.windowslive.initConfig);
+		var isLoggedIn = WL.getSession() != null;
+		
+		if(isLoggedIn && __windowsLiveUser == null) {
+			manager.library.getUser();
+		}
+		
+		return isLoggedIn;
 	};
 	
 	// Sign the current user into Windows Live
@@ -75,8 +84,7 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 			// scope is required but defaults to WL.init for values
 		).then(
 			function (success) {
-				utils.logHelper.clear('');
-				__windowsLiveLoggedIn = true;				
+				utils.logHelper.clear('');			
 				getUser(); // triggers login complete
 			},
 			function (failure)	{
@@ -103,10 +111,7 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 				function(success) {
 					utils.logHelper.debug('WindowsLive logout complete');
 		
-					__windowsLiveLoggedIn = false;
-					manager.library.user = {};
-
-					
+					__windowsLiveUser = null;
 					
 					clearInterval(interval);
 					
@@ -199,31 +204,28 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 	};
 
 	// Returns the all unread Outlook message using JSON
-	//  mailboxName: string for mailbox to review. INBOX (default)
-	//  searchCommand: string or array of strings. ALL, SEEN, RECENT, UNSEEN (default)
+	//  mailbox: string for mailbox to review. INBOX (default)
+	//  command: string or array of strings. ALL, SEEN, RECENT, UNSEEN (default)
 	//
 	// NOTE: Thought to use jsonp but felt it wasn't any need 
 	// considering IMAP service is what I created. But you never know...
 	IMAP.prototype.getMessages = getMessages;
-	function getMessages(mailboxName,searchCommand) {
-		utils.logHelper.debug('WindowsLive getMessages({mailboxName},{searchCommand}');
-		var url = '/'+globals.windowslive.value+'/mailbox/inbox/unseen';
+	function getMessages(id) {
+		utils.logHelper.debug('WindowsLive getMessages({'+id.mailbox+','+id.command+'})');
+		var url = '/'+globals.windowslive.value+'/mailbox/'+id.mailbox+'/'+id.command;
 		
-		// TODO: Use dropdown list for these options 1 for mailboxes and 2 for search commands
-		var data = {
-			mailboxName:  mailboxName || 'INBOX', 
-			searchCommand: searchCommand || 'UNSEEN'
-		};
-		
-		var promise = {
-			id: globals.windowslive.value,
+		if(id.messageId != null)
+			return;
+			
+		promise = {
+			id: id,
 			then: function(doneCallback, errorCallback) {	
 				$.getJSON(url, function(response) {
-					var results = createMessageResults(true, [], response.error);
+					var results = createMessageResults([], response.error);
 
 					if(response && response.length > 0) {
 						for(var i=0; i<response.length; i++) {
-							msg = createMessageFromResponse(response[i]);
+							msg = createMessageFromResponse(id, response[i]);
 							results.messages.push(msg);
 						} // end for	
 						
@@ -242,19 +244,59 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 		return promise;
 	}; // end getMessages
 	
+	// Get single email message from server
+	IMAP.prototype.getMessage = getMessage;
+	function getMessage(id) {
+		if(id.messageId == null)
+			return null;
+			
+		utils.logHelper.debug('WindowsLive get message');
+		var promise = {
+			then: function(doneCallback, errorCallback) {							
+		
+				if(!id || !id.messageId || id.libraryId != globals.windowslive.value) {
+					utils.logHelper.debug('WindowsLive get message id: ' + id);
+					errorCallback({viewMessages: false, message: undefined, error: 'Invalid parameter for get message'});
+					return;
+				}
+
+				// REST call /windowslive/:name/view/:id
+				var url = '/'+globals.windowslive.value+'/'+id.mailbox+'/view/'+id.messageId;
+				utils.logHelper.debug('Windows Live get message url ' + url);
+				
+				$.getJSON(url, function(response) {
+					var msg = createMessageFromResponse(id, response[0]); // message needs to be in an array
+					var results = createMessageResults(msg, response.error);				
+										
+					if(!results.error) {
+						doneCallback(results);
+					} else {					
+						errorCallback(results);
+					}
+				}); // end $.getJSON
+			} // end then
+		}; // end promise
+		
+		return promise;
+	}; // end getMessage
+
 	// Package the results for view binding
-	function createMessageResults(viewingAllMessges, messages, error) {
+	function createMessageResults(data, error) {
 		var results = {
-			viewMessages: viewingAllMessges,
-			messages: messages,
-			error: error
+			error: (typeof error == 'undefined')? null: error
 		};
+		
+		if($.isArray(data)) {
+			results.messages = data;
+		} else {
+			results.message = data;
+		}
 
 		return results;
 	}; // end createMessageResults
 	
 	// Create a hash map of message from the server response
-	function createMessageFromResponse(response) {
+	function createMessageFromResponse(id, response) {
 		if(!response || !response.attr) return {};
 		
 		var seqno = response.seqno;
@@ -268,54 +310,24 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/utilities'], function
 			date: date.toDateString(),
 			id: attr.ENVELOPE.message_id,
 			
-			// controller = home, action: viewer, hash parts client-side only
-			link: 'home/viewer#mail/'+globals.windowslive.value+'/inbox/'+seqno,
+			// controller = home, action: viewer 
+			// #mail/{controller}/:name/view/:messageid => ex. controller windowslive
+			link: 'home/viewer#mail.viewer/'+globals.windowslive.value+'/'+id.mailbox+'/view/'+seqno,
 			click: function() {
-				manager.navigateToViewer($(this).attr('href'));
+				var title = 'Account Manager EMail: '+ this.link;
+				manager.navigateToViewer(title, this.link);
 				return false;
 			}, // end click
-			body: attr.ENVELOPE['BODY[]']
+			body: attr['BODY[]'] || ''
 		}; // end msg
 		
 		return msg;
 	}; // end createMessageFromResponse
-	
-	// Get single email message from server
-	IMAP.prototype.getMessage = getMessage;
-	function getMessage(id) {
-		utils.logHelper.debug('WindowsLive get message');
-		var promise = {
-			then: function(doneCallback, errorCallback) {							
 		
-				if(!id || !id.messageId || id.libraryId != globals.windowslive.value) {
-					utils.logHelper.debug('WindowsLive get message id: ' + $.JSON.parse(id));
-					errorCallback({viewMessages: false, message: undefined, error: 'Invalid parameter for get message'});
-					return;
-				}
-
-				// REST call windowslive/mailbox/:name/:id
-				var url = globals.windowslive.value+'/mailbox/'+id.mailbox+'/'+id.messageId;
-				$.getJSON(url, function(response) {
-					var msg = createMessageFromResponse(response);
-					var results = createMessageResults(false, msg, response.error);
-					
-					if(!response && !response.error) {
-						doneCallback(results);
-					} else {					
-						errorCallback(results);
-					}
-				}); // end $.getJSON
-			} // end then
-		}; // end promise
-		
-		return promise;
-	}; // end getMessage
-	
 	WindowsLive.prototype.foldersfiles = new FoldersFiles();
 	WindowsLive.prototype.imap = new IMAP();
 
-	var __windowsLiveLoggedIn = false;
-	var __windowsLiveUser = undefined;
+	var __windowsLiveUser = null;
 	
 	var windowslive = new  WindowsLive();
 	
