@@ -45,7 +45,7 @@ define(['jquery', 'app/utilities'], function($, utils) {
 							
 							doneCallback(results);
 						} else {		
-							utils.logHelper.debug(''IMAP['+this.libraryName+'] getMessages('+id+') error: '+results);
+							utils.logHelper.debug('IMAP['+this.libraryName+'] getMessages('+id+') error: '+results);
 							
 							errorCallback(results);
 						} // end if
