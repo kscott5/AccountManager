@@ -51,28 +51,32 @@ define(['jquery', 'app/utilities', 'app/models/modelbase'], function($, utils, m
 		
 		viewModel.loadModelData = function loadModelData() {
 			utils.logHelper.debug('Mail load model data');
-			var self = this;
+			var self = viewModel;
 			var promise = {};
-			var id = getId();
+			var id = self.getId();
 			
-			var promise = manager.library.imap.getMessages(id);
-			
-			promise.then(
-				function(success) {
-					self.model.data = success;
-					
-					// Notify any observers
-					$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
-				},
-				function(error) {
-					self.model.data = error;
-					
-					utils.logHelper.appMessage(error.error);
-					
-					// Notify any observers
-					$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
-				}
-			);
+			try {
+				var promise = manager.library.imap.getMessages(id);
+				
+				promise.then(
+					function(success) {
+						self.model.data = success;
+						
+						// Notify any observers
+						$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
+					},
+					function(error) {
+						self.model.data = error;
+						
+						utils.logHelper.appMessage(error.error);
+						
+						// Notify any observers
+						$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
+					}
+				);
+			} catch(e) {
+				throw new Error('Mail load model data promise error: ' + e);
+			}
 		}; //end loadModelData
 
 		return viewModel; // NOW..

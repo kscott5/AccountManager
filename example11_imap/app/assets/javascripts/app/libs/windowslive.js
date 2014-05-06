@@ -24,6 +24,7 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/libs/imapbase', 'app/
 			
 			self.imapLinkName = globals.windowslive.imapLinkName;
 			self.folderLinkName = globals.windowslive.folderLinkName;
+			self.imap = imapbase.instance(globals.windowslive.value);
 		};
 
 		// Get the user basic information 
@@ -97,9 +98,8 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/libs/imapbase', 'app/
 		WindowsLive.prototype.logout = logout;
 		function logout() {
 			utils.logHelper.debug('WindowsLive logout');
-			utils.logHelper.appMessage('Logging out - FIX THE DELAY: <span id="timer" name="timer" count="0"></span>');
 			
-			var interval = setInterval("eval(\"var count = parseInt($('#timer').attr('count'))+1; $('#timer').attr('count', count); $('#timer').html(count);\")", 1000);
+			manager.setInterval('WindwsLive logout - FIX THE DELAY');
 			
 			// Must be call before other WL.{method} calls
 			WL.init(globals.windowslive.initConfig);
@@ -111,8 +111,6 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/libs/imapbase', 'app/
 						utils.logHelper.debug('WindowsLive logout complete');
 			
 						__windowsLiveUser = null;
-						
-						clearInterval(interval);
 						
 						// Notify any observers
 						$(manager.library).trigger(globals.LOGOUT_COMPLETE_LISTENER);
@@ -198,8 +196,7 @@ define([globals.windowslive.requireJS.path, 'jquery', 'app/libs/imapbase', 'app/
 
 			
 		WindowsLive.prototype.foldersfiles = new FoldersFiles();
-		WindowsLive.prototype.imap = imapbase.instance(globals.windowslive.value);
-
+		
 		var __windowsLiveUser = null;
 		
 		var windowslive = new  WindowsLive();

@@ -20,7 +20,7 @@ define(['jquery','app/utilities', 'app/models/modelbase'], function($, utils, mo
 		var viewModel = modelbase.instance(title,description,keywords,false);
 		
 		viewModel.loadModelData = function loadModelData() {
-			var model = {};		
+			var model = {};
 			model.data = getServerData();
 			model.moreData = [ 
 				{name: 'app/utilities', description: 'javascript library that provides basic app functionality'},
@@ -28,11 +28,12 @@ define(['jquery','app/utilities', 'app/models/modelbase'], function($, utils, mo
 				{name: 'app/viewmodels', description: 'javscript library that creates model for the view using REST api and KnockoutJS'},
 				{name: 'app/views', description: 'folder that contains your convention over configuration'},
 			];
-					
-			this.model = model;
+			
+			var self = viewModel;
+			self.model = model;
 			
 			// Notify observers
-			$(this).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(this));
+			$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
 		} //end loadModelData
 		
 		// Private function

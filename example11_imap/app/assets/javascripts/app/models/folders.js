@@ -30,19 +30,23 @@ define(['jquery', 'app/utilities', 'app/models/modelbase'], function($, utils, m
 			
 		viewModel.loadModelData = function loadModelData() {
 			utils.logHelper.debug('Folders loading model data');
-			var self = this;
-					
-			var promise = manager.library.foldersfiles.getTopLevel(getId())
-			promise.then(
-				function(success) {
-					self.model.data = success;
-					
-					$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
-				},
-				function(failure) {
-					// DO NOTHING
-				}
-			); // end promise then
+			var self = viewModel;
+			
+			try {
+				var promise = manager.library.foldersfiles.getTopLevel(getId())
+				promise.then(
+					function(success) {
+						self.model.data = success;
+						
+						$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
+					},
+					function(failure) {
+						// DO NOTHING
+					}
+				); // end promise then
+			} catch(e) {
+				throw new Error('Folder load model data promise error: ' + e);
+			}
 		}; //end loadModelData
 			
 		return viewModel; // NOW..

@@ -13,6 +13,9 @@
 	Returns: Manager
 */
 define(['jquery', 'jqueryUI', 'ko', 'app/utilities'], 	function($, jQueryUI, ko,utils) {	
+	var __managerInterval = null;
+	var __managerViewModel = null;
+	
 	try {
 		// rootNode to document root <HTML></HTML>. This allows me to
 		// provide UI binding throughout the entire xml document
@@ -201,6 +204,12 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities'], 	function($, jQueryUI, ko,
 			var cfg = globals.require.config;
 			var deps = getDependenciesArray(viewName);
 			
+			// remove any listenering on current view model
+			if(__managerViewModel) {
+				// Stop observing this viewModel to prevent multiple listeners
+				manager.removeListener(__managerViewModel, globals.VIEWMODEL_LOAD_COMPLETE_LISTENER);
+			} 
+			
 			// Use requireJS to load the view's dependencies
 			// This is load asyc, so you can predict when it
 			// with call the callback function. But it will...
@@ -218,22 +227,27 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities'], 	function($, jQueryUI, ko,
 							$('#content').html('<h1>Login required</h1>');
 						} else {
 						
+							// Save view model for later. Used to 
+							// prevent manager from receiving multiple
+							// load complete actions
+							__managerViewModel = viewModel;
+							
+							manager.setInterval('Progressing request');
+							
 							// Observer the viewModel
-							manager.addListener(viewModel, globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, function(event, data) {
+							manager.addListener(__managerViewModel, globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, function(event, data) {
 
+								manager.clearInterval();
 								manager.logHelper.debug('Manager received viewmodel load complete');
 								
 								// Load html content into there containers
 								$("#content").html(viewHtml);
 													
 								// bind mappedData to view NOW...
-								ko.applyBindings(data ,rootNode);
-							
-								// Stop observing this viewModel to prevent multiple listeners
-								manager.removeListener(viewModel, globals.VIEWMODEL_LOAD_COMPLETE_LISTENER);
+								ko.applyBindings(data ,rootNode);							
 							});
 							
-							viewModel.loadModelData();
+							__managerViewModel.loadModelData();
 						} // end if
 			
 					});
@@ -246,7 +260,35 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities'], 	function($, jQueryUI, ko,
 					manager.logHelper.appMessage('Unable to navigate to requested view.' + (failedId || ''));
 			});
 		}; // end navigateToView
+		
+		// Sets the windows interval
+		// NOTE: it will clear any before resetting
+		Manager.prototype.setInterval = setInterval;
+		function setInterval(msg) {
+			manager.clearInterval();
+			
+			var html = '<div id=\'progress\' name=\'progress\'>' +
+						msg + '&nbsp;<span id=\'timer\' name\'timer\' count=\'0\'></span>' +
+						'</div>';
+			$('#content').html(html);
 
+			var script = "eval(" +
+						  "\"var count = parseInt($('#timer').attr('count'))+1; " +
+						  "$('#timer').attr('count', count); " +
+						  "$('#timer').html(count);\"" +
+						  ")";
+			__managerInterval = window.setInterval(script, 1000);
+		}; //end setInterval
+		
+		// Clear the windows interval
+		Manager.prototype.clearInterval = clearInterval;
+		function clearInterval() {
+			if(__managerInterval) {
+				window.clearInterval(__managerInterval);
+				__managerInterval = null;
+			}
+		}; // end clearInterval
+		
 		// Navigate to viewer (No headers and footers)
 		Manager.prototype.navigateToViewer = navigateToViewer;
 		function navigateToViewer(viewTitle, viewUrl) {
@@ -288,4 +330,5 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities'], 	function($, jQueryUI, ko,
 	} catch(e) {
 		utils.logHelper.error('define[Manager] Error: ' + e);
 	}
+	
 }); // end Manager module

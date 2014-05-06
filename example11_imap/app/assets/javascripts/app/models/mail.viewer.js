@@ -24,29 +24,33 @@ define(['jquery', 'app/utilities', 'app/models/modelbase', 'app/models/mail'], f
 		
 		viewModel.loadModelData = function loadModelData() {
 			utils.logHelper.debug('MailViewer load model data');
-			var self = this;
+			var self = viewModel;
 			var promise = {};
 			var id = self.getId();
 			
-			var promise = manager.library.imap.getMessage(id);
-			
-			promise.then(
-				function(success) {
-					self.model.data = success;
-					
-					// Notify any observers
-					$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
-				},
-				function(error) {
-					self.model.data = error;
-					
-					utils.logHelper.appMessage(error.error);
-					
-					// Notify any observers
-					$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
-				}
-			);
-		}; //end loadModelData
+			try {
+				var promise = manager.library.imap.getMessage(id);
+				
+				promise.then(
+					function(success) {
+						self.model.data = success;
+						
+						// Notify any observers
+						$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
+					},
+					function(error) {
+						self.model.data = error;
+						
+						utils.logHelper.appMessage(error.error);
+						
+						// Notify any observers
+						$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
+					}
+				);
+			}; //end loadModelData
+		} catch(e) {
+			throw new Error('Mail viewer load model data promise error: ' + e);
+		}
 		
 		return viewModel; // NOW..
 	} catch(e) {

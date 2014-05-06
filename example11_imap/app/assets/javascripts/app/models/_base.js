@@ -18,10 +18,13 @@ define(['jquery', 'app/utilities', 'app/models/modelbase'], function($, utils, m
 				
 		var viewModel = modelbase.instance(title,description,keywords,/*isLoginRequired*/false );
 		viewModel.loadModelData = function loadModelData() {
-			this.model = {};
+			var model = {};
+			
+			var self = viewModel;
+			self.model = model;
 			
 			// Notify observers
-			$(this).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(this));
+			$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
 		};
 		
 		return viewModel; // NOW...

@@ -3,15 +3,91 @@ define(['jquery', 'app/utilities'], function($, utils) {
 		function IMAPBASE() {
 		}; // end IMAPBASE
 		
-		IMAPBASE.prototype.instance = imapInstance;
-		function imapInstance(libraryName) {
-			var self = {			
-				// This is also the during RESTful service calls
-				libraryName: libraryName
-			}
+		IMAPBASE.prototype.instance = instance		
+		function instance(libraryName) {
+			return new ImapInstance(libraryName);
+		};
+		
+		function ImapInstance(libraryName) {
+			var self = this;			
 			
-			return self;
-		}; // end instance
+			// This is also the during RESTful service calls
+			this.libraryName = libraryName;
+		};
+
+		// Returns the all unread Outlook message using JSON
+		//  mailbox: string for mailbox to review. INBOX (default)
+		//  command: string or array of strings. ALL, SEEN, RECENT, UNSEEN (default)
+		//
+		// NOTE: Thought to use jsonp but felt it wasn't any need 
+		// considering IMAP service is what I created. But you never know...
+		ImapInstance.prototype.getMessages = getMessages;
+		function getMessages(id) {
+			var url = '/'+this.libraryName+'/mailbox/'+id.mailbox+'/'+id.command;
+			utils.logHelper.debug('IMAP['+this.libraryName+'] getMessages('+id+') url => '+url);
+			
+			if(id.messageId != null)
+				return;
+				
+			promise = {
+				id: id,
+				then: function(doneCallback, errorCallback) {	
+					$.getJSON(url, function(response) {
+						var results = createMessageResults([], response.error);
+
+						if(response && response.length > 0) {
+							for(var i=0; i<response.length; i++) {
+								msg = createMessageFromResponse(id, this.libraryName, response[i]);
+								results.messages.push(msg);
+							} // end for	
+							
+							utils.logHelper.debug('\t\tdone: '+results.messages.length+' emails');
+							
+							doneCallback(results);
+						} else {		
+							utils.logHelper.debug('\t\terror: '+results);
+							
+							errorCallback(results);
+						} // end if
+					}); // end $.getJSON
+				} // end then
+			}; // end promise
+			
+			return promise;
+		}; // end getMessages
+		
+		// Get single email message from server
+		ImapInstance.prototype.getMessage = getMessage;
+		function getMessage(id) {
+			if(id.messageId == null)
+				return null;
+				
+			var promise = {
+				then: function(doneCallback, errorCallback) {							
+					// REST call /windowslive/:name/view/:id
+					var url = '/'+this.libraryName+'/'+id.mailbox+'/view/'+id.messageId;
+					utils.logHelper.debug('IMAP['+this.libraryName+'] getMessage('+id+') url => '+ url);
+					
+					if(!id || !id.messageId || id.libraryId != globals.windowslive.value) {
+						errorCallback({viewMessages: false, message: undefined, error: 'Invalid parameter for get message'});
+						return;
+					}
+
+					$.getJSON(url, function(response) {
+						var msg = createMessageFromResponse(id, this.libaryName, response[0]); // message needs to be in an array
+						var results = createMessageResults(msg, response.error);				
+											
+						if(!results.error) {
+							doneCallback(results);
+						} else {					
+							errorCallback(results);
+						}
+					}); // end $.getJSON
+				} // end then
+			}; // end promise
+			
+			return promise;
+		}; // end getMessage
 
 		// Package the results for view binding
 		function createMessageResults(data, error) {
@@ -57,79 +133,6 @@ define(['jquery', 'app/utilities'], function($, utils) {
 			return msg;
 		}; // end createMessageFromResponse
 			
-		// Returns the all unread Outlook message using JSON
-		//  mailbox: string for mailbox to review. INBOX (default)
-		//  command: string or array of strings. ALL, SEEN, RECENT, UNSEEN (default)
-		//
-		// NOTE: Thought to use jsonp but felt it wasn't any need 
-		// considering IMAP service is what I created. But you never know...
-		imapInstance.prototype.getMessages = getMessages;
-		function getMessages(id) {
-			var url = '/'+this.libraryName+'/mailbox/'+id.mailbox+'/'+id.command;
-			utils.logHelper.debug('IMAP['+this.libraryName+'] getMessages('+id+') url => '+url);
-			
-			if(id.messageId != null)
-				return;
-				
-			promise = {
-				id: id,
-				then: function(doneCallback, errorCallback) {	
-					$.getJSON(url, function(response) {
-						var results = createMessageResults([], response.error);
-
-						if(response && response.length > 0) {
-							for(var i=0; i<response.length; i++) {
-								msg = createMessageFromResponse(id, this.libraryName, response[i]);
-								results.messages.push(msg);
-							} // end for	
-							
-							utils.logHelper.debug('\t\tdone: '+results.messages.length+' emails');
-							
-							doneCallback(results);
-						} else {		
-							utils.logHelper.debug('\t\terror: '+results);
-							
-							errorCallback(results);
-						} // end if
-					}); // end $.getJSON
-				} // end then
-			}; // end promise
-			
-			return promise;
-		}; // end getMessages
-		
-		// Get single email message from server
-		imapInstance.prototype.getMessage = getMessage;
-		function getMessage(id) {
-			if(id.messageId == null)
-				return null;
-				
-			var promise = {
-				then: function(doneCallback, errorCallback) {							
-					// REST call /windowslive/:name/view/:id
-					var url = '/'+this.libraryName+'/'+id.mailbox+'/view/'+id.messageId;
-					utils.logHelper.debug('IMAP['+this.libraryName+'] getMessage('+id+') url => '+ url);
-					
-					if(!id || !id.messageId || id.libraryId != globals.windowslive.value) {
-						errorCallback({viewMessages: false, message: undefined, error: 'Invalid parameter for get message'});
-						return;
-					}
-
-					$.getJSON(url, function(response) {
-						var msg = createMessageFromResponse(id, this.libaryName, response[0]); // message needs to be in an array
-						var results = createMessageResults(msg, response.error);				
-											
-						if(!results.error) {
-							doneCallback(results);
-						} else {					
-							errorCallback(results);
-						}
-					}); // end $.getJSON
-				} // end then
-			}; // end promise
-			
-			return promise;
-		}; // end getMessage
 
 		var imapBase = new IMAPBASE();
 		
