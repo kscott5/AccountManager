@@ -7,7 +7,6 @@ class HomeController < ApplicationController
   
   # Viewer is just that. No header or footers available
   def viewer
-	render
   end # viewer
   
  end # HomeController

@@ -10,31 +10,23 @@
 		
 	Returns: ViewModel
 */
-define(['app/utilities'], function(utils) {	
-	var Terms = function() {
-		// page meta data
-		this.title = 'Account Manager: terms';
-		this.description = 'Account Manager terms page. Self containing web app to help with...';
-		this.keywords = 'KnockoutJS, MVVM, requiredJS, javascript, jQuery, Ruby on Rails, prototype, OO';
+define(['jquery','app/utilities', 'app/models/modelbase'], function($, utils, modelbase) {	
+	try {
+		var title = 'Account Manager: terms';
+		var description = 'Account Manager terms page. Self containing web app to help with...';
+		var keywords = 'KnockoutJS, MVVM, requiredJS, javascript, jQuery, Ruby on Rails, prototype, OO';
 		
-		this.model = {};
-		this.app = utils.app;
-	}; 
-	
-	Terms.prototype.isLoginRequired = isLoginRequired;
-	function isLoginRequired() {
-		return false;
-	};
-	
-	Terms.prototype.loadModelData = loadModelData;
-	function loadModelData() {
-		this.model = {};
+		var viewModel = modelbase.instance(title,description,keywords,false);
 		
-		// Notify observers
-		$(this).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(this));
-	} //end loadModelData
+		viewModel.loadModelData = function loadModelData() {
+			this.model = {};
 			
-	var viewModel =  new Terms();
-
-	return viewModel; // NOW..
+			// Notify observers
+			$(this).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(this));
+		} //end loadModelData
+				
+		return viewModel; // NOW..
+	} catch(e) {
+		utils.logHelper.error('define(Terms) Error: ' + e);
+	}
 }); // end Terms View Model

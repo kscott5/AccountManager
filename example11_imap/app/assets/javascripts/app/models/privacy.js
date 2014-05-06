@@ -10,31 +10,23 @@
 		
 	Returns: ViewModel
 */
-define(['app/utilities'], function(utils) {	
-	var Privacy = function() {
-		// page meta data
-		this.title = 'Account Manager: privacy';
-		this.description = 'Account Manager privacy page. Self containing web app to help with...';
-		this.keywords = 'KnockoutJS, MVVM, requiredJS, javascript, jQuery, Ruby on Rails, prototype, OO';
-		
-		this.model = {};
-		this.app = utils.app;
-	}; 
-	
-	Privacy.prototype.isLoginRequired = isLoginRequired;
-	function isLoginRequired() {
-		return false;
-	};
+define(['jquery', 'app/utilities', 'app/models/modelbase'], function($, utils, modelbase) {
+	try {
+		var title = 'Account Manager: privacy';
+		var description = 'Account Manager privacy page. Self containing web app to help with...';
+		var keywords = 'KnockoutJS, MVVM, requiredJS, javascript, jQuery, Ruby on Rails, prototype, OO';
 
-	Privacy.prototype.loadModelData = loadModelData;
-	function loadModelData() {
-		this.model = {};
+		var viewModel = modelbase.instance(title,description,keywords,false);
 		
-		// Notify observers
-		$(this).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(this));
-	} //end loadModelData
+		viewModel.loadModelData = function loadModelData() {
+			this.model = {};
 			
-	var viewModel =  new Privacy();
-
-	return viewModel; // NOW..
+			// Notify observers
+			$(this).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(this));
+		} //end loadModelData
+				
+		return viewModel; // NOW..
+	} catch(e) {
+		utils.logHelper.error('define(Privacy) Error: ' + e);
+	}
 });// end Privacy View Model

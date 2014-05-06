@@ -11,81 +11,72 @@
 	Module Id: mail
 	Returns: ViewModel 
 */
-define(['app/utilities'], function(utils) {	
-	var Mail = function() {
-		// page meta data
-		this.title = "Account Manager: Mail";
-		this.description = 'Account Manager Mail page. Self containing web app to help with...';
-		this.keywords = 'KnockoutJS, MVVM, requiredJS, javascript, jQuery, Ruby on Rails, prototype, OO';
-		this.app = utils.app;
-				
-		this.model = {};				
-	}; 
-
-	// Get the identifier for the view model
-	Mail.prototype.getId = getId;
-	function getId() {
-		var id = { 
-			libraryId: manager.library.value, 
-			mailbox: 'inbox', // review IMAP rfc spec
-			command: 'unseen', // review IMAP rfc spec 
-			messageId: null,
-			toString: function() {
-				return 'id: {library: '+this.libraryId+', '+
-					   'mailbox: '+this.mailbox+', '+
-					   'command: '+this.command+', '+
-					   'messageId: '+this.messageId+
-					   '}';
-			}};
+define(['jquery', 'app/utilities', 'app/models/modelbase'], function($, utils, modelbase) {	
+	try {
+		var title = "Account Manager: Mail";
+		var description = 'Account Manager Mail page. Self containing web app to help with...';
+		var keywords = 'KnockoutJS, MVVM, requiredJS, javascript, jQuery, Ruby on Rails, prototype, OO';
 		
-		// This are the two formats that need parsing
-	    // home#mail
-		// home/viewer#mail/{library}/{mailbox}/{mailboxName}/{id}
-		var hashParts = document.location.hash.split('#');
-		if(hashParts.length > 1) {
-			mailParts = hashParts[1].split('/');
-			if(mailParts.length == 5) {
-				id.messageId = mailParts[4];
-			}
-		} // end if
+		var viewModel = modelbase.instance(title,description,keywords, true);
 		
-		utils.logHelper.debug('Mail get id complete for ' + id );
-		return id;
-	}; // end getId
-	
-	Mail.prototype.isLoginRequired = isLoginRequired;
-	function isLoginRequired() {
-		return true;
-	};
-		
-	Mail.prototype.loadModelData = loadModelData;
-	function loadModelData() {
-		var self = this;
-		var promise = {};
-		var id = getId();
-		utils.logHelper.debug('Mail id: ' + id);
-		
-			promise = manager.library.imap.getMessages(id);
-		
-		promise.then(
-			function(success) {
-				self.model.data = success;
-				
-				// Notify any observers
-				$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
-			},
-			function(error) {
-				self.model.data = error;
-				
-				utils.logHelper.appMessage(error.error);
-				
-				// Notify any observers
-				$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
-			}
-		);
-	}; //end loadModelData
+		// Get the identifier for the view model
+		viewModel.getId = function getId() {
+			var id = { 
+				libraryId: manager.library.value, 
+				mailbox: 'inbox', // review IMAP rfc spec
+				command: 'unseen', // review IMAP rfc spec 
+				messageId: null,
+				toString: function() {
+					return '{library: '+this.libraryId+', '+
+						   'mailbox: '+this.mailbox+', '+
+						   'command: '+this.command+', '+
+						   'messageId: '+this.messageId+
+						   '}';
+				}};
 			
-	var viewModel =  new Mail();
+			// This are the two formats that need parsing
+			// home#mail
+			// home/viewer#mail/{library}/{mailbox}/{mailboxName}/{id}
+			var hashParts = document.location.hash.split('#');
+			if(hashParts.length > 1) {
+				mailParts = hashParts[1].split('/');
+				if(mailParts.length == 5) {
+					id.messageId = mailParts[4];
+				}
+			} // end if
+			
+			utils.logHelper.debug('Mail get id complete for ' + id );
+			return id;
+		}; // end getId
+		
+		viewModel.loadModelData = function loadModelData() {
+			utils.logHelper.debug('Mail load model data');
+			var self = this;
+			var promise = {};
+			var id = getId();
+			
+			var promise = manager.library.imap.getMessages(id);
+			
+			promise.then(
+				function(success) {
+					self.model.data = success;
+					
+					// Notify any observers
+					$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
+				},
+				function(error) {
+					self.model.data = error;
+					
+					utils.logHelper.appMessage(error.error);
+					
+					// Notify any observers
+					$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
+				}
+			);
+		}; //end loadModelData
 
-	return viewModel; // NOW..
+		return viewModel; // NOW..
+	} catch(e) {
+		utils.logHelper.error('define(Mail) Error: '+e);
+	}
 }); // end define Mail View Model
