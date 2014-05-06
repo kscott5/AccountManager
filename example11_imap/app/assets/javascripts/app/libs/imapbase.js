@@ -41,11 +41,11 @@ define(['jquery', 'app/utilities'], function($, utils) {
 								results.messages.push(msg);
 							} // end for	
 							
-							utils.logHelper.debug('\t\tdone: '+results.messages.length+' emails');
+							utils.logHelper.debug('IMAP['+this.libraryName+'] getMessages('+id+') done: '+results.messages.length+' emails');
 							
 							doneCallback(results);
 						} else {		
-							utils.logHelper.debug('\t\terror: '+results);
+							utils.logHelper.debug(''IMAP['+this.libraryName+'] getMessages('+id+') error: '+results);
 							
 							errorCallback(results);
 						} // end if
