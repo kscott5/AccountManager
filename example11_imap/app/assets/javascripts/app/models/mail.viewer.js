@@ -47,10 +47,10 @@ define(['jquery', 'app/utilities', 'app/models/modelbase', 'app/models/mail'], f
 						$(self).trigger(globals.VIEWMODEL_LOAD_COMPLETE_LISTENER, manager.toPlainObject(self));
 					}
 				);
-			}; //end loadModelData
-		} catch(e) {
-			throw new Error('Mail viewer load model data promise error: ' + e);
-		}
+			} catch(e) {
+				throw new Error('Mail viewer load model data promise error: ' + e);
+			}
+		}; //end loadModelData
 		
 		return viewModel; // NOW..
 	} catch(e) {

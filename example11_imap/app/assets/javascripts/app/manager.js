@@ -285,6 +285,7 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities'], 	function($, jQueryUI, ko,
 		function clearInterval() {
 			if(__managerInterval) {
 				window.clearInterval(__managerInterval);
+				$('#content').html('');
 				__managerInterval = null;
 			}
 		}; // end clearInterval

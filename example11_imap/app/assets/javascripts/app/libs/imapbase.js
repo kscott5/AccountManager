@@ -24,7 +24,7 @@ define(['jquery', 'app/utilities'], function($, utils) {
 		ImapInstance.prototype.getMessages = getMessages;
 		function getMessages(id) {
 			var url = '/'+this.libraryName+'/mailbox/'+id.mailbox+'/'+id.command;
-			utils.logHelper.debug('IMAP['+this.libraryName+'] getMessages('+id+') url => '+url);
+			utils.logHelper.debug('IMAP getMessages('+id+')');
 			
 			if(id.messageId != null)
 				return;
@@ -37,15 +37,15 @@ define(['jquery', 'app/utilities'], function($, utils) {
 
 						if(response && response.length > 0) {
 							for(var i=0; i<response.length; i++) {
-								msg = createMessageFromResponse(id, this.libraryName, response[i]);
+								msg = createMessageFromResponse(id, response[i]);
 								results.messages.push(msg);
 							} // end for	
 							
-							utils.logHelper.debug('IMAP['+this.libraryName+'] getMessages('+id+') done: '+results.messages.length+' emails');
+							utils.logHelper.debug('IMAP getMessages('+id+') done: '+results.messages.length+' emails');
 							
 							doneCallback(results);
 						} else {		
-							utils.logHelper.debug('IMAP['+this.libraryName+'] getMessages('+id+') error: '+results);
+							utils.logHelper.debug('IMAP getMessages('+id+') error');
 							
 							errorCallback(results);
 						} // end if
@@ -64,9 +64,9 @@ define(['jquery', 'app/utilities'], function($, utils) {
 				
 			var promise = {
 				then: function(doneCallback, errorCallback) {							
-					// REST call /windowslive/:name/view/:id
-					var url = '/'+this.libraryName+'/'+id.mailbox+'/view/'+id.messageId;
-					utils.logHelper.debug('IMAP['+this.libraryName+'] getMessage('+id+') url => '+ url);
+					// REST call /{libraryId}/:name/view/:id
+					var url = '/'+id.libraryId+'/'+id.mailbox+'/view/'+id.messageId;
+					utils.logHelper.debug('IMAP getMessage('+id+')');
 					
 					if(!id || !id.messageId || id.libraryId != globals.windowslive.value) {
 						errorCallback({viewMessages: false, message: undefined, error: 'Invalid parameter for get message'});
@@ -74,14 +74,14 @@ define(['jquery', 'app/utilities'], function($, utils) {
 					}
 
 					$.getJSON(url, function(response) {
-						var msg = createMessageFromResponse(id, this.libaryName, response[0]); // message needs to be in an array
+						var msg = createMessageFromResponse(id, response[0]); // message needs to be in an array
 						var results = createMessageResults(msg, response.error);				
 											
 						if(!results.error) {
-							utils.logHelper.debug('IMAP['+this.libraryName+'] getMessage('+id+') done url => '+ url);
+							utils.logHelper.debug('IMAP getMessage('+id+') done');
 							doneCallback(results);
 						} else {
-							utils.logHelper.debug('IMAP['+this.libraryName+'] getMessage('+id+') error url => '+ url);
+							utils.logHelper.debug('IMAP getMessage('+id+') error');
 							errorCallback(results);
 						}
 					}); // end $.getJSON
@@ -107,7 +107,7 @@ define(['jquery', 'app/utilities'], function($, utils) {
 		}; // end createMessageResults
 		
 		// Create a hash map of message from the server response
-		function createMessageFromResponse(id, libraryName, response) {
+		function createMessageFromResponse(id, response) {
 			if(!response || !response.attr) return {};
 			
 			var seqno = response.seqno;
@@ -122,8 +122,8 @@ define(['jquery', 'app/utilities'], function($, utils) {
 				id: attr.ENVELOPE.message_id,
 				
 				// controller = home, action: viewer 
-				// #mail/{controller}/:name/view/:messageid => ex. controller windowslive
-				link: 'home/viewer#mail.viewer/'+libraryName+'/'+id.mailbox+'/view/'+seqno,
+				// #mail/{libraryId}/:name/view/:messageid => ex. controller windowslive
+				link: 'home/viewer#mail.viewer/'+id.libraryId+'/'+id.mailbox+'/view/'+seqno,
 				click: function() {
 					var title = 'Account Manager Email: '+ this.link;
 					manager.navigateToViewer(title, this.link);

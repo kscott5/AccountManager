@@ -45,7 +45,6 @@ define(['jquery', 'app/utilities', 'app/models/modelbase'], function($, utils, m
 				}
 			} // end if
 			
-			utils.logHelper.debug('Mail get id complete for ' + id );
 			return id;
 		}; // end getId
 		
