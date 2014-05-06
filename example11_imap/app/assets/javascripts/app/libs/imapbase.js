@@ -78,8 +78,10 @@ define(['jquery', 'app/utilities'], function($, utils) {
 						var results = createMessageResults(msg, response.error);				
 											
 						if(!results.error) {
+							utils.logHelper.debug('IMAP['+this.libraryName+'] getMessage('+id+') done url => '+ url);
 							doneCallback(results);
-						} else {					
+						} else {
+							utils.logHelper.debug('IMAP['+this.libraryName+'] getMessage('+id+') error url => '+ url);
 							errorCallback(results);
 						}
 					}); // end $.getJSON
