@@ -16,7 +16,7 @@ Example6::Application.routes.draw do
   # NOTE: using the 'only:' attribute to restrict the verb control and action mapping.
   resources :home, only: [:index, :viewer, :wlcbk]
   resources :windowslive, only: [:callback, :refresh, :mailbox, :message]
-  resources :googleapi, only: [:callback]
+  resources :googleapi, only: [:callback, :refresh, :mailbox, :message]
   
   # Example resource route with options:
   #   resources :products do
@@ -69,12 +69,18 @@ Example6::Application.routes.draw do
   get 'home/viewer'
   get 'home' => 'home#index'
   
-  get 'windowslive/callback'
-  get 'windowslive/refresh'
-  get 'windowslive/mailbox/:name/:command' => 'windowslive#mailbox'
-  get 'windowslive/:name/view/:messageid' => 'windowslive#message'
+  # Route to retrieve library IMAP mailbox information
+  get ':library/mailbox/:name/:command' => 'home#mailbox'
   
-  get 'googleapi/callback'
+  # Route to retrieve library IMAP mailbox message
+  get ':library/:name/view/:messageid' => 'home#message'
+  
+  # Routes for library OAuth2 flow
+  get ':library/callback' => 'home#callback'
+  get ':library/refresh' => 'home#refresh'
+   
+  get 'home/windowslive/profile' => 'home#windowsLiveProfile'
+  get 'home/googleapi/profile' => 'home#googleApiProfile'
   
   # You can have the root of your site routed with "root"
   # format is important here. Before set the root use the 

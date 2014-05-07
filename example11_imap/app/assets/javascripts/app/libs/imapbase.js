@@ -129,13 +129,12 @@ define(['jquery', 'app/utilities'], function($, utils) {
 					manager.navigateToViewer(title, this.link);
 					return false;
 				}, // end click
-				body: attr['BODY[]'] || ''
+				// TODO: Determine correct IMAP RFC body structure to use
+				body:  attr['BODY[]'] || '' // (attr['BODY[]'])? window.atob(attr['BODY[]']) : ''
 			}; // end msg
 			
 			return msg;
 		}; // end createMessageFromResponse
-			
-
 		var imapBase = new IMAPBASE();
 		
 		return imapBase;

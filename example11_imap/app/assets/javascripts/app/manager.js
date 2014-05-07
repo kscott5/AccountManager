@@ -247,7 +247,13 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities'], 	function($, jQueryUI, ko,
 								ko.applyBindings(data ,rootNode);							
 							});
 							
-							__managerViewModel.loadModelData();
+							try {
+								__managerViewModel.loadModelData();
+							} catch(e) {
+								manager.clearInterval();
+								utils.logHelper.error('Manager navigate to view load model data error: '+ e);
+								utils.logHelper.appMessage('Unable to process your request at this time.');
+							}
 						} // end if
 			
 					});
@@ -293,8 +299,8 @@ define(['jquery', 'jqueryUI', 'ko', 'app/utilities'], 	function($, jQueryUI, ko,
 		// Navigate to viewer (No headers and footers)
 		Manager.prototype.navigateToViewer = navigateToViewer;
 		function navigateToViewer(viewTitle, viewUrl) {
+			utils.logHelper.debug('Manager navigate to viewer');
 			var width = 525, height = 525;
-			utils.logHelper.debug('Manager navigate to viewer [title: '+viewTitle+', url: '+viewUrl+']');
 			
 			var features = [
 					"width=" + width,
