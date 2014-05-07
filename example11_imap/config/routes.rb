@@ -79,8 +79,9 @@ Example6::Application.routes.draw do
   get ':library/callback' => 'home#callback'
   get ':library/refresh' => 'home#refresh'
    
-  get 'home/windowslive/profile' => 'home#windowsLiveProfile'
-  get 'home/googleapi/profile' => 'home#googleApiProfile'
+  # Test only
+  #get 'home/windowslive/profile' => 'home#windowsLiveProfile'
+  #get 'home/googleapi/profile' => 'home#googleApiProfile'
   
   # You can have the root of your site routed with "root"
   # format is important here. Before set the root use the 

@@ -185,7 +185,7 @@ class HomeController < ApplicationController
 	return render json: 'Access Denied'.to_json, layout: false if profile.nil?
 	
 	accessToken = profile['access_token']
-	email = profile['emails']['preferred']
+	email = profile['email']
 	server = profile['imap_server']
 	port = profile['imap_server_port']	
 
