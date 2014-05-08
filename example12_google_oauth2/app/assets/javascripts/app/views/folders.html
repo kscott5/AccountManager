@@ -1,0 +1,16 @@
+<div id="templateContent" name="templateContent">
+	<h1 data-bind="text: model.description"></h1>
+	<div id="breadcrumbs" name="breadcrumbs"></div>
+	<ul data-bind="foreach: model.data">
+		<li>
+			<!-- ko if: $data.isParent -->
+				<a data-bind="attr: {href: $data.link, title: $data.name}, click: $data.click">
+					<span id="ffname" name="ffname" data-bind="text: $data.name"/>
+				</a>
+			<!-- /ko -->
+			<!-- ko ifnot: $data.isParent -->
+				<span id="ffname" name="ffname" data-bind="text: $data.name"/>
+			<!-- /ko -->
+		</li>
+	</ul>
+</div>
