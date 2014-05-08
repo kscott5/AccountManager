@@ -20,20 +20,6 @@ class HomeController < ApplicationController
   # Viewer is just that. No header or footers available
   def viewer
   end # viewer
-
-  # Get the current profile for the library
-  #
-  # :library/profile
-  # ex: windowslive/profile
-  def profile
-	library = params[:library].downcase
-	
-	profile = '{\'error\': \'NO_DATA\'}'
-	profile = googleapi_profile if library == 'googleapi'
-	profile = windowslive_profile if library == 'windowslive'
-	
-	render json: profile.to_json, layout: false
-  end # profile
  
   # Retrieves all the library's command (UNSEEN) messages from boxname (INBOX)
   #

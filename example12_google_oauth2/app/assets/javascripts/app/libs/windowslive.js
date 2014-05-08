@@ -114,26 +114,18 @@ define([globals.windowslive.requireJS.path, 'jqueryExtend', 'app/libs/imapbase',
 		function logout() {
 			utils.logHelper.debug('WindowsLive logout');
 			
-			manager.setInterval('WindwsLive logout - FIX THE DELAY');
-			
 			// Must be call before other WL.{method} calls
 			WL.init(globals.windowslive.initConfig);
 			
-			// HUGE delay when execute this Promise, 10+ seconds
-			WL.logout()
-				.then(
-					function(success) {
-						utils.logHelper.debug('WindowsLive logout complete');
+			// DO NOT USE THE .then() METHOD ON logout()
+			// VERY POOR PERFORMANCE
+			// THIS IS BETTER!!!!!
+			WL.logout();
 			
-						__windowsLiveUser = null;
+			__windowsLiveUser = null;
 						
-						// Notify any observers
-						$(manager.library).trigger(globals.LOGOUT_COMPLETE_LISTENER);
-					},
-					function(failure) {
-						// TODO: send admin message
-					}
-			); // end		
+			// Notify any observers
+			$(manager.library).trigger(globals.LOGOUT_COMPLETE_LISTENER);
 		}; // end logout	
 
 		// Windows Live API OneDrive
