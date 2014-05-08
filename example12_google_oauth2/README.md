@@ -46,8 +46,8 @@ imap.search("UNSEEN").each do |message_id]
   envelope = imap.fetch(message_id, "ENVELOPE")[0]
 end
 
-This is VERY slow. In fact, IMAP RFC documents mention passing a list of message_id.
-This is better.
+This is VERY slow, 60 seconds for 20 messages. In fact, IMAP RFC documents mention 
+passing a list of message_id. This is better at approx. 10 seconds for 55 messages.
 
 imap.examine("INBOX")
 idList = imap.search("UNSEEN")
