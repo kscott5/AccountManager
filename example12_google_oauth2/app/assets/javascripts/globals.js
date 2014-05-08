@@ -1,7 +1,9 @@
 // Remove comment for app console information
 var DEBUGGING = true; // Comment for production
 
+// Initialize a blank manager
 var manager = {};
+
 var globals = {};
 
 // add listener constants
@@ -27,6 +29,8 @@ globals.windowslive = (function(){
 		imapLinkName: 'Outlook',
 		imapServer: 'imap-mail.outlook.com',
 		imapPort: 993,
+		smtpServer: 'smtp-mail.outlook.com',
+		smtpPort: 587,
 		
 		initConfig : {
 			logging: true,
@@ -52,16 +56,19 @@ globals.windowslive = (function(){
 })(); // end globals.windowslive
 
 // Configuration for Google+ API
-globals.googleapi = (function(){	
+globals.googleapi = (function(){
+	
 	return {
 		description: 'Google API for accessing Profile, Drive and Mail',
 		text: 'Google',
 		value: 'googleapi',
 		folderLinkName: 'Drive',
 		imapLinkName: 'GMail',
-		imapServer: '',
-		imapPort: -1,
-
+		imapServer: 'imap.gmail.com',
+		imapPort: 993,
+		smtpServer: 'smtp.gmail.com',
+		smtpPort: 587,
+		
 		initConfig : { //https://developers.google.com/+/web/signin/reference#signin-tag-attributes
 			'clientid': '1082334669557-rlki04e4u64eg249mvirs8vsgl4ug99h.apps.googleusercontent.com',
 			'cookiepolicy': globals.host_uri,
@@ -70,7 +77,7 @@ globals.googleapi = (function(){
 				'https://www.googleapis.com/auth/plus.login', // This is the recommended login scope providing access to social features. This scope implicitly includes the profile scope
 				'https://www.googleapis.com/auth/drive.readonly' // Allows read-only access to file metadata and file content
 			].join(' '),
-			'callback': 'manager.library.login'
+			'callback': 'Remember to manually add the manager.library.login function before calling this method'
 		},
 		
 		oauth2Config : {

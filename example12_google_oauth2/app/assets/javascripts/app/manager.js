@@ -47,29 +47,6 @@ define(['jqueryExtend', 'ko', 'app/utilities'], function($,ko,utils) {
 			manager.navigateToView(document.location.hash);
 		}; // end loginComplete
 		
-		// Change to the user selected library
-		function setUserSelectLibrary(libraryName) {	
-			var dep = 'app/libs/{0}'.replace('{0}', libraryName);
-			var cfg = globals.require.config;
-			
-			if(typeof manager.library != 'undefined' && manager.library.value != libraryName) {
-				manager.logHelper.debug('Manager library changing to ' + libraryName);
-				// Prevents manager from observing multiple libraries
-				manager.removeListener(manager.library, globals.LOGIN_COMPLETE_LISTENER);
-				manager.removeListener(manager.library, globals.LOGOUT_COMPLETE_LISTENER);
-			} // end if
-			
-			require(cfg, [dep], function(library) {
-				manager.library = library;
-
-				// Allows manager to observe changes in library
-				manager.addListener(manager.library, globals.LOGIN_COMPLETE_LISTENER, loginComplete);
-				manager.addListener(manager.library, globals.LOGOUT_COMPLETE_LISTENER, logoutComplete);	
-				
-				manager.navigateToView(document.location.hash);
-			}); // end require
-		}; // end setUserSelectLibrary
-
 		// Handler for logout complete
 		function logoutComplete(event) {
 			manager.navigateToView(document.location.hash);
@@ -114,6 +91,7 @@ define(['jqueryExtend', 'ko', 'app/utilities'], function($,ko,utils) {
 				$('#header #session #status').html('Logout');
 				$('#header #session #status').on(globals.ACCOUNT_MANAGER_CLICK_LISTENER, manager.library.logout);
 			} else {
+				$('#header #session #user').html('');
 				$('#header #session #status').html('Login');
 				$('#header #session #status').on(globals.ACCOUNT_MANAGER_CLICK_LISTENER, manager.library.login);
 			} // end is connected check
@@ -140,7 +118,7 @@ define(['jqueryExtend', 'ko', 'app/utilities'], function($,ko,utils) {
 			});
 				
 			// default to windows live library
-			setUserSelectLibrary(globals.windowslive.value);
+			manager.loadUserSelectLibrary(globals.windowslive.value, true);
 		};
 		
 		// FUN STUFF... Design Patterns observable
@@ -184,9 +162,37 @@ define(['jqueryExtend', 'ko', 'app/utilities'], function($,ko,utils) {
 		Manager.prototype.libraryChanged = libraryChanged;
 		function libraryChanged() {	
 			// Facade or wrap required to allow event handling
-			setUserSelectLibrary($(this).val());
+			manager.loadUserSelectLibrary($(this).val(), true);
 		};
 		
+		// Change to the user selected library
+		Manager.prototype.loadUserSelectLibrary = loadUserSelectLibrary;
+		function loadUserSelectLibrary(libraryName, navigate) {	
+			var dep = 'app/libs/{0}'.replace('{0}', libraryName);
+			var cfg = globals.require.config;
+			
+			if(manager.library != null &&  
+				manager.library.value != null && 
+					manager.library.value != libraryName) {
+				manager.logHelper.debug('Manager library changing to ' + libraryName);
+				// Prevents manager from observing multiple libraries
+				manager.removeListener(manager.library, globals.LOGIN_COMPLETE_LISTENER);
+				manager.removeListener(manager.library, globals.LOGOUT_COMPLETE_LISTENER);
+			} // end if
+			
+			require(cfg, [dep], function(library) {
+				manager.library = library;
+
+				// Allows manager to observe changes in library
+				manager.addListener(manager.library, globals.LOGIN_COMPLETE_LISTENER, loginComplete);
+				manager.addListener(manager.library, globals.LOGOUT_COMPLETE_LISTENER, logoutComplete);	
+				
+				if(navigate) {
+					manager.navigateToView(document.location.hash);
+				}
+			}); // end require
+		}; // end loadUserSelectLibrary
+
 		// NOTE: To make this into a viewer with header and footer
 		//       open new target _blank and then call navigate to view.
 		//

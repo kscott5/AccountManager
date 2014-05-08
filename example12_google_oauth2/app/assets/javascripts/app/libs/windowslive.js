@@ -27,7 +27,9 @@ define([globals.windowslive.requireJS.path, 'jqueryExtend', 'app/libs/imapbase',
 			
 			self.imapServer = globals.windowslive.imapServer;
 			self.imapPort = globals.windowslive.imapPort;
-			
+			self.smtpServer = globals.windowslive.smtpServer;
+			self.smtpPort = globals.windowslive.smtpPort;
+
 			self.imap = imapbase.instance();
 			self.toString = function() {
 				return '{' +
@@ -36,7 +38,9 @@ define([globals.windowslive.requireJS.path, 'jqueryExtend', 'app/libs/imapbase',
 					'description: '+this.description+', '+
 					'imapLinkName: '+this.imapLinkName+', '+
 					'imapServer: '+this.imapServer+', '+
-					'imapPort: '+this.imapPort+
+					'imapPort: '+this.imapPort+', '+
+					'smtpServer: '+this.smtpServer+', '+
+					'smtpPort: '+this.smtpPort+
 					'}';				
 			} // end toString
 		};
@@ -61,8 +65,7 @@ define([globals.windowslive.requireJS.path, 'jqueryExtend', 'app/libs/imapbase',
 					__windowsLiveUser = {
 						fullname: success.name,
 						email: success.emails.preferred,
-						token: WL.getSession().access_token,
-						// Available values success.first_name, success.last_name
+						token: WL.getSession().access_token,						
 						toString: function() {
 							return '{fullanme: '+this.fullname+', email: '+this.email+', token: '+this.token+'}';
 						}

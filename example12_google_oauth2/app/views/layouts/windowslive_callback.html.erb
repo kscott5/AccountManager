@@ -1,9 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-<%= csrf_meta_tags %>
+	<%= csrf_meta_tags %>
+	<%= javascript_include_tag "globals", media: "all", "data-turbolinks-track" => true %>
+	<%= javascript_include_tag "require-2.1.11", media: "all", "data-main" => "/assets/data-main-windowslive",  "data-turbolinks-track" => true %>
+
 </head>
 <body>
-	<script src="//js.live.net/v5.0/wl.debug.js"></script>
+	<div id="errorInfo" name="errorInfo"></div>
+
+	<%= yield %>
+
 </body>
 </html>

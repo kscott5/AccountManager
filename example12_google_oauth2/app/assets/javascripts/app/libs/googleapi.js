@@ -26,6 +26,8 @@ define([globals.googleapi.requireJS.path, 'jqueryExtend', 'app/libs/imapbase', '
 
 			self.imapServer = globals.googleapi.imapServer;
 			self.imapPort = globals.googleapi.imapPort;
+			self.smtpServer = globals.googleapi.smtpServer;
+			self.smtpPort = globals.googleapi.smtpPort;
 			
 			self.imap = imapbase.instance();
 			self.toString = function() {
@@ -35,7 +37,9 @@ define([globals.googleapi.requireJS.path, 'jqueryExtend', 'app/libs/imapbase', '
 					'description: '+this.description+', '+
 					'imapLinkName: '+this.imapLinkName+', '+
 					'imapServer: '+this.imapServer+', '+
-					'imapPort: '+this.imapPort+
+					'imapPort: '+this.imapPort+', '+
+					'smtpServer: '+this.smtpServer+', '+
+					'smtpPort: '+this.smtpPort+
 					'}';				
 			} // end toString			
 		};
@@ -46,7 +50,7 @@ define([globals.googleapi.requireJS.path, 'jqueryExtend', 'app/libs/imapbase', '
 			utils.logHelper.debug('Google API get user');
 			
 			// Do we have a user?
-			if(typeof __googleApiUser != 'undefined' || !__googleApiLoggedIn) {
+			if(__googleApiUser != null) {
 				return __googleApiUser;
 			}
 			
@@ -71,8 +75,6 @@ define([globals.googleapi.requireJS.path, 'jqueryExtend', 'app/libs/imapbase', '
 						}
 					};
 					
-					__googleApiLoggedIn = true;
-					
 					// Notify any observers
 					$(manager.library).trigger(globals.LOGIN_COMPLETE_LISTENER, [__googleApiUser]);
 				});
@@ -82,7 +84,11 @@ define([globals.googleapi.requireJS.path, 'jqueryExtend', 'app/libs/imapbase', '
 		// Add as method to prevent external changes
 		GoogleApi.prototype.isLoggedIn = isLoggedIn;
 		function isLoggedIn() {
-			return __googleApiLoggedIn;
+			if(gapi.auth) {
+				return gapi.auth.getToken() != null;
+			} else {
+				return false; // gapi.auth not loaded yet...
+			}
 		}; // end isLoggedIn
 
 		GoogleApi.prototype.login = login;
@@ -108,14 +114,17 @@ define([globals.googleapi.requireJS.path, 'jqueryExtend', 'app/libs/imapbase', '
 			// The duration, in seconds, the token is valid for. Only present in successful responses.
 			// state - type: string (globals.googleapi.oauth2Config.scope)
 			// The Google API scopes related to this token.
-			utils.logHelper.debug('Google API login');
+			
 					// Notify any observers
 					//$(manager.library).trigger(globals.LOGOUT_COMPLETE_LISTENER);
 
+			
 			if(!token.type) {
 				gapi.auth.setToken(token);
-			} else {				
-				gapi.auth.authorize(globals.googleapi.oauth2Config, manager.library.login);
+			} else {
+				utils.logHelper.debug('Google API login');
+				globals.googleapi.initConfig.callback = manager.library.login;
+				gapi.auth.signIn(globals.googleapi.initConfig);
 			}
 		}; // end login
 
@@ -225,8 +234,7 @@ define([globals.googleapi.requireJS.path, 'jqueryExtend', 'app/libs/imapbase', '
 		GoogleApi.prototype.foldersfiles = new FoldersFiles();	
 		GoogleApi.prototype.imap = imapbase.instance(globals.googleapi.value);
 		
-		var __googleApiLoggedIn = false;
-		var __googleApiUser = undefined;
+		var __googleApiUser = null;
 		
 		var googleapi = new  GoogleApi();
 		
