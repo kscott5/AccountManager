@@ -1,5 +1,6 @@
 <div id="templateContent" name="templateContent">
 	<table id="emailList" name="emailList">
+		<!-- ko if: model.data.messages.length > 0 -->
 		<thead>
 			<tr id="header" name="header">
 				<td><span id="date" name="date">Date</span></td>
@@ -22,5 +23,20 @@
 				</td>
 			</tr>
 		</tbody>
+		<!-- /ko -->
+	
+		<!-- ko if: model.data.messages.length == 0 -->
+		<thead>
+			<tr id="header" name="header">
+				<td></td>
+		</thead>
+		<tbody>
+			<tr>
+				<td id="nomsgs" name="nomsgs">
+					NO MESSAGES
+				</td>
+			</tr>
+		</tbody>
+		<!-- /ko -->
 	</table>
 </div>

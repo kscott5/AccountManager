@@ -74,6 +74,7 @@ globals.googleapi = (function(){
 			'cookiepolicy': globals.host_uri,
 			'scope': [ // https://developers.google.com/accounts/docs/OAuth2Login#scope-param
 				'openid profile email',
+				'https://mail.google.com/', // https://developers.google.com/gmail/xoauth2_protocol
 				'https://www.googleapis.com/auth/plus.login', // This is the recommended login scope providing access to social features. This scope implicitly includes the profile scope
 				'https://www.googleapis.com/auth/drive.readonly' // Allows read-only access to file metadata and file content
 			].join(' '),

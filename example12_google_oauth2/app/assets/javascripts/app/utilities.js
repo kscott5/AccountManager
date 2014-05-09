@@ -44,7 +44,7 @@ define(['toastr'], function(toastr) {
 			LogHelper.prototype.debug = debug;
 			function debug(msg, title) {
 				if('boolean' == typeof DEBUGGING && DEBUGGING) {
-					console.debug('[AM] ' + msg);
+					console.log('[AM] ' + msg);
 				}
 			}
 			

@@ -66,12 +66,22 @@ define([globals.googleapi.requireJS.path, 'jqueryExtend', 'app/libs/imapbase', '
 					  return;
 					}
 					
+					token = gapi.auth.getToken();
+					
 					__googleApiUser = {
 						fullname: results.displayName,
-						email: results.email,
-						token: gapi.auth.getToken(),
+						email: results.emails[0].value,
+						profileUrl: results.url,
+						imageUrl: results.image.url,
+						token: token.access_token,
 						toString: function() {
-							return '{fullanme: '+this.fullname+', email: '+this.email+', token: '+this.token+'}';
+							return '{'+
+									'fullanme: '+this.fullname+', '+
+									'email: '+this.email+', '+
+									'profileUrl: '+this.profileUrl+', '+
+									'imageUrl: '+this.imageUrl+', '+
+									'token: '+this.token+
+								'}';
 						}
 					};
 					
@@ -119,10 +129,20 @@ define([globals.googleapi.requireJS.path, 'jqueryExtend', 'app/libs/imapbase', '
 					//$(manager.library).trigger(globals.LOGOUT_COMPLETE_LISTENER);
 
 			
-			if(!token.type) {
-				gapi.auth.setToken(token);
+			if(!token.type && token.status.signed_in) {
+				utils.logHelper.debug('Google API login - signed in');
+				manager.library.getUser();
+			} else if(!token.type && !token.status.signed_in) {
+				utils.logHelper.debug('Google API login - signing out');
+				
+				// Review logout() for reasoning
+				__googleApiUser = null;
+				
+				// Notify any observers
+				$(manager.library).trigger(globals.LOGOUT_COMPLETE_LISTENER);
 			} else {
 				utils.logHelper.debug('Google API login');
+				
 				globals.googleapi.initConfig.callback = manager.library.login;
 				gapi.auth.signIn(globals.googleapi.initConfig);
 			}
@@ -130,12 +150,12 @@ define([globals.googleapi.requireJS.path, 'jqueryExtend', 'app/libs/imapbase', '
 
 		GoogleApi.prototype.logout = logout;
 		function logout() {
-			utils.logHelper.debug('Google API logout will call login per documentation')
+			utils.logHelper.debug('Google API logout (calling login next)');
 			
 			// Google API uses the same callback function initiate with
 			// the signin function. 
 			//
-			// __googleApiLoggedIn flag is update in login()
+			// Set the __googleApiUser  to null in login()
 			//
 			// https://developers.google.com/+/web/signin/sign-out
 			gapi.auth.signOut();

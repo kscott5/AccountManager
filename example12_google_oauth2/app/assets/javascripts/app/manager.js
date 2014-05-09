@@ -96,7 +96,35 @@ define(['jqueryExtend', 'ko', 'app/utilities'], function($,ko,utils) {
 				$('#header #session #status').on(globals.ACCOUNT_MANAGER_CLICK_LISTENER, manager.library.login);
 			} // end is connected check
 		}; // end applyBindings
+		
+		// Loads the user selected library and then
+		// navigate to current view if true
+		function loadUserSelectLibrary(libraryName, navigate) {	
+			var dep = 'app/libs/{0}'.replace('{0}', libraryName);
+			var cfg = globals.require.config;
 			
+			if(manager.library != null &&  
+				manager.library.value != null && 
+					manager.library.value != libraryName) {
+				manager.logHelper.debug('Manager library changing to ' + libraryName);
+				// Prevents manager from observing multiple libraries
+				manager.removeListener(manager.library, globals.LOGIN_COMPLETE_LISTENER);
+				manager.removeListener(manager.library, globals.LOGOUT_COMPLETE_LISTENER);
+			} // end if
+			
+			require(cfg, [dep], function(library) {
+				manager.library = library;
+
+				// Allows manager to observe changes in library
+				manager.addListener(manager.library, globals.LOGIN_COMPLETE_LISTENER, loginComplete);
+				manager.addListener(manager.library, globals.LOGOUT_COMPLETE_LISTENER, logoutComplete);	
+				
+				if(navigate) {
+					manager.navigateToView(document.location.hash);
+				}
+			}); // end require
+		}; // end loadUserSelectLibrary
+
 		// Defines Manager as function
 		var Manager = function() {		
 			this.app = utils.app;
@@ -118,7 +146,7 @@ define(['jqueryExtend', 'ko', 'app/utilities'], function($,ko,utils) {
 			});
 				
 			// default to windows live library
-			manager.loadUserSelectLibrary(globals.windowslive.value, true);
+			loadUserSelectLibrary(globals.windowslive.value, /*navigate*/true );
 		};
 		
 		// FUN STUFF... Design Patterns observable
@@ -162,37 +190,19 @@ define(['jqueryExtend', 'ko', 'app/utilities'], function($,ko,utils) {
 		Manager.prototype.libraryChanged = libraryChanged;
 		function libraryChanged() {	
 			// Facade or wrap required to allow event handling
-			manager.loadUserSelectLibrary($(this).val(), true);
+			loadUserSelectLibrary($(this).val(), true);
 		};
 		
 		// Change to the user selected library
-		Manager.prototype.loadUserSelectLibrary = loadUserSelectLibrary;
-		function loadUserSelectLibrary(libraryName, navigate) {	
-			var dep = 'app/libs/{0}'.replace('{0}', libraryName);
-			var cfg = globals.require.config;
-			
-			if(manager.library != null &&  
-				manager.library.value != null && 
-					manager.library.value != libraryName) {
-				manager.logHelper.debug('Manager library changing to ' + libraryName);
-				// Prevents manager from observing multiple libraries
-				manager.removeListener(manager.library, globals.LOGIN_COMPLETE_LISTENER);
-				manager.removeListener(manager.library, globals.LOGOUT_COMPLETE_LISTENER);
-			} // end if
-			
-			require(cfg, [dep], function(library) {
-				manager.library = library;
-
-				// Allows manager to observe changes in library
-				manager.addListener(manager.library, globals.LOGIN_COMPLETE_LISTENER, loginComplete);
-				manager.addListener(manager.library, globals.LOGOUT_COMPLETE_LISTENER, logoutComplete);	
-				
-				if(navigate) {
-					manager.navigateToView(document.location.hash);
-				}
-			}); // end require
-		}; // end loadUserSelectLibrary
-
+		Manager.prototype.callback = callback;
+		function callback() {
+			if(document.location.href.match(globals.windowslive.value)) {
+				loadUserSelectLibrary(globals.windowslive.value, false /* navigate */);
+			} else if(document.location.href.match(globals.googleapi.value)) {
+				loadUserSelectLibrary(globals.googleapi.value, false /* navigate */);
+			}
+		}; // end callback
+		
 		// NOTE: To make this into a viewer with header and footer
 		//       open new target _blank and then call navigate to view.
 		//
@@ -331,7 +341,7 @@ define(['jqueryExtend', 'ko', 'app/utilities'], function($,ko,utils) {
 					"menubar=no",
 					"scrollbars=yes"];
 
-			window.open(viewUrl, viewTitle, features.join(' '));
+			window.open(viewUrl, '_blank', features.join(' '));
 		};
 		
 		// Use knockout to convert the object to json

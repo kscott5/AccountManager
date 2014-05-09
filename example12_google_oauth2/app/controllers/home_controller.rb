@@ -26,6 +26,10 @@ class HomeController < ApplicationController
   # :library/mailbox/:name/:command
   # ex. windowslive/mailbox/inbox/unseen
   def mailbox
+    #**********************************************************************************
+    # TODO: DETERMINE HOW THIS PERFORMANCES WITH MULTIPLE REQUEST FROM DIFFERENT USERS
+	#**********************************************************************************	
+	
 	library = params[:library].downcase # windowslive, googleapi
 	boxname = params[:name].upcase  # ex. INBOX, JUNK or any other mailbox that's created
 	command = params[:command].upcase # UNSEEN, SEEN, RECENT or any other command
@@ -59,11 +63,12 @@ class HomeController < ApplicationController
 	
 	msgIdList = imap.search(command) # Search by command
 	
+	
 	# Fetch by list of message_id is better PERFORMANCE 
 	# than the documented approach found in the imap.rb file.
 	imap.fetch(msgIdList, "ENVELOPE").each do |envelope|	
 		envelopes.push(envelope)
-	end
+	end if msgIdList.count > 0 # ensure we have message id list before fetching
 		
 	imap.disconnect
 	
@@ -120,17 +125,37 @@ class HomeController < ApplicationController
   end # message
   
   # The Windows Live API callback 
-  # http://msdn.microsoft.com/en-us/library/dn631818.aspx#signinflow
   def windowslive_callback
 	logger.debug('Windows Live initiated an OAuth2 authorization request/response')
-		
-	render layout: 'windowslive_callback'
+	
+	#IMPORTANT (http://msdn.microsoft.com/en-us/library/dn631818.aspx#signinflow)
+	#
+	# Because the sign-in control flow requires no server-side processing, 
+	# apps can access user info only after the page has loaded.
+	#
+	# Therefore the code below isn't required
+	#
+	#if not params[:code].nil?
+	#	# Request authorization now...
+	#	# Will redirect back to this method
+	#	RestClient.post 'https://login.live.com/oauth20_token.srf', 
+	#		'client_id=0000000048117D67' +
+	#		'&redirect_uri=http%3A%2F%2Fksacctmgr.com%2Fwindowslive%2Fcallback' +
+	#		'&client_secret=BWDsH6czEa68fQWXbcmdeOITbt0UslpE' +
+	#		'&code=' + params[:code] +
+	#		'&grant_type=authorization_code',
+	#		:content_type => 'application/x-www-form-urlencoded'	
+    #
+	#	logger.debug ("#Requested for authorization made")
+	#end
+	
+	render file: 'home/callback', layout: 'callback'
   end # windowslive_callback
 
   # Google API callback 
   def googleapi_callback	
 	logger.debug('Google API callback initiated an OAuth2 authorization request/response')	
 	
-	render layout: 'googleapi_callback'
+	render file: 'home/callback', layout: 'callback'
   end # googleapi_callback
  end # HomeController

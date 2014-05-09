@@ -57,6 +57,7 @@ define([globals.windowslive.requireJS.path, 'jqueryExtend', 'app/libs/imapbase',
 			// Must be call before other WL.{method} calls
 			WL.init(globals.windowslive.initConfig);
 			
+			var session = WL.getSession();
 			WL.api({
 					path: "me",
 					method: "GET"
@@ -65,9 +66,17 @@ define([globals.windowslive.requireJS.path, 'jqueryExtend', 'app/libs/imapbase',
 					__windowsLiveUser = {
 						fullname: success.name,
 						email: success.emails.preferred,
-						token: WL.getSession().access_token,						
+						profileUrl: success.link+'/'+success.id,
+						imageUrl: '',
+						token: session.access_token,						
 						toString: function() {
-							return '{fullanme: '+this.fullname+', email: '+this.email+', token: '+this.token+'}';
+							return '{'+
+									'fullanme: '+this.fullname+', '+
+									'email: '+this.email+', '+
+									'profileUrl: '+this.profileUrl+', '+
+									'imageUrl: '+this.imageUrl+', '+
+									'token: '+this.token+
+								'}';
 						}
 					};
 					

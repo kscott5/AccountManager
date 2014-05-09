@@ -45,11 +45,11 @@ define(['jqueryExtend', 'app/utilities'], function($, utils) {
 								results.messages.push(msg);
 							} // end for	
 							
-							utils.logHelper.debug('IMAP getMessages('+id+') done: '+results.messages.length+' emails');
+							utils.logHelper.debug('\t\tcompleted with '+results.messages.length+' emails');
 							
 							doneCallback(results);
 						} else {		
-							utils.logHelper.debug('IMAP getMessages('+id+') error');
+							utils.logHelper.debug('\t\tfailed to return data');
 							
 							errorCallback(results);
 						} // end if
@@ -90,10 +90,10 @@ define(['jqueryExtend', 'app/utilities'], function($, utils) {
 						var results = createMessageResults(msg, response.error);				
 											
 						if(!results.error) {
-							utils.logHelper.debug('IMAP getMessage('+id+') done');
+							utils.logHelper.debug('\t\tcompleted');
 							doneCallback(results);
 						} else {
-							utils.logHelper.debug('IMAP getMessage('+id+') error');
+							utils.logHelper.debug('\t\tfailed to return data');
 							errorCallback(results);
 						}
 					}); // end $.postJSON
