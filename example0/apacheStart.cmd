@@ -1,6 +1,0 @@
-@echo off
-cls
-echo Apache daemon started...
-/webservers/apache2.2/bin/httpd.exe -k install -f /apps/web/accountmgr/conf/apache/httpd.conf -E /apps/web/accountmgr/logs/apache_startup.log
-echo Apache daemon stopped...
-pause
