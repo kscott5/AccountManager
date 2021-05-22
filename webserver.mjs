@@ -11,6 +11,8 @@ const pagenotfound = '<html><body><h1>Account Manager page not found.</body></ht
 
 const server = http.createServer((req,res) => {
 	console.log(`${req.method.toUpperCase()}: ${req.url}`);
+	
+	debugger; // https://bit.ly/2SdN0eY
 
 	if(home(req,res)) return;
 	if(favicon(req,res)) return;
@@ -21,7 +23,7 @@ const server = http.createServer((req,res) => {
 });
 
 function home(req,res) {
-	if(!req.url.endsWith('/index')) return false;
+	if( req.url != '/index' && req.url != '/') return false;
 
 	let file = path.join(publicFolder, '/index.html');
 	fs.readFile(file, {encoding: 'utf8'}, (err,data) => {
