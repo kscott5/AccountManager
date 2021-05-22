@@ -25,15 +25,64 @@ const server = http.createServer((req,res) => {
 function home(req,res) {
 	if( req.url != '/index' && req.url != '/') return false;
 
-	let file = path.join(publicFolder, '/index.html');
-	fs.readFile(file, {encoding: 'utf8'}, (err,data) => {
-		if(err) console.log(`${err}`);
+	res.setHeader('Content-Type', 'text/html');
 
-		res.statusCode = (err)? 404: 200;
-		res.setHeader('Content-Type', 'text/html');
-		res.write((err)? pagenotfound : data);
-		res.end();
-	});
+	let file = path.join(publicFolder, '/index.html');
+	readFileContent(res,file);
+
+	return true;
+}
+
+function readFileContent(res, file) {
+	fs.promises.readFile(file, {encoding: 'utf8'})
+		.then((data) => {
+			res.statusCode = 200;
+			res.end(data);
+		})
+		.catch((err) => {
+			res.statusCode = 404;
+			res.end(pagenotfound);
+		});
+}
+
+function staticContent(req,res) {
+	let file = path.join(publicFolder, req.url);
+	let extname = path.extname(file);
+
+	let contentType =  'text/plain';
+	switch(extname) {
+		case '.js':
+			contentType = 'text/javascript';
+			break;
+
+		default:
+			 return false;
+	}
+
+	fs.promises.access(file, fs.constants.F_OK)
+		.then((data) => {
+			fs.promises.readFile(file, {encoding: 'utf8'})
+				.then((data) => {
+					res.statusCode = 200;
+					res.setHeader('Content-Type', contentType);
+					readFileContent(res,file);					
+				})
+				.catch((err) => {
+					res.setHeader('Content-Type', 'text/html');
+					res.end(pagenotfound);
+				});	
+		})
+		.catch((err) => {
+			res.setHeader('Content-Type', 'text/html');
+			res.end(pagenotfound);
+		});
+}
+
+function services(req,res) {
+	let apiName = req.url;
+	let apiMethod = req.method;
+
+	if(apiName != '/callback' && apiMethod != 'POST') return false;
 
 	return true;
 }
