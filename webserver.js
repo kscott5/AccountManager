@@ -14,26 +14,18 @@ const server = http.createServer((req,res) => {
 	
 	debugger; // https://bit.ly/2SdN0eY
 
-	if(home(req,res)) return;
-	if(favicon(req,res)) return;
+	if(dynamicContent(req,res,['/','/index'],'GET')) return;
+	if(dynamicContent(req,res,['/callback'],'POST')) return;
+	if(staticContent(req,res)) return;
 
 	res.statusCode = 404;
 	res.setHeader('Content-Type', 'text/html');
 	res.end(pagenotfound);
 });
 
-function home(req,res) {
-	if( req.url != '/index' && req.url != '/') return false;
+function readFileContent(res, file, contentType) {
+	res.setHeader('Content-Type', contentType);
 
-	res.setHeader('Content-Type', 'text/html');
-
-	let file = path.join(publicFolder, '/index.html');
-	readFileContent(res,file);
-
-	return true;
-}
-
-function readFileContent(res, file) {
 	fs.promises.readFile(file, {encoding: 'utf8'})
 		.then((data) => {
 			res.statusCode = 200;
@@ -41,7 +33,7 @@ function readFileContent(res, file) {
 		})
 		.catch((err) => {
 			res.statusCode = 404;
-			res.end(pagenotfound);
+			res.end();
 		});
 }
 
@@ -52,48 +44,45 @@ function staticContent(req,res) {
 	let contentType =  'text/plain';
 	switch(extname) {
 		case '.js':
-			contentType = 'text/javascript';
+			readFileContent(res,file,'text/javascript');
+			break;
+
+		case '.ico':
+			readFileContent(res, file, 'image/x-icon');
+			break;
+
+		case '.png':
+			readFileContent(res, file, 'image/png');
+			break;
+
+		case '.css':
+			readFileContent(res, file, 'text/css');
 			break;
 
 		default:
 			 return false;
 	}
 
-	fs.promises.access(file, fs.constants.F_OK)
-		.then((data) => {
-			fs.promises.readFile(file, {encoding: 'utf8'})
-				.then((data) => {
-					res.statusCode = 200;
-					res.setHeader('Content-Type', contentType);
-					readFileContent(res,file);					
-				})
-				.catch((err) => {
-					res.setHeader('Content-Type', 'text/html');
-					res.end(pagenotfound);
-				});	
-		})
-		.catch((err) => {
-			res.setHeader('Content-Type', 'text/html');
-			res.end(pagenotfound);
-		});
-}
-
-function services(req,res) {
-	let apiName = req.url;
-	let apiMethod = req.method;
-
-	if(apiName != '/callback' && apiMethod != 'POST') return false;
-
 	return true;
 }
 
-function favicon(req,res) {
-	res.statusCode = 200;
-//	res.setHeader('Content-Type', 'image/x-icon');
-	res.end('');
+function dynamicContent(req,res,urls,method) {
+	if(!urls.includes(req.url)) return false;
+	if(req.method != method) return false;
 
-	return true;
+	if(req.url == '/'  || req.url == '/index') {
+		let file = path.join(publicFolder, '/index.html');
+		readFileContent(res, file, 'text/html');
+		return true;
+	}
+
+	switch(method) {
+		case 'GET':
+	}
+
+	return false;
 }
+
 
 server.listen(port, hostname, () => {
 	console.log(`Account Manager Server running on http://${hostname}:${port}`);
