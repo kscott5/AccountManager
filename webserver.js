@@ -11,12 +11,12 @@ const pagenotfound = '<html><body><h1>Account Manager page not found.</body></ht
 
 const server = http.createServer((req,res) => {
 	console.log(`${req.method.toUpperCase()}: ${req.url}`);
-	
+
 	debugger; // https://bit.ly/2SdN0eY
 
-	if(dynamicContent(req,res,['/','/index'],'GET')) return;
-	if(dynamicContent(req,res,['/callback'],'POST')) return;
-	if(staticContent(req,res)) return;
+	if(indexService(req,res)) return;
+	if(callbackService(req,res)) return;
+	if(staticFileService(req,res)) return;
 
 	res.statusCode = 404;
 	res.setHeader('Content-Type', 'text/html');
@@ -37,7 +37,7 @@ function readFileContent(res, file, contentType) {
 		});
 }
 
-function staticContent(req,res) {
+function staticFileService(req,res) {
 	let file = path.join(publicFolder, req.url);
 	let extname = path.extname(file);
 
@@ -66,23 +66,48 @@ function staticContent(req,res) {
 	return true;
 }
 
-function dynamicContent(req,res,urls,method) {
-	if(!urls.includes(req.url)) return false;
-	if(req.method != method) return false;
+function indexService(req,res) {
+	if(req.url != '/'  && req.url != '/index') return false;
 
-	if(req.url == '/'  || req.url == '/index') {
-		let file = path.join(publicFolder, '/index.html');
-		readFileContent(res, file, 'text/html');
-		return true;
-	}
-
-	switch(method) {
-		case 'GET':
-	}
-
-	return false;
+	let file = path.join(publicFolder, '/index.html');
+	readFileContent(res, file, 'text/html');
+	return true;
 }
 
+/*
+	Javascript console example. F12 button.
+
+	clear();
+	fetch('http://localhost:1270/callback', {
+  		method: 'POST',
+  		headers: { 
+  			'Content-Type': 'application/json'
+  		},
+  		body: JSON.stringify({'name': 'Karega K Scott'})
+	})
+	.then(response => response.json())
+	.then((data) => { console.log(data);})
+*/
+function callbackService(req,res) {
+	if(req.url != '/callback' || req.method != 'POST') return false;
+
+	let body = [];
+
+	res.statusCode = 200;
+	res.setHeader('Content-Type', 'text/json');
+	
+	req.on('data', (chuck) => { body.push(chuck); });
+	req.on('end', () => { 
+		body = JSON.parse(Buffer.concat(body).toString()); 
+
+		// request body now available.
+
+		res.end(JSON.stringify({msg: 'found callback', body: body}));
+	});
+	req.on('error', (err) => { res.end(JSON.stringify({err: err})); });
+	
+	return true;
+}
 
 server.listen(port, hostname, () => {
 	console.log(`Account Manager Server running on http://${hostname}:${port}`);
