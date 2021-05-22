@@ -1,4 +1,6 @@
 const http = require('http');
+const querystring = require('querystring');
+
 const path = require('path');
 const fs = require('fs');
 
@@ -98,7 +100,7 @@ function callbackService(req,res) {
 	
 	req.on('data', (chuck) => { body.push(chuck); });
 	req.on('end', () => { 
-		body = JSON.parse(Buffer.concat(body).toString()); 
+		body = querystring.parse(Buffer.concat(body).toString()); 
 
 		// request body now available.
 
