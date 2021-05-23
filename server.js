@@ -19,7 +19,7 @@ const pagenotfound = '<html><body><h1>Account Manager page not found.</body></ht
 //
 // command-line option
 //
-// AM_TENANT_ID='<?>' AM_CLIENT_ID='<?>' AM_CLIENT_SECRET='<?>' node [inspect] webserver.js
+// AM_TENANT_ID='<?>' AM_CLIENT_ID='<?>' AM_CLIENT_SECRET='<?>' node [inspect] server.js
 //
 const server = http.createServer((request,response) => {
 	console.log(`${request.method.toUpperCase()}: ${request.url}`);
