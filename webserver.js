@@ -1,4 +1,6 @@
+// https://nodejs.org/docs/latest-v15.x/api/http2.html
 const http = require('http');
+
 const querystring = require('querystring');
 
 const path = require('path');
@@ -93,22 +95,39 @@ function indexService(req,res) {
 function callbackService(req,res) {
 	if(req.url != '/callback' || req.method != 'POST') return false;
 
-	let body = [];
+	req.body = [];
 
 	res.statusCode = 200;
 	res.setHeader('Content-Type', 'text/json');
 	
-	req.on('data', (chuck) => { body.push(chuck); });
+	req.on('data', (chuck) => { req.body.push(chuck); });
 	req.on('end', () => { 
-		body = querystring.parse(Buffer.concat(body).toString()); 
+		req.body = querystring.parse(Buffer.concat(req.body).toString()); 
 
-		// request body now available.
-
-		res.end(JSON.stringify({msg: 'found callback', body: body}));
+		microsoftTokenRequest(req,res);
 	});
 	req.on('error', (err) => { res.end(JSON.stringify({err: err})); });
 	
 	return true;
+}
+
+function microsoftTokenRequest(req,res) {
+	req.socket.write(
+		`POST /${process.env.AM_TENANT_ID}/oauth2/v2.0/token HTTP/1.1
+	 	HOST: https://login.microsoftonline.com
+	 	Content-Type: application/x-www-form-urlencoded
+		
+		client_id=${process.env.AM_CLIENT_ID}&
+		scope=user.read%20mail.read&
+		code=${req.body.code}&
+		redirect_uri=${req.headers.host}%2Fcallback&
+		grant_type=authorization_code&
+		client_secret=${process.env.AM_CLIENT_SECRET}`);
+
+	req.socket.on('data', (chuck) => { req.token = chuck.toString()});
+	req.socket.on('end', () => {
+		res.end(JSON.stringify(req.token));
+	});
 }
 
 server.listen(port, hostname, () => {
