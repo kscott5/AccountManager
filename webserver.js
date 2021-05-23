@@ -99,6 +99,14 @@ function callbackService(req,res) {
 
 	res.statusCode = 200;
 	res.setHeader('Content-Type', 'text/json');
+const formData = querystring.stringify({
+        client_id: `${process.env.AM_CLIENT_ID}`,
+        scope: 'user.read%20mail.read',
+        code: `${req.body.code}`,
+        redirect_uri: redirectUri,
+        grant_type: 'authorization_code',
+        client_secret: `${process.env.AM_CLIENT_SECRET}`
+    });
 	
 	req.on('data', (chuck) => { req.body.push(chuck); });
 	req.on('end', () => { 
@@ -112,17 +120,27 @@ function callbackService(req,res) {
 }
 
 function microsoftTokenRequest(req,res) {
-	req.socket.write(
-		`POST /${process.env.AM_TENANT_ID}/oauth2/v2.0/token HTTP/1.1
-	 	HOST: https://login.microsoftonline.com
-	 	Content-Type: application/x-www-form-urlencoded
-		
-		client_id=${process.env.AM_CLIENT_ID}&
-		scope=user.read%20mail.read&
-		code=${req.body.code}&
-		redirect_uri=${req.headers.host}%2Fcallback&
-		grant_type=authorization_code&
-		client_secret=${process.env.AM_CLIENT_SECRET}`);
+	const redirectUri = querystring.escape(`${process.env.AM_SCHEMA}://${req.headers.host}/callback`);
+
+	const formData = querystring.stringify({
+		client_id: `${process.env.AM_CLIENT_ID}`,
+		scope: 'user.read%20mail.read',
+		code: `${req.body.code}`,
+		redirect_uri: redirectUri,
+		grant_type: 'authorization_code',
+		client_secret: `${process.env.AM_CLIENT_SECRET}`
+	});
+
+	const client = http.request({
+		host: 'https://www.microsoftonline.com',
+		method: 'POST',
+		path: `/${process.env.AM_TENANT_ID}/oauth2/v2.0/token`
+		header: {
+	 		'Content-Type': 'application/x-www-form-urlencoded',
+			'Content-Length': Buffer.byteLength(formData)
+		});
+
+	client.end(formData);
 
 	req.socket.on('data', (chuck) => { req.token = chuck.toString()});
 	req.socket.on('end', () => {
