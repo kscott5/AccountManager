@@ -159,12 +159,15 @@ function microsoftAccessTokenService(httpResponse,code) {
 		headers: {
 	 		'Content-Type': 'application/x-www-form-urlencoded',
 			'Content-Length': Buffer.byteLength(formData)
-		}});
-
-	httpRequest.on('response', (response) => {
-		// send client the json response from server
-		httpResponse.end(response);
-	});
+		}},
+		/*callback where*/ (response) => { /*is an http.IncomingMessage that extends stream.Readable*/
+			response.body = [];
+			response.on('data', (chuck) => { response.body.push(chuck); });
+			response.on('end', () => {
+				response.body = Buffer.concat(response.body).toString();
+				httpResponse.end(response.body);
+			});
+		});
 
 	httpRequest.end(formData);
 }
