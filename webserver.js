@@ -144,11 +144,11 @@ function microsoftTokenRequest(req,res) {
 	const client = http.request({
 		host: 'https://login.microsoftonline.com',
 		method: 'POST',
-		path: `/${process.env.AM_TENANT_ID}/oauth2/v2.0/token`
+		path: `/${process.env.AM_TENANT_ID}/oauth2/v2.0/token`,
 		header: {
 	 		'Content-Type': 'application/x-www-form-urlencoded',
 			'Content-Length': Buffer.byteLength(formData)
-		});
+		}});
 
 	client.end(formData);
 
