@@ -163,7 +163,7 @@ function microsoftAccessTokenService(httpResponse,code) {
 
 	httpRequest.on('response', (response) => {
 		// send client the json response from server
-		httpResponse.end(response));
+		httpResponse.end(response);
 	});
 
 	httpRequest.end(formData);
