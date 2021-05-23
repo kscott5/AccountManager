@@ -13,6 +13,16 @@ const port = 1270;
 
 const pagenotfound = '<html><body><h1>Account Manager page not found.</body></html>';
 
+// This server uses these environment variables.
+//
+// AM_TENANT_ID='8c584db7-3fe3-4098-8651-2b14363c5f43'
+// AM_CLIENT_ID='7c0c6428-b652-45b4-b4e5-6d9c7941cd74'
+// AM_CLIENT_SECRET=<Azure Portal Application Registration - Certificate and Secrets>
+//
+// command-line option
+//
+// AM_TENANT_ID='<?>' AM_CLIENT_ID='<?>' AM_CLIENT_SECRET='<?>' node [inspect] webserver.js
+//
 const server = http.createServer((req,res) => {
 	console.log(`${req.method.toUpperCase()}: ${req.url}`);
 
@@ -120,7 +130,7 @@ const formData = querystring.stringify({
 }
 
 function microsoftTokenRequest(req,res) {
-	const redirectUri = querystring.escape(`${process.env.AM_SCHEMA}://${req.headers.host}/callback`);
+	const redirectUri = querystring.escape(`${process.env.AM_SCHEMA}://${hostname}:${port}/callback`);
 
 	const formData = querystring.stringify({
 		client_id: `${process.env.AM_CLIENT_ID}`,
@@ -132,7 +142,7 @@ function microsoftTokenRequest(req,res) {
 	});
 
 	const client = http.request({
-		host: 'https://www.microsoftonline.com',
+		host: 'https://login.microsoftonline.com',
 		method: 'POST',
 		path: `/${process.env.AM_TENANT_ID}/oauth2/v2.0/token`
 		header: {
