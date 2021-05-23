@@ -21,13 +21,17 @@ const pagenotfound = '<html><body><h1>Account Manager page not found.</body></ht
 //
 // AM_TENANT_ID='<?>' AM_CLIENT_ID='<?>' AM_CLIENT_SECRET='<?>' node [inspect] server.js
 //
+// NOTE: command-line needs administrator privileges. 
+//
+// linux:   this is sudo, su or group prossible.
+// windows: this is 'Run As'
 const server = http.createServer((request,response) => {
 	console.log(`${request.method.toUpperCase()}: ${request.url}`);
 
 	debugger; // https://bit.ly/2SdN0eY
 
 	if(indexService(request,response)) return;
-	if(mircosoftCallbackService(request,response)) return;
+	if(microsoftCallbackService(request,response)) return;
 	if(staticFileService(request,response)) return;
 
 	response.statusCode = 404;
