@@ -1,0 +1,78 @@
+{
+	"info": {
+		"_postman_id": "add3f828-c57f-4c6b-b4fd-4cf99336174b",
+		"name": "microsoft graph",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "https://login.microsoftonline.com/'8c584db7-3fe3-4098-8651-2b14363c5f43/oauth2/v2.0/token",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					},
+					{
+						"key": "Content-Length",
+						"value": "1461",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "7c0c6428-b652-45b4-b4e5-6d9c7941cd74",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "user.read%20mail.read",
+							"type": "text"
+						},
+						{
+							"key": "code\n",
+							"value": "0.AVcAt01YjOM_mECGUSsUNjxfQyhkDHxStrRFtOVtnHlBzXQBAHo.AQABAAIAAAD--DLA3VO7QrddgJg7Wevrg8qmlG6ECfr3HV1KzTb54W7UxOlb4rONGlBV5mKBoX9vza20fPWPnhxgJjlR5wMs0ALOhuseLmWWRQCa6ItCZ0oAxNpInKsvPYXdBOftfLWVqMj24r5_JNRiCBtHujDh08PNCFE3gEVtQ_dQF00M58khb1LQH6bl8g-3k1UwGLCGF9l4sQfeFETd4YtXhKljaeGJqt309BpMZYHXim7lueYt-fMO4p0ctRYdJJHuovRWcDG02qfVQxNhBT1Xn_4PJNY6HHnom3AhqmvVhlrijR_uAfQczx6EE930iA3k5lVp8JSbsUF6CW7m_mdOmqJGK5b1vOzCQa6XWeRxfz4GoDmt2ujVxjz5i2kh54rPCeSF4SxTxdkV3IQKqizGpq0xljaqwZ0CkQnNeTtz3QINDZGNoyFzwxotqaI5qpfNwklIfkT5zCRYHNfM_KFMqGlkjPtBqQC8uichjdPEdxin4NAnRToFWdGcO2wZF5zyfnDz327-CUVrm1L7LQIGMOKBunchgpiW5M7JpHWofsy8Hicl4-4rVnTyT8vlujo6qOFP_X3zJ8KTtg1nteYe3f0V62T2N45AJdUaYvw4PlEWgFyiv1uqDC5yh2wrA-PyDJk_YVID7XMVdVym8PGjqOppOt-cObHYYFj3sP9HBrre2UY3N12RiNVU53DEU60MoHVS3p2CDS3llJ1FmVmC8BkgAMP1RtCbl6baEPfOlqZ9MnPmWg05U86ulI8XTmuGi8g8vp1nvaWjviTDvBJQUWNX8mDsZk2JgxKCTsQP7EnYAXadnU9HliGj5bbeuSOz1UU0TNf60tjAe3aqjxMrymxkbhU-JFkbPLQz_4cJF_QcEsPBAYJvaKw1BbaUSKiGPphSI0E5cFjsztqHbBxF9ZeSFA96CKSmGjKvXH4cvJb-PmixRpJfSEhGwfr5JoNvrtVl6Eis3h7xodbzEYaRdJD9Rs4Ev1y4t_RSMdiqznmGH6d3E93eW5MWEZ0n7HyuZtpz_skG-sKXkUQKj9AwdhjWF313hak_TDrNKbrNQIuu4VTzMhO6hyYncxyn2mVjK29_fSfGNVI80eWfDWXxLR6HHYXpYQPn0BfV1vDVgCExS1bFS3f_2Gk00-do7uPASbOtR9OIRDs9LMnNSpMMXYXmBldvtkKIILiQpyYsobbf2aTO2mdEmeRtrilDumpgYl8gAA",
+							"type": "text"
+						},
+						{
+							"key": "redirect_uri",
+							"value": "http://localhost:1270/callback",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "authorization_code",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "7fe69e40-49a0-498f-8adb-1ee5cdf04f20\n",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://login.microsoftonline.com/8c584db7-3fe3-4098-8651-2b14363c5f43/oauth2/v2.0/token",
+					"protocol": "https",
+					"host": [
+						"login",
+						"microsoftonline",
+						"com"
+					],
+					"path": [
+						"8c584db7-3fe3-4098-8651-2b14363c5f43",
+						"oauth2",
+						"v2.0",
+						"token"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
