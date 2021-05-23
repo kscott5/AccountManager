@@ -6,8 +6,8 @@ const fs = require('fs');
 
 const publicFolder = path.join(process.cwd(), 'public');
 
-const hostname = '127.0.0.1';
-const port = 1270;
+const hostname = 'localhost'; // Development standard 127.0.0.1
+const port = 80; // HTTP standard
 
 const pagenotfound = '<html><body><h1>Account Manager page not found.</body></html>';
 
@@ -123,7 +123,7 @@ function microsoftCallbackService(httpRequest,httpResponse) {
 	
 	httpRequest.on('data', (chuck) => { httpRequest.body.push(chuck); });
 	httpRequest.on('end', () => { 
-		httpRequest.body = Buffer.concat(httpRequest.body).toString());
+		httpRequest.body = Buffer.concat(httpRequest.body).toString();
 		httpRequest.body = querystring.parse(httpRequest.body);
 
 		microsoftAccessTokenService(httpResponse,httpRequest.body.code);
