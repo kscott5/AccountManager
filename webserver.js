@@ -109,14 +109,6 @@ function callbackService(req,res) {
 
 	res.statusCode = 200;
 	res.setHeader('Content-Type', 'text/json');
-const formData = querystring.stringify({
-        client_id: `${process.env.AM_CLIENT_ID}`,
-        scope: 'user.read%20mail.read',
-        code: `${req.body.code}`,
-        redirect_uri: redirectUri,
-        grant_type: 'authorization_code',
-        client_secret: `${process.env.AM_CLIENT_SECRET}`
-    });
 	
 	req.on('data', (chuck) => { req.body.push(chuck); });
 	req.on('end', () => { 
@@ -136,16 +128,16 @@ function microsoftTokenRequest(req,res) {
 		client_id: `${process.env.AM_CLIENT_ID}`,
 		scope: 'user.read%20mail.read',
 		code: `${req.body.code}`,
-		redirect_uri: redirectUri,
+		redirect_uri: `${redirectUri}`,
 		grant_type: 'authorization_code',
 		client_secret: `${process.env.AM_CLIENT_SECRET}`
 	});
 
 	const client = http.request({
-		host: 'https://login.microsoftonline.com',
+		host: 'login.microsoftonline.com',
 		method: 'POST',
 		path: `/${process.env.AM_TENANT_ID}/oauth2/v2.0/token`,
-		header: {
+		headers: {
 	 		'Content-Type': 'application/x-www-form-urlencoded',
 			'Content-Length': Buffer.byteLength(formData)
 		}});
