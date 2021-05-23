@@ -19,15 +19,19 @@ const pagenotfound = '<html><body><h1>Account Manager page not found.</body></ht
 //
 // command-line option
 //
-// AM_TENANT_ID='<?>' AM_CLIENT_ID='<?>' AM_CLIENT_SECRET='<?>' node [inspect] webserver.js
+// AM_TENANT_ID='<?>' AM_CLIENT_ID='<?>' AM_CLIENT_SECRET='<?>' node [inspect] server.js
 //
+// NOTE: command-line needs administrator privileges. 
+//
+// linux:   this is sudo, su or group prossible.
+// windows: this is 'Run As'
 const server = http.createServer((request,response) => {
 	console.log(`${request.method.toUpperCase()}: ${request.url}`);
 
 	debugger; // https://bit.ly/2SdN0eY
 
 	if(indexService(request,response)) return;
-	if(mircosoftCallbackService(request,response)) return;
+	if(microsoftCallbackService(request,response)) return;
 	if(staticFileService(request,response)) return;
 
 	response.statusCode = 404;
@@ -155,12 +159,15 @@ function microsoftAccessTokenService(httpResponse,code) {
 		headers: {
 	 		'Content-Type': 'application/x-www-form-urlencoded',
 			'Content-Length': Buffer.byteLength(formData)
-		}});
-
-	httpRequest.on('response', (response) => {
-		// send client the response data
-		httpResponse.end(JSON.stringify(response));
-	});
+		}},
+		/*callback where*/ (response) => { /*is an http.IncomingMessage that extends stream.Readable*/
+			response.body = [];
+			response.on('data', (chuck) => { response.body.push(chuck); });
+			response.on('end', () => {
+				response.body = Buffer.concat(response.body).toString();
+				httpResponse.end(response.body);
+			});
+		});
 
 	httpRequest.end(formData);
 }
