@@ -3,7 +3,7 @@ function MicrosoftGraph(appName,clientId) {
 		return new MicrosoftGraph(name,clientId);
 	}
 
-	this.clientId = '';
+	this.clientId = clientId;
 	this.appName = appName || 'Account Manager';
 	this.resourceUrl = 'https://graph.microsoft.com/v1.0/me';
 }
@@ -15,7 +15,7 @@ MicrosoftGraph.prototype.login = function(target) {
 	let redirectUri = encodeURIComponent(`${document.location.origin}/microsoft/callback`);
 
 	let url = `https://login.microsoftonline.com/common/oauth2/v2.0/authroize?
-			client_id${this.clientId}&response_type=${this.responseType}&
+			client_id${this.clientId}&response_type=${responseType}&
 			response_mode=${responseMode}&redirect_uri=${redirectUri}&
 			scopes=${scopes}`;
 
