@@ -34,24 +34,6 @@ const port = 80; // HTTP standard
 
 const pagenotfound = '<html><body><h1>Account Manager page not found.</body></html>';
 
-const server = http.createServer({});
-server.on('request', (request,response) => {
-	console.log(`${request.method.toUpperCase()}: ${request.url}`);
-
-	debugger; // https://bit.ly/2SdN0eY
-
-	crossSiteService(request,response); // preflight -> https://mzl.la/3oJbVmZ
-
-	if(staticFileService(request,response)) return;
-	if(microsoftCallbackService(request,response)) return;
-	
-	// Page not found
-	response.statusCode = 404;
-	response.setHeader('Content-Type', 'text/html');
-	response.end(pagenotfound);
-});
-
-
 /*
  * Contents of the file are sent to the client.
  */
@@ -90,6 +72,45 @@ function crossSiteService(httpRequest,httpResponse) {
 	httpResponse.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
 	httpResponse.setHeader('Access-Control-Allow-Headers', 'Access-Token, Content-Type');
 	httpResponse.setHeader('Access-Control-Allow-Origin', origin);
+}
+
+/*
+ * Callback service used with Microsoft Graph API. 
+ *
+ * Javascript console example. F12 button on browser.
+ * NOTE: Fiddler, JSFiddle and Postman are the same. 
+ *
+ * clear();
+ * fetch('http://localhost/callback', {
+ * 		method: 'POST',
+ * 		headers: { 
+ * 			'Content-Type': 'application/json'
+ * 		},
+ * 		body: JSON.stringify({'name': 'Karega K Scott'})
+ * })
+ * .then(response => response.json())
+ * .then((data) => { console.log(data);})
+ */
+function microsoftCallbackService(httpRequest,httpResponse) {
+	if(httpRequest.url != '/microsoft/callback' /*|| httpRequest.method != 'POST'*/) return false;
+
+	httpRequest.body = [];
+
+	httpResponse.statusCode = 200;
+	httpResponse.setHeader('Content-Type', 'text/html');
+
+	httpRequest.on('data', (chuck) => { httpRequest.body.push(chuck); });
+	httpRequest.on('end', () => { 
+		httpRequest.body = Buffer.concat(httpRequest.body).toString();
+		httpRequest.body = querystring.parse(httpRequest.body);
+
+		httpResponse.setHeader('set-cookie',[`access_token=${httpRequest.body.access_token}; SameSite=Strict`]);
+		httpResponse.end('<html><body><script>(()=>{opener.callback.close();})(document);</script></body></html');
+
+	});
+	httpRequest.on('error', (err) => { httpResponse.end(JSON.stringify({err: err})); });
+	
+	return true;
 }
 
 /*
@@ -139,47 +160,27 @@ function staticFileService(httpRequest,httpResponse) {
 	return true;
 }
 
+// Create a new http server
+const server = http.createServer({});
 
-/*
- * Callback service used with Microsoft Graph API. 
- *
- * Javascript console example. F12 button on browser.
- * NOTE: Fiddler, JSFiddle and Postman are the same. 
- *
- * clear();
- * fetch('http://localhost/callback', {
- * 		method: 'POST',
- * 		headers: { 
- * 			'Content-Type': 'application/json'
- * 		},
- * 		body: JSON.stringify({'name': 'Karega K Scott'})
- * })
- * .then(response => response.json())
- * .then((data) => { console.log(data);})
- */
-function microsoftCallbackService(httpRequest,httpResponse) {
-	if(httpRequest.url != '/microsoft/callback' /*|| httpRequest.method != 'POST'*/) return false;
+// Server answers all client request
+server.on('request', (request,response) => {
+	console.log(`${request.method.toUpperCase()}: ${request.url}`);
 
-	httpRequest.body = [];
+	debugger; // https://bit.ly/2SdN0eY
 
-	httpResponse.statusCode = 200;
-	httpResponse.setHeader('Content-Type', 'text/html');
+	crossSiteService(request,response); // preflight secures this server services from XSS... -> https://mzl.la/3oJbVmZ
 
-	httpRequest.on('data', (chuck) => { httpRequest.body.push(chuck); });
-	httpRequest.on('end', () => { 
-		httpRequest.body = Buffer.concat(httpRequest.body).toString();
-		httpRequest.body = querystring.parse(httpRequest.body);
-
-		httpResponse.setHeader('set-cookie',[`access_token=${httpRequest.body.access_token}; SameSite=Strict`]);
-		httpResponse.end('<html><body><script>(()=>{opener.callback.close();})(document);</script></body></html');
-
-	});
-	httpRequest.on('error', (err) => { httpResponse.end(JSON.stringify({err: err})); });
+	if(staticFileService(request,response)) return;
+	if(microsoftCallbackService(request,response)) return;
 	
-	return true;
-}
+	// Page not found
+	response.statusCode = 404;
+	response.setHeader('Content-Type', 'text/html');
+	response.end(pagenotfound);
+});
 
-// Starts the Account Manager simple web portal 
+// Starts the Account Manager simple web portal server
 server.listen(port, hostname, () => {
 	console.log(`Account Manager Server running on http://${hostname}:${port}`);
 });
