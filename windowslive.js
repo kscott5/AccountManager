@@ -1,18 +1,43 @@
-function WindowsLive(clientId, tenantId) {
-	this.clientId = clientId;
-	this.tenantId = tenantId;
-	this.loginUri = `https://url_to_windows_live_sdk/${tenantId}/`;
+function MicrosoftGraph(name,clientId, {
+	if(!this instanceof MicrosoftGraph) {
+		return new MicrosoftGraph(name,clientId);
+	}
+
+	this.clientId = '';
+	this.appName = appName || 'Account Manager';
+	this.resourceUrl = 'https://graph.microsoft.com/v1.0/me';
 }
 
-let wl_login_url = `https://login.microsoftonline.com/${this.tenantId}/oauth2/v2.0/authorize?client_id=${clientId}&response_type=code
-&redirect_uri=${redirectUri}&response_mode=query&&scope=offline_access%20user.read%20mail.read&state=0123456789`;
+MicrosoftGraph.prototype.login = function() {
+	let responseType = 'token';
+	let responseMode = 'form_post';
+	let scopes = encodeUIComponent('user.read https://graph.microsoft.com/mail.read');
+	let redirectUri = encodeUIComponent(`${document.location.origin}/microsoft/callback`);
 
-WindowsLive.prototype.login = function() {
-	let dialog = window.open(
+	let url = `https://login.microsoftonline.com/common/oauth2/v2.0/authroize?
+			client_id${this.clientId}&response_type=${this.responseType}&
+			response_mode=${responseMode}&redirect_uri=${redirectUri}&
+			scopes=${scopes}`;
+
+	let features = "menubar=no,location=yes,resizable=no,scrollbars=yes,status=yes";
+	window.activeDialog = window.open(url,target || this.appName, features);
 }
 
-WindowsLive.prototype.logout = function() {
+MicrosoftGraph.prototype.logout = function() {
 }
 
-WindowsLive.prototype.me = function() {
+MicrosoftGraph.prototype.me = function() {
+	let client = new XMLHHttpRequest();
+	client.onreadystatechange = () => {
+		if(client.readyState == XMLHttpRequest.DONE && client.status == 200) {
+			let data = JSON.parse(client.responseText);
+			console.log(data);
+		}
+	};
+
+	let url = `${this.resourceUrl}`;
+	client.open('GET', url);
+	client.setHeader('Authorization', `Bearer ${document.cookie}`);
+	client.setHeader('Content-Type', 'application/json');
+	client.send();
 }
