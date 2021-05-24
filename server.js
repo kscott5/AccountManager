@@ -75,7 +75,7 @@ function crossSiteService(httpRequest,httpResponse) {
 	if(typeof origins != 'string') return false;
 
 	const origin = httpRequest.headers.origin;
-	if(origins.match('*').length == 0 /*wildcard any not found*/ && origins.match(origin).length == 0  /*origin not found*/) return false;
+	if(origins.match('[*]') == null /*asterisk, a wildcard of any, not found*/ && origins.match(origin) == null  /*origin not found*/) return false;
 
 	httpResponse.statusCode = 200;
 	httpResponse.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
