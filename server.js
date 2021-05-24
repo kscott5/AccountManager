@@ -105,7 +105,8 @@ function microsoftCallbackService(httpRequest,httpResponse) {
 		httpRequest.body = querystring.parse(httpRequest.body);
 
 		httpResponse.setHeader('set-cookie',[`access_token=${httpRequest.body.access_token}; SameSite=Strict`]);
-		httpResponse.end('<html><body><script>(()=>{opener.callback.close();})(document);</script></body></html');
+		httpResponse.end(`<!DOCTYPE html><html lang='en lang='en'>
+<body><script>(()=>{opener.callback.close();})();</script></body></html>`);
 
 	});
 	httpRequest.on('error', (err) => { httpResponse.end(JSON.stringify({err: err})); });
