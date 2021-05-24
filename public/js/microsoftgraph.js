@@ -8,19 +8,23 @@ function MicrosoftGraph(appName,clientId) {
 	this.resourceUrl = 'https://graph.microsoft.com/v1.0';
 }
 
+MicrosoftGraph.prototype.accesstoken = () => {
+	return document.cookie.split("=")[1];
+}
+
 /*
  * Login with application conscent from person on website.
  */
 MicrosoftGraph.prototype.login = function(target) {
 	let responseType = 'token';
 	let responseMode = 'form_post';
-	let scopes = encodeURIComponent('user.read https://graph.microsoft.com/mail.read');
+	let scopes = encodeURIComponent('openid offline_access user.read https://graph.microsoft.com/mail.read');
 	let redirectUri = encodeURIComponent(`${document.location.origin}/microsoft/callback`);
 
-	let url = `https://login.microsoftonline.com/common/oauth2/v2.0/authroize?
-			client_id${this.clientId}&response_type=${responseType}&
+	let url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?
+			client_id=${this.clientId}&response_type=${responseType}&
 			response_mode=${responseMode}&redirect_uri=${redirectUri}&
-			scopes=${scopes}`;
+			scope=${scopes}&state=12345`;
 
 	let features = "menubar=no,location=yes,resizable=no,scrollbars=yes,status=yes";
 	window.activeDialog = window.open(url,target || this.appName, features);
@@ -33,7 +37,7 @@ MicrosoftGraph.prototype.login = function(target) {
  */
 MicrosoftGraph.prototype.logout = function() {
 	let client = new XMLHttpRequest();
-	client.onreadystatechange = () {
+	client.onreadystatechange = () => {
 		if(client.readyState = XMLHttpRequest.DONE && client.status == 204) {
 			let data = client.responseText;
 			console.log(`${data} on ${this.appName}`);
@@ -42,7 +46,7 @@ MicrosoftGraph.prototype.logout = function() {
 
 	let url = `${this.resourceUrl}/me/revokeSignInSessions`;
 	client.open('POST', url);
-	client.setHeader('Authorization', `Bearer ${document.cookie}`);
+	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken()}`);
 	client.send();
 }
 
@@ -53,16 +57,16 @@ MicrosoftGraph.prototype.logout = function() {
  */
 MicrosoftGraph.prototype.deletePermissions = function() {
 	let client = new XMLHttpRequest();
-	client.onreadystatechange = () {
+	client.onreadystatechange = () => {
 		if(client.readyState = XMLHttpRequest.DONE && client.status == 204) {
 			let data = client.responseText;
 			console.log(`${data} on ${this.appName}`);
 		}
 	};
 
-	let url = `${this.resourceUrl}/oauth2PermissionGrant/`;
+	let url = `${this.resourceUrl}/oauth2PermissionGrant/user.read`;
 	client.open('DELETE', url);
-	client.setHeader('Authorization', `Bearer ${document.cookie}`);
+	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken()}`);
 	client.send();
 }
 
@@ -77,7 +81,7 @@ MicrosoftGraph.prototype.me = function() {
 
 	let url = `${this.resourceUrl}/me`;
 	client.open('GET', url);
-	client.setHeader('Authorization', `Bearer ${document.cookie}`);
-	client.setHeader('Content-Type', 'application/json');
+	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken()}`);
+	client.setRequestHeader('Content-Type', 'application/json');
 	client.send();
 }
