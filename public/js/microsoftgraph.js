@@ -1,4 +1,4 @@
-function MicrosoftGraph(name,clientId, {
+function MicrosoftGraph(name,clientId) {
 	if(!this instanceof MicrosoftGraph) {
 		return new MicrosoftGraph(name,clientId);
 	}
