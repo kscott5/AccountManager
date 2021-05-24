@@ -71,7 +71,7 @@ function readFileContent(httpResponse,file,contentType) {
 function crossSiteService(httpRequest,httpResponse) {
 	if(httpRequest.method != 'OPTIONS') return false;
 
-	const origins = process.env.AM_ALL_ORIGINS;
+	const origins = process.env.AM_ALLOW_ORIGINS;
 	if(typeof origins != 'string') return false;
 
 	const origin = httpRequest.headers.origin;
