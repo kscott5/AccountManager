@@ -14,11 +14,13 @@ const pagenotfound = '<html><body><h1>Account Manager page not found.</body></ht
 //
 // AM_CLIENT_ID='7c0c6428-b652-45b4-b4e5-6d9c7941cd74'
 // AM_CLIENT_SECRET=<Azure Portal Application Registration - Certificate and Secrets>
-// AM_ALLOW_ORIGINS='<Comma seperated list of urls or * where * is allow all>'
-
+// AM_CORS_ORIGINS='<Comma seperated list of urls or * where * is allow all. default: http://localhost>'
+// AM_CORS_METHODS='<Comma seperated list of http verbs. defaults: GET, POST>'
+// AM_CORS_HEADERS='<Comma seperated list of request headers>'
+//
 // command-line option
 //
-// AM_CLIENT_ID='<?>' AM_CLIENT_SECRET='<?>' AM_ALLOW_ORIGINS='<?>' node [inspect] server.js
+// AM_CLIENT_ID='<?>' AM_CLIENT_SECRET='<?>' AM_CORS_ORIGINS='<?>' node [inspect] server.js
 //
 // NOTE: command-line needs administrator privileges. 
 //
@@ -31,7 +33,8 @@ server.on('request', (request,response) => {
 
 	debugger; // https://bit.ly/2SdN0eY
 
-	if(crossSiteService(request,response)) return;
+	crossSiteService(request,response);
+
 	if(indexService(request,response)) return;
 	if(microsoftCallbackService(request,response)) return;
 	if(staticFileService(request,response)) return;
@@ -69,19 +72,23 @@ function readFileContent(httpResponse,file,contentType) {
  * https://mzl.la/3fgVL0S
  */
 function crossSiteService(httpRequest,httpResponse) {
-	if(httpRequest.method != 'OPTIONS') return false;
+	httpRequest.corsEnabled = false;
 
-	const origins = process.env.AM_ALLOW_ORIGINS;
-	if(typeof origins != 'string') return false;
+	const methods = process.env.AM_CORS_METHODS || 'POST, GET';
+	if(httpRequest.method != 'OPTIONS' && methods.match(httpRequest.method) == null) return;
 
-	const origin = httpRequest.headers.origin;
-	if(origins.match('[*]') == null /*asterisk, a wildcard of any, not found*/ && origins.match(origin) == null  /*origin not found*/) return false;
+	const origins = process.env.AM_CORS_ORIGINS || 'http://localhost';
+	if(typeof origins != 'string') return;
+
+	const origin = httpRequest.headers.origin || '';
+	if(origins.match('[*]') == null /*asterisk, a wildcard of any, not found*/ && origins.match(origin) == null  /*origin not found*/) return;
+
+	httpRequest.corsEnabled = true;
 
 	httpResponse.statusCode = 200;
 	httpResponse.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
 	httpResponse.setHeader('Access-Control-Allow-Headers', 'Access-Token, Content-Type');
 	httpResponse.setHeader('Access-Control-Allow-Origin', origin);
-	httpResponse.end();
 }
 
 /*
