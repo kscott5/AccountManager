@@ -11,8 +11,8 @@ function MicrosoftGraph(appName,clientId) {
 MicrosoftGraph.prototype.login = function() {
 	let responseType = 'token';
 	let responseMode = 'form_post';
-	let scopes = encodeUIComponent('user.read https://graph.microsoft.com/mail.read');
-	let redirectUri = encodeUIComponent(`${document.location.origin}/microsoft/callback`);
+	let scopes = encodeURIiComponnent('user.read https://graph.microsoft.com/mail.read');
+	let redirectUri = encodeURIComponent(`${document.location.origin}/microsoft/callback`);
 
 	let url = `https://login.microsoftonline.com/common/oauth2/v2.0/authroize?
 			client_id${this.clientId}&response_type=${this.responseType}&
