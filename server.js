@@ -103,10 +103,10 @@ function microsoftCallbackService(httpRequest,httpResponse) {
 	httpRequest.on('end', () => { 
 		httpRequest.body = Buffer.concat(httpRequest.body).toString();
 		httpRequest.body = querystring.parse(httpRequest.body);
-
-		httpResponse.setHeader('set-cookie',[`access_token=${httpRequest.body.access_token}; SameSite=Strict`]);
+		
+		httpResponse.setHeader('set-cookie',[`access_token=${httpRequest.body.access_token}; Path=/; SameSite=Strict;`]);
 		httpResponse.end(`<!DOCTYPE html><html lang='en lang='en'>
-<body><script>(()=>{opener.callback.close();})();</script></body></html>`);
+<body><script>(()=>{window.opener.close();})();</script></body></html>`);
 
 	});
 	httpRequest.on('error', (err) => { httpResponse.end(JSON.stringify({err: err})); });
