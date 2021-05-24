@@ -1,4 +1,3 @@
-// https://nodejs.org/docs/latest-v15.x/api/http2.html
 const http = require('http');
 const querystring = require('querystring');
 const path = require('path');
@@ -13,23 +12,26 @@ const pagenotfound = '<html><body><h1>Account Manager page not found.</body></ht
 
 // This server uses these environment variables.
 //
-// AM_TENANT_ID='8c584db7-3fe3-4098-8651-2b14363c5f43'
 // AM_CLIENT_ID='7c0c6428-b652-45b4-b4e5-6d9c7941cd74'
 // AM_CLIENT_SECRET=<Azure Portal Application Registration - Certificate and Secrets>
-//
+// AM_ALLOW_ORIGINS='<Comma seperated list of urls or * where * is allow all>'
+
 // command-line option
 //
-// AM_TENANT_ID='<?>' AM_CLIENT_ID='<?>' AM_CLIENT_SECRET='<?>' node [inspect] server.js
+// AM_CLIENT_ID='<?>' AM_CLIENT_SECRET='<?>' AM_ALLOW_ORIGINS='<?>' node [inspect] server.js
 //
 // NOTE: command-line needs administrator privileges. 
 //
 // linux:   this is sudo, su or group prossible.
 // windows: this is 'Run As'
-const server = http.createServer((request,response) => {
+const server = http.createServer({});
+
+server.on('request', (request,response) => {
 	console.log(`${request.method.toUpperCase()}: ${request.url}`);
 
 	debugger; // https://bit.ly/2SdN0eY
 
+	if(crossSiteService(request,response)) return;
 	if(indexService(request,response)) return;
 	if(microsoftCallbackService(request,response)) return;
 	if(staticFileService(request,response)) return;
@@ -38,6 +40,7 @@ const server = http.createServer((request,response) => {
 	response.setHeader('Content-Type', 'text/html');
 	response.end(pagenotfound);
 });
+
 
 /*
  * Contents of the file are sent to the client.
@@ -54,6 +57,31 @@ function readFileContent(httpResponse,file,contentType) {
 			httpResponse.statusCode = 404;
 			httpResponse.end();
 		});
+}
+/*
+ * Controls view access of a cross-origin CORS request or different url endpoint.
+ *
+ * NOTE: possible error message
+ *
+ * Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at http://...
+ * (Reason: CORS header ‘Access-Control-Allow-Origin’ missing)
+ *  
+ * https://mzl.la/3fgVL0S
+ */
+function crossSiteService(httpRequest,httpResponse) {
+	if(httpRequest.method != 'OPTIONS') return false;
+
+	const origins = process.env.AM_ALL_ORIGINS;
+	if(typeof origins != 'string') return false;
+
+	const origin = httpRequest.headers.origin;
+	if(origins.match(/*any*/ '*').length == 0 /*not found*/ && origins.match(/*this*/ origin).length == 0  /*not found*/) return false;
+
+	httpResponse.statusCode = 200;
+	httpResponse.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+	httpResponse.setHeader('Access-Control-Allow-Headers', 'Access-Token, Content-Type');
+	httpResponse.setHeader('Access-Control-Allow-Origin', origin);
+	httpResponse.end();
 }
 
 /*
@@ -107,7 +135,7 @@ function indexService(httpRequest,httpResponse) {
  * NOTE: Fiddler, JSFiddle and Postman are the same. 
  *
  * clear();
- * fetch('http://localhost:1270/callback', {
+ * fetch('http://localhost/callback', {
  * 		method: 'POST',
  * 		headers: { 
  * 			'Content-Type': 'application/json'
@@ -118,58 +146,25 @@ function indexService(httpRequest,httpResponse) {
  * .then((data) => { console.log(data);})
  */
 function microsoftCallbackService(httpRequest,httpResponse) {
-	if(httpRequest.url != '/microsoft/callback' || httpRequest.method != 'POST') return false;
+	if(httpRequest.url != '/microsoft/callback' /*|| httpRequest.method != 'POST'*/) return false;
 
 	httpRequest.body = [];
 
 	httpResponse.statusCode = 200;
-	httpResponse.setHeader('Content-Type', 'text/json');
-	
+	httpResponse.setHeader('Content-Type', 'text/html');
+
 	httpRequest.on('data', (chuck) => { httpRequest.body.push(chuck); });
 	httpRequest.on('end', () => { 
 		httpRequest.body = Buffer.concat(httpRequest.body).toString();
 		httpRequest.body = querystring.parse(httpRequest.body);
 
-		microsoftAccessTokenService(httpResponse,httpRequest.body.code);
+		httpResponse.setHeader('set-cookie',[`access_token=${httpRequest.body.access_token}; SameSite=Strict`]);
+		httpResponse.end('<html><body><script>(()=>{opener.callback.close();})(document);</script></body></html');
+
 	});
 	httpRequest.on('error', (err) => { httpResponse.end(JSON.stringify({err: err})); });
 	
 	return true;
-}
-
-/*
- * Gets a token used to access the Microsoft Graph API.
- */
-function microsoftAccessTokenService(httpResponse,code) {
-	const redirectUri = querystring.escape(`${process.env.AM_SCHEMA}://${hostname}:${port}/microsft/callback`);
-
-	const formData = querystring.stringify({
-		client_id: `${process.env.AM_CLIENT_ID}`,
-		scope: 'user.read%20mail.read',
-		code: `${code}`,
-		redirect_uri: `${redirectUri}`,
-		grant_type: 'authorization_code',
-		client_secret: `${process.env.AM_CLIENT_SECRET}`
-	});
-
-	const httpRequest = http.request({
-		host: 'login.microsoftonline.com',
-		method: 'POST',
-		path: `/${process.env.AM_TENANT_ID}/oauth2/v2.0/token`,
-		headers: {
-	 		'Content-Type': 'application/x-www-form-urlencoded',
-			'Content-Length': Buffer.byteLength(formData)
-		}},
-		/*callback where*/ (response) => { /*is an http.IncomingMessage that extends stream.Readable*/
-			response.body = [];
-			response.on('data', (chuck) => { response.body.push(chuck); });
-			response.on('end', () => {
-				response.body = Buffer.concat(response.body).toString();
-				httpResponse.end(response.body);
-			});
-		});
-
-	httpRequest.end(formData);
 }
 
 // Starts the Account Manager simple web portal 
