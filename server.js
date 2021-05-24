@@ -3,13 +3,6 @@ const querystring = require('querystring');
 const path = require('path');
 const fs = require('fs');
 
-const publicFolder = path.join(process.cwd(), 'public');
-
-const hostname = 'localhost'; // Development standard 127.0.0.1
-const port = 80; // HTTP standard
-
-const pagenotfound = '<html><body><h1>Account Manager page not found.</body></html>';
-
 // This server uses these environment variables.
 //
 // AM_CLIENT_ID='7c0c6428-b652-45b4-b4e5-6d9c7941cd74'
@@ -17,6 +10,9 @@ const pagenotfound = '<html><body><h1>Account Manager page not found.</body></ht
 // AM_CORS_ORIGINS='<Comma seperated list of urls or * where * is allow all. default: http://localhost>'
 // AM_CORS_METHODS='<Comma seperated list of http verbs. defaults: GET, POST>'
 // AM_CORS_HEADERS='<Comma seperated list of request headers>'
+//
+// AM_DEFAULT_PAGE='index'. default
+// AM_DEFAULT_EXTENSION='.html' default
 //
 // command-line option
 //
@@ -26,19 +22,30 @@ const pagenotfound = '<html><body><h1>Account Manager page not found.</body></ht
 //
 // linux:   this is sudo, su or group prossible.
 // windows: this is 'Run As'
-const server = http.createServer({});
+const origins = process.env.AM_CORS_ORIGINS || 'http://localhost';
+const methods = process.env.AM_CORS_METHODS || 'POST, GET';
+	
+const defaultpage = process.env.AM_DEFAULT_PAGE || 'index';
+const defaultext = process.env.AM_DEFAULT_EXTENSION || '.html';
 
+const publicFolder = path.join(process.cwd(), 'public');
+const hostname = 'localhost'; // Development standard 127.0.0.1
+const port = 80; // HTTP standard
+
+const pagenotfound = '<html><body><h1>Account Manager page not found.</body></html>';
+
+const server = http.createServer({});
 server.on('request', (request,response) => {
 	console.log(`${request.method.toUpperCase()}: ${request.url}`);
 
 	debugger; // https://bit.ly/2SdN0eY
 
-	crossSiteService(request,response);
+	crossSiteService(request,response); // preflight -> https://mzl.la/3oJbVmZ
 
-	if(indexService(request,response)) return;
-	if(microsoftCallbackService(request,response)) return;
 	if(staticFileService(request,response)) return;
-
+	if(microsoftCallbackService(request,response)) return;
+	
+	// Page not found
 	response.statusCode = 404;
 	response.setHeader('Content-Type', 'text/html');
 	response.end(pagenotfound);
@@ -72,18 +79,12 @@ function readFileContent(httpResponse,file,contentType) {
  * https://mzl.la/3fgVL0S
  */
 function crossSiteService(httpRequest,httpResponse) {
-	httpRequest.corsEnabled = false;
-
-	const methods = process.env.AM_CORS_METHODS || 'POST, GET';
 	if(httpRequest.method != 'OPTIONS' && methods.match(httpRequest.method) == null) return;
 
-	const origins = process.env.AM_CORS_ORIGINS || 'http://localhost';
 	if(typeof origins != 'string') return;
 
 	const origin = httpRequest.headers.origin || '';
 	if(origins.match('[*]') == null /*asterisk, a wildcard of any, not found*/ && origins.match(origin) == null  /*origin not found*/) return;
-
-	httpRequest.corsEnabled = true;
 
 	httpResponse.statusCode = 200;
 	httpResponse.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
@@ -95,10 +96,11 @@ function crossSiteService(httpRequest,httpResponse) {
  * Controls view access on images, javascripts, stylesheets content.
  */
 function staticFileService(httpRequest,httpResponse) {
+	if(httpRequest.method != 'GET') return;
+
 	let file = path.join(publicFolder,httpRequest.url);
 	let extname = path.extname(file);
 
-	let contentType =  'text/plain';
 	switch(extname) {
 		case '.js':
 			readFileContent(httpResponse,file,'text/javascript');
@@ -116,24 +118,27 @@ function staticFileService(httpRequest,httpResponse) {
 			readFileContent(httpResponse,file,'text/css');
 			break;
 
+		case '': // Control access to a directory home page			
+			file = (/*what if*/ file.endsWith('/public/'))? /*then*/
+				file.concat(defaultpage).concat(defaultext)  : /*else*/
+					file.concat(defaultext);
+	
+			fs.promises.realpath(file)
+				.then(()=>{
+					readFileContent(httpResponse,file,'text/html');
+				})
+				.catch((error)=>{
+					console.log(error.message);
+				});
+			break;
+
 		default:
-			 return false;
+			return false;
 	}
 
 	return true;
 }
 
-/*
- * Controls view access on home page.
- */
-function indexService(httpRequest,httpResponse) {
-	if(httpRequest.url != '/'  && httpRequest.url != '/index') return false;
-
-	let file = path.join(publicFolder,'/index.html');
-	readFileContent(httpResponse,file,'text/html');
-
-	return true;
-}
 
 /*
  * Callback service used with Microsoft Graph API. 
