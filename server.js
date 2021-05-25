@@ -174,7 +174,7 @@ const server = http.createServer({});
 
 // Server answers all client request
 server.on('request', (request,response) => {
-	console.log(`${request.method.toUpperCase()}: ${request.url}`);
+	console.log(`\x1b[32m${request.method.toUpperCase()}:\x1b[0m ${request.url}`);
 
 	debugger; // https://bit.ly/2SdN0eY
 
@@ -191,8 +191,8 @@ server.on('request', (request,response) => {
 
 // Starts the Account Manager simple web portal server
 server.listen(port, hostname, () => {
-	console.log(`server.listen(port, hostname, () => \{`);
-	console.log(`  Account Manager Server running on http://${hostname}:${port})`);
+	console.log(`\x1b[32mserver.listen(port, hostname, () => \{\x1b[0m`);
+	console.log(`  \x1b[34mAccount Manager\x1b[0m server running on http://${hostname}:${port})\n`);
 
 	// AM_CLIENT_ID='<?>' AM_CORS_ALLOW_ORIGINS='<?>' node [inspect] server.js
 	//
@@ -201,13 +201,42 @@ server.listen(port, hostname, () => {
 	// linux:   this is sudo, su or group prossible.
 	// windows: this is 'Run As'
 
-	console.log(`  Environment variables:`);
-	console.log(`\tAM_CLIENT_ID=${clientid || 'Microsoft Azure Applciation Client Id in Application Registration'}\n`);
-	console.log(`\tAM_CORS_ALLOW_ORIGINS=${origins || '<Comma seperated list of urls or * where * is allow all> DEFAULT: http://localhost'}`);
-	console.log(`\tAM_CORS_ALLOW_METHODS=${methods || '<Comma seperated list of http verbs> DEFAULT: GET, POST>'}`);
-	console.log(`\tAM_CORS_ALLOW_HEADERS=${headers || '<Comma seperated list of request headers> DEFAULT: Content-Type'}\n`);
-	console.log(`\tAM_DEFAULT_PAGE=${defaultpage || 'DEFAULT: index'}`);
-	console.log(`\tAM_DEFAULT_EXTENSION=${defaultext || 'DEFAULT: .html'}`);
-	console.log(`\}\);\n`);
+	console.log(`  \x1b[34mEnvironment variables\x1b[0m: Application out of process.`);
+	console.log(`\t\x1b[34mAM_CLIENT_ID\x1b[0m=${clientid || 'Microsoft Azure Applciation Client Id in Application Registration'}\n`);
+	console.log(`\t\x1b[34mAM_CORS_ALLOW_ORIGINS\x1b[0m=${origins || '<Comma seperated list of urls or * where * is allow all> DEFAULT: http://localhost'}`);
+	console.log(`\t\x1b[34mAM_CORS_ALLOW_METHODS\x1b[0m=${methods || '<Comma seperated list of http verbs> DEFAULT: GET, POST>'}`);
+	console.log(`\t\x1b[34mAM_CORS_ALLOW_HEADERS\x1b[0m=${headers || '<Comma seperated list of request headers> DEFAULT: Content-Type'}\n`);
+	console.log(`\t\x1b[34mAM_DEFAULT_PAGE\x1b[0m=${defaultpage || 'DEFAULT: index'}`);
+	console.log(`\t\x1b[34mAM_DEFAULT_EXTENSION\x1b[0m=${defaultext || 'DEFAULT: .html'}`);
+	console.log(`\x1b[32m\}\);\x1b[0m\n`);
 });
+
+// https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
+//
+// Reset = "\x1b[0m"
+// Bright = "\x1b[1m"
+// Dim = "\x1b[2m"
+// Underscore = "\x1b[4m"
+// Blink = "\x1b[5m"
+// Reverse = "\x1b[7m"
+// Hidden = "\x1b[8m"
+//
+// FgBlack = "\x1b[30m"
+// FgRed = "\x1b[31m"
+// FgGreen = "\x1b[32m"
+// FgYellow = "\x1b[33m"
+// FgBlue = "\x1b[34m"
+// FgMagenta = "\x1b[35m"
+// FgCyan = "\x1b[36m"
+// FgWhite = "\x1b[37m"
+//
+// BgBlack = "\x1b[40m"
+// BgRed = "\x1b[41m"
+// BgGreen = "\x1b[42m"
+// BgYellow = "\x1b[43m"
+// BgBlue = "\x1b[44m"
+// BgMagenta = "\x1b[45m"
+// BgCyan = "\x1b[46m"
+// BgWhite = "\x1b[47m"
+
 
