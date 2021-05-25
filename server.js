@@ -3,28 +3,12 @@ const querystring = require('querystring');
 const path = require('path');
 const fs = require('fs');
 
-// This server uses these environment variables.
-//
-// AM_CLIENT_ID='7c0c6428-b652-45b4-b4e5-6d9c7941cd74'
-// AM_CLIENT_SECRET=<Azure Portal Application Registration - Certificate and Secrets>
-// AM_CORS_ORIGINS='<Comma seperated list of urls or * where * is allow all. default: http://localhost>'
-// AM_CORS_METHODS='<Comma seperated list of http verbs. defaults: GET, POST>'
-// AM_CORS_HEADERS='<Comma seperated list of request headers>'
-//
-// AM_DEFAULT_PAGE='index'. default
-// AM_DEFAULT_EXTENSION='.html' default
-//
-// command-line option
-//
-// AM_CLIENT_ID='<?>' AM_CLIENT_SECRET='<?>' AM_CORS_ORIGINS='<?>' node [inspect] server.js
-//
-// NOTE: command-line needs administrator privileges. 
-//
-// linux:   this is sudo, su or group prossible.
-// windows: this is 'Run As'
-const origins = process.env.AM_CORS_ORIGINS || 'http://localhost';
-const methods = process.env.AM_CORS_METHODS || 'POST, GET';
-	
+const clientid = process.env.AM_CLIENT_ID || '7c0c6428-b652-45b4-b4e5-6d9c7941cd74';
+
+const origins = process.env.AM_CORS_ALLOW_ORIGINS || 'http://localhost';
+const methods = process.env.AM_CORS_ALLOW_METHODS || 'POST, GET';
+const headers = process.env.AM_CORS_ALLOW_HEADERS || 'Content-Type';
+
 const defaultpage = process.env.AM_DEFAULT_PAGE || 'index';
 const defaultext = process.env.AM_DEFAULT_EXTENSION || '.html';
 
@@ -32,7 +16,21 @@ const publicFolder = path.join(process.cwd(), 'public');
 const hostname = 'localhost'; // Development standard 127.0.0.1
 const port = 80; // HTTP standard
 
-const pagenotfound = '<html><body><h1>Account Manager page not found.</body></html>';
+const pagenotfound = '<html><body><h2>Account Manager page not found.</h2></body></html>';
+const pagecallback = `
+<!DOCTYPE html>
+<html lang='en lang='en'>
+<head>
+<script language='javascript'>
+	(function(){
+		opener.window.activeDialog.close();
+	})();
+</script>
+</head>
+<body>
+	<h2>Account Manager redirecting to Home Page. Closing window...
+</body>
+</html>`;
 
 /*
  * Contents of the file are sent to the client.
@@ -81,7 +79,7 @@ function crossSiteService(httpRequest,httpResponse) {
  * NOTE: Fiddler, JSFiddle and Postman are the same. 
  *
  * clear();
- * fetch('http://localhost/callback', {
+ * fetch('http://localhost/microsoft/callback', {
  * 		method: 'POST',
  * 		headers: { 
  * 			'Content-Type': 'application/json'
@@ -101,7 +99,9 @@ function microsoftCallbackService(httpRequest,httpResponse) {
 		return true;
 	}
 
-	httpRequest.body = [];
+httpRequest.body = [];
+
+	httpResponse.statusCode = 200;
 	httpResponse.setHeader('Content-Type', 'text/html');
 
 	httpRequest.on('data', (chuck) => { httpRequest.body.push(chuck); });
@@ -110,8 +110,7 @@ function microsoftCallbackService(httpRequest,httpResponse) {
 		httpRequest.body = querystring.parse(httpRequest.body);
 		
 		httpResponse.setHeader('set-cookie',[`access_token=${httpRequest.body.access_token}; Path=/; SameSite=Strict;`]);
-		httpResponse.end(`<!DOCTYPE html><html lang='en lang='en'>
-<body><script>(()=>{window.opener.close();})();</script></body></html>`);
+		httpResponse.end(pagecallback);
 
 	});
 	httpRequest.on('error', (err) => { httpResponse.end(JSON.stringify({err: err})); });
@@ -188,5 +187,23 @@ server.on('request', (request,response) => {
 
 // Starts the Account Manager simple web portal server
 server.listen(port, hostname, () => {
-	console.log(`Account Manager Server running on http://${hostname}:${port}`);
+	console.log(`server.listen(port, hostname, () => \{`);
+	console.log(`  Account Manager Server running on http://${hostname}:${port})`);
+
+	// AM_CLIENT_ID='<?>' AM_CORS_ALLOW_ORIGINS='<?>' node [inspect] server.js
+	//
+	// NOTE: command-line needs administrator privileges. 
+	//
+	// linux:   this is sudo, su or group prossible.
+	// windows: this is 'Run As'
+
+	console.log(`  Environment variables:`);
+	console.log(`\tAM_CLIENT_ID=${clientid || 'Microsoft Azure Applciation Client Id in Application Registration'}\n`);
+	console.log(`\tAM_CORS_ALLOW_ORIGINS=${origins || '<Comma seperated list of urls or * where * is allow all> DEFAULT: http://localhost'}`);
+	console.log(`\tAM_CORS_ALLOW_METHODS=${methods || '<Comma seperated list of http verbs> DEFAULT: GET, POST>'}`);
+	console.log(`\tAM_CORS_ALLOW_HEADERS=${headers || '<Comma seperated list of request headers> DEFAULT: Content-Type'}\n`);
+	console.log(`\tAM_DEFAULT_PAGE=${defaultpage || 'DEFAULT: index'}`);
+	console.log(`\tAM_DEFAULT_EXTENSION=${defaultext || 'DEFAULT: .html'}`);
+	console.log(`\}\);\n`);
 });
+
