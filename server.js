@@ -64,6 +64,7 @@ function crossSiteService(httpRequest,httpResponse) {
 	if(typeof origins != 'string') return;
 
 	const origin = httpRequest.headers.origin || '';
+	if(origin == '' || origin == null /*not set on server owns request?*/) return;
 	if(origins.match('[*]') == null /*asterisk, a wildcard of any, not found*/ && origins.match(origin) == null  /*origin not found*/) {
 		console.log(`AM_CORS_ALLOW_ORIGINS: ${origin} not available.`);
 		return;
