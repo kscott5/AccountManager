@@ -64,7 +64,10 @@ function crossSiteService(httpRequest,httpResponse) {
 	if(typeof origins != 'string') return;
 
 	const origin = httpRequest.headers.origin || '';
-	if(origins.match('[*]') == null /*asterisk, a wildcard of any, not found*/ && origins.match(origin) == null  /*origin not found*/) return;
+	if(origins.match('[*]') == null /*asterisk, a wildcard of any, not found*/ && origins.match(origin) == null  /*origin not found*/) {
+		console.log(`AM_CORS_ALLOW_ORIGINS: ${origin} not available.`);
+		return;
+	}
 
 	httpResponse.statusCode = 200;
 	httpResponse.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
@@ -86,7 +89,7 @@ function crossSiteService(httpRequest,httpResponse) {
  * 		},
  * 		body: JSON.stringify({'name': 'Karega K Scott'})
  * })
- * .then(response => response.json())
+ * .then(response => response.text())
  * .then((data) => { console.log(data);})
  */
 function microsoftCallbackService(httpRequest,httpResponse) {
