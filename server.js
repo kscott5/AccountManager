@@ -92,11 +92,16 @@ function crossSiteService(httpRequest,httpResponse) {
  * .then((data) => { console.log(data);})
  */
 function microsoftCallbackService(httpRequest,httpResponse) {
-	if(httpRequest.url != '/microsoft/callback' /*|| httpRequest.method != 'POST'*/) return false;
-
-	httpRequest.body = [];
+	if(httpRequest.url != '/microsoft/callback') return false;
 
 	httpResponse.statusCode = 200;
+	if(httpRequest.method != 'POST') {
+		httpResponse.setHeader('Content-Type', 'text/json');
+		httpResponse.end(JSON.stringify({ok:false, msg: `${httpRequest.method} not valid.`}));
+		return true;
+	}
+
+	httpRequest.body = [];
 	httpResponse.setHeader('Content-Type', 'text/html');
 
 	httpRequest.on('data', (chuck) => { httpRequest.body.push(chuck); });
