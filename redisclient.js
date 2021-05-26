@@ -45,7 +45,7 @@ function RedisClient(options) {
 		return new RedisClient(options);
 	}
 
-	options = options || {}; //fixes undefined 
+	options = options || {};
 	
 	/* yank and paste, below is the actual redis connection. */ 
 	this.socket = new net.Socket({
