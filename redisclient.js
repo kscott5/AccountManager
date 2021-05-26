@@ -6,14 +6,14 @@
 
 	const net = require('net');
 
-	socket = new net.Socket({
+	let socket = new net.Socket({
 		allowHalfOpen: true,
 		readable: false,
 		writable: true
 	});
 
 	socket.setEncoding('utf8');	
-	socket.connect({port: options.port || 6379}); // opens the connection
+	socket.connect({port: 6379}); // opens the connection
 
 	socket.on('data',(data)=>{
 		//save information in data after socket.write.
@@ -22,15 +22,12 @@
 		//report what happens after error with socket.write.
 	});
 
-	socket.setEncoding('utf8');
-	socket.connect({port: 6379});
-
-	// Writes requires both carriage returns \r and linefeeds \n with redis.
-	socket.write(`set 'redis' 'client'\r\n`);
+	socket.write(`set 'redis' 'client'\r\n`);	// Writes requires both carriage returns \r and linefeeds \n with redis.
 	socket.write(`get 'redis'\r\n`);
-	socket.write(`cleint nfo`\r\n);
-
-	socket.end(); // socket.connect
+	socket.write(`cleint nfo\r\n`);
+	
+	// possible slow connection. call next line manually
+	// socket.end(`\r\n`); // socket.connect
 
 	**yank and paste, above is the actual redis connection.**
 */
@@ -78,7 +75,6 @@ function send(command, callback) {
 	this.socket.on('data', (data) => {
 		callback(null,data);
 	});
-
 	this.socket.on('error', (error) => {
 		callback(error,null);
 	});
