@@ -1,27 +1,29 @@
-Account Manager
+Account Manager (UPDATE)
 ==============
 
-Simple tutorial to learn Object Oriented Javascript, KnockoutJS, RequireJS, Windows Live API and more
+A tutorial that explorers a minimal or simple use of standard HTML, [Javascript](http://developer.mozilla.org) and [Nodejs](https://nodejs.org).
 
-This tutorial is spread across several examples that provide the following details:
+This tutorial is spread over many [git](https://git-scm.com/) [commits](https://git-scm.com/docs/git-commit) on this GitHub repository, and
 
-1. Introduction and basic project structure
-2. Basic refactor of javascript code to conform with object oriented best practices
-3. Utilize open source or free tools for development primarily Nginx web server
-4. Slow introduce the various javascript script libraries
-5. Begin introduction of Windows Live API
-6. Replacement of Nginx web server with Ruby on Rails
-7. Document lesson learn as I go along.
-8. Version control
+1. Introduces basic project structure without initial node_modules depends.
+2. Gradually makes changes of code with different javascript recommendations or requirements. 
+3. Uses open source or free OS, frameworks, libraries and tools for programming.
+4. Slow introduction and use of Nodejs http and net.Socket modules.
+5. Slow migration towards simple webserver with CORS and oauth2 integraion.
+6. Make a small telnet functional database or data store with [redis](https://redis.io) client, and more.
 
-No worries about the Windows Live API client_id and client_secret. I know it was included in
-my initial push but I hope you DO THE RIGHT THING until I remove this. It would be much 
-appreciated if you do no harm. 
+No worries about the [Microsoft Graph API](https://developer.microsoft.com/en-us/graph/graph-explorer) application client_id. Its included in
+with every [git push](https://git-scm.com/docs/git-push), and secure with [Microsoft Azure portal](https://azure.microsoft.com/en-us/), 
+Google API, and other similar portal application registration page.
 
-If I have time I will uses Rails yaml or something like rails can detect as configuration 
-to store this data. Then exclude that file using the .gitignore.
+NOTE: At the time of creating this, I didn't have home internet access and Chicago public library computers stops 
+administrative access on command prompt and executable files. All tools are open source, free downloads with simple
+terms of use. Share details.
 
-NOTE: At the time of creating this, I didn't have internet access and or a computer with
-administrative access. So when I complete the this tutorial I will include the contents of 
-my USB drive I created to complete ALL this work. It contains all the tools I needed to work 
-from a public computer with internet access, namely at the local public library.
+Its possibly faster with existing third party software or hardward library; however, each uses its own opinion relative with industry standards
+around javascript, html and css specifically.
+
+Today's computer configuration is a HP ElitBook with [Ubuntu 20.04](https://ubuntu.com/), a Debian linux os distrution. There's a 
+Windows 10 Desktop but that's not portable.
+
+
