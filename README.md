@@ -13,7 +13,7 @@ This tutorial is a series of [git checkouts](https://git-scm.com/docs/git-checko
 5. Slow migration towards simple webserver with CORS and oauth2 integraion.
 6. Make a small telnet functional database or data store with [redis](https://redis.io) client, and more.
 
-Discover the use of [git revert](https://git-scm.com/docs/git-revert) [git stash](https://git-scm.com/docs/git-stash) helps.
+Discover the use of [git revert](https://git-scm.com/docs/git-revert) and [git stash](https://git-scm.com/docs/git-stash) helps.
 
 No worries about the [Microsoft Graph API](https://developer.microsoft.com/en-us/graph/graph-explorer) application client_id. Its included in
 with every [git push](https://git-scm.com/docs/git-push), and secure with [Microsoft Azure portal](https://azure.microsoft.com/en-us/), 
