@@ -44,6 +44,8 @@ function RedisClient(options) {
 	if(!this instanceof RedisClient) {
 		return new RedisClient(options);
 	}
+
+	options = options || {}; //fixes undefined 
 	
 	/* yank and paste, below is the actual redis connection. */ 
 	this.socket = new net.Socket({
@@ -86,4 +88,4 @@ function send(command, callback) {
 
 }
 
-module.exports = { RedisClient };
+module.exports = { Client: RedisClient }
