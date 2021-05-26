@@ -21,7 +21,7 @@ administrative access on command prompt and executable files. All tools are open
 terms of use. Share details.
 
 Its possibly faster with existing third party software or hardward library; however, each uses its own opinion relative with industry standards
-around javascript, html and css specifically.
+around javascript, html and css. Specifically knockout, angular, reactjs, vuejs and others.
 
 Today's computer configuration is a HP ElitBook with [Ubuntu 20.04](https://ubuntu.com/), a Debian linux os distrution. There's a 
 Windows 10 Desktop but that's not portable.
