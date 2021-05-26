@@ -24,20 +24,20 @@ const stream = require('stream');
 const redis = new net.Socket({allowHalfOpen: true, readable: true, writable: true});
 
 redis.on('ready', () => {
-	console.log('Connection with redis ready');
+	console.log(`Connection with redis: done`);
 });
 redis.on('data', (data) => {
-	console.log(`Save redis data: ${data}`);
-	redis.data = data;
+	console.log(`Save redis data: done`);
+	redis.data = data.split(`\r\n`)[1];
 	redis.error = '';
 });
 redis.on('error', (error) => {
-	console.log(`Error redis:  ${error}`);
+	console.log(`Save redis error: done `);
 	redis.error = error;
 	redis.data = '';
 });
 redis.on('close', ()=> {
-	console.log(`Close redis connection done.`);
+	console.log(`Close redis connection: done`);
 });
 
 redis.setEncoding('utf8');
