@@ -86,4 +86,4 @@ function send(command, callback) {
 
 }
 
-module.export = { RedisClient };
+module.exports = { RedisClient };
