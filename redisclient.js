@@ -51,11 +51,11 @@ function RedisClient(options) {
 	this.socket = new net.Socket({
 		allowHalfOpen: options.allowHalfOpen || true,
 		readable: options.readable || false,
-		writable: optinos.writable || true
+		writable: options.writable || true
 	});
 
 	this.port = options.port || 6379;
-	this.prototype.send = send;
+	RedisClient.prototype.send = send;
 }
 	
 
