@@ -63,29 +63,27 @@ function RedisClient(options) {
  * Send redis the command with net.Socket.write.
  */
 function send(command, callback) {
-	if(!command && !callback instanceof Function) return false;
+	if(!command) return false;
+
+	callback = (callback instanceof Function)? callback : 
+		(error,data) => {console.log(`Send: ${error||data}`);};
 
 	// regular expression finds carriage returns \r and line feeds \n
-	if(!command.match(`(\\r\\n|\\n\\r`) /*not found*/) 
+	if(!command.match(`(\\r\\n|\\n\\r)`) /*not found*/) 
 		command = command.concat('\r\n');
 	
 	this.socket.setEncoding('utf8');	
 	this.socket.connect({port: this.port}); // opens the connection with specific port
 
-	this.socket.off('data');	
 	this.socket.on('data', (data) => {
-		console.log(`Save redis data: done`);
-		callback(null,data);	
+		callback(null,data);
 	});
 
-	this.socket.off('error');
 	this.socket.on('error', (error) => {
-		console.log(`Save redis error: done `);
 		callback(error,null);
 	});
 
-	this.socket.end(command, callback); // is this.socket.write then this.socket.end.
-
+	this.socket.end(command); // is this.socket.write then this.socket.end.
 }
 
 module.exports = { Client: RedisClient }
