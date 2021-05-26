@@ -3,7 +3,7 @@ Account Manager (UPDATE)
 
 A tutorial that explorers a minimal or simple use of standard HTML, [Javascript](http://developer.mozilla.org) and [Nodejs](https://nodejs.org).
 
-This tutorial is a series of [git](https://git-scm.com/) [git checkouts](https://git-scm.com/docs/git-checkout), [git commit](https://git-scm.com/docs/git-commit), 
+This tutorial is a series of [git checkouts](https://git-scm.com/docs/git-checkout), [git commit](https://git-scm.com/docs/git-commit), 
 [git merge](https://git-scm.com/docs/git-merge) and [git push](https://git-scm.com/docs/git-push) on this repository, and
 
 1. Introduces basic project structure without initial node_modules depends.
