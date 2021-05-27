@@ -51,11 +51,12 @@ function RedisClient(options) {
 		writable: options.writable || true
 	});
 
+	this.hostname = options.hostname || 'localhost';
 	this.port = options.port || 6379;
+
 	RedisClient.prototype.send = send;
 }
 	
-
 /**
  * Send redis the command with net.Socket.write.
  */
@@ -70,7 +71,7 @@ function send(command, callback) {
 		command = command.concat('\r\n');
 	
 	this.socket.setEncoding('utf8');	
-	this.socket.connect({port: this.port}); // opens the connection with specific port
+	this.socket.connect({hostname: this.hostname, port: this.port}); // opens the connection with specific port
 
 	this.socket.on('data', (data) => {
 		callback(null,data);
