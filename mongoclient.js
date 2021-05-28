@@ -1,3 +1,4 @@
+const util = require('util');
 const net = require('net');
 const tls = require('tls');
 const fs = require('fs');
@@ -17,29 +18,16 @@ console.logFile(`Mongo client logging`);
 
 // Self-signed cert is its own certificate authority
 const ca = process.env.DEFAULT_CERTICATE_AUTHORITY || 'X509 CERTICATE';
-const keyPEMFile = path.resolve(process.env.PRIVATE_CERT_PEM_FILE || ''); console.logFile(keyPEMFile);
+const keyPEMFile = path.resolve(process.env.PRIVATE_CERT_PEM_FILE || '');
 const certPEMFile = path.resolve(process.env.PUBLIC_CERT_PEM_FILE || '');
 
-let cert = ''; // public self signed X509 certificate PEM key
-fs.promises.readFile(`${certPEMFile}`, {encoding: 'utf8'})
-	.then((data)=>{
-		cert=data; // save and use data later
-		console.logFile(cert);
-	})
-	.catch((error)=>{
-		console.logFile(error);
-		process.exitCode = 1; // detail reason  https://bit.ly/3fvyCbb
-	});
+// public self signed X509 certificate PEM key
+let cert = fs.readFileSync(`${certPEMFile}`);
+if(!cert) console.logFile('Error reading public certificate. Secure socket not ready.');
 
-let key = ''; // private certificate PEM key
-fs.promises.readFile(`${keyPEMFile}`, {encoding: 'utf8'})
-	.then((data)=>{
-		key = data; // save and use the data later
-	})
-	.catch((error)=>{
-		console.logFile(`${error}`);
-		process.exitCode = 1; // detail reason  https://bit.ly/3fvyCbb
-	});
+// private certificate PEM key
+let key = fs.readFileSync(`${keyPEMFile}`);
+if(!key) console.logFile('Error reading private certificate. Secure socket not ready.');
 
 // Create a new client socket
 let socket = new net.Socket({
@@ -74,11 +62,14 @@ let secureSocket= new tls.TLSSocket(socket, {
 secureSocket.on('keylog',(line)=>{
 	console.logFile(`secure socket.on keylog: ${line}`);
 });
-secureSocket.on('OCSP',(response)=>{
-	console.logFile(`secure socket.on OCSP: ${response}`);
+secureSocket.on('OCSPResponse',(response)=>{
+	console.logFile(`secure socket.on OCSPResponse: ${response}`);
 });
-secureSocket.on('connect',()=>{
-	console.logFile(`secure socket.on connect: done`);
+secureSocket.on('secureConnect',()=>{
+	console.logFile(`secure socket.on secure connect: done`);
+});
+secureSocket.on('session',(session)=>{
+	console.logFile(`secure socket.on session: ${session}`);
 });
 secureSocket.on('ready',()=>{
 	console.logFile(`secure socket.on ready: use read/write now `);
