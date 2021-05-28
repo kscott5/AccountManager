@@ -36,7 +36,7 @@ const net = require('net');
 const fs = require('fs');
 
 // File system folder
-const logFile = process.env.DEAFAULT_LOGS_PATH || `${process.cwd}/redisclient.log`;
+const logFile = process.env.DEAFAULT_LOGS_PATH || `${process.cwd()}/redisclient.log`;
 
 // create a log file and append its writer on console
 console.logFile = fs.createWriteStream(`${logFile}`, {flags:'a'}).write;
