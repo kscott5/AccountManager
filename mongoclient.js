@@ -9,7 +9,7 @@ const logFile = process.env.DEAFAULT_LOGS_PATH || `${process.cwd()}/mongoclient.
 // create a log file and append new data
 console.logFile = (data)=>{
 	fs.appendFile(logFile,`${new Date()}: ${data}\n`,(error)=>{
-		console.log(`Error: ${error}`);
+		console.log(`${logFile} error: ${error}`);
 	});
 };
 
