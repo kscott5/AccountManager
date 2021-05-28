@@ -38,8 +38,14 @@ const fs = require('fs');
 // File system folder
 const logFile = process.env.DEAFAULT_LOGS_PATH || `${process.cwd()}/redisclient.log`;
 
-// create a log file and append its writer on console
-console.logFile = fs.createWriteStream(`${logFile}`, {flags:'a'}).write;
+// create a log file and append new data
+console.logFile = (data)=>{
+	fs.appendFile(logFile,`${new Date()}: ${data}\n`,(error)=>{
+		console.log(`${logFile} error: ${error}`);
+	});
+};
+
+fs.createWriteStream(`${logFile}`, {flags:'a'}).write;
 console.logFile(`Redis client logging`);
 
 /**
