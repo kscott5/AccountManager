@@ -33,6 +33,14 @@
 */
 
 const net = require('net');
+const fs = require('fs');
+
+// File system folder
+const logFile = process.env.DEAFAULT_LOGS_PATH || `${process.cwd}/redisclient.log`;
+
+// create a log file and append its writer on console
+console.logFile = fs.createWriteStream(`${logFile}`, {flags:'a'}).write;
+console.logFile(`Redis client logging`);
 
 /**
  * Creates new redis client with net.Socket
@@ -64,7 +72,7 @@ function send(command, callback) {
 	if(!command) return false;
 
 	callback = (callback instanceof Function)? callback : 
-		(error,data) => {console.log(`Send: ${error||data}`);};
+		(error,data) => {console.logFile(`Send: ${error||data}`);};
 
 	// regular expression finds carriage returns \r and line feeds \n
 	if(!command.match(`(\\r\\n|\\n\\r)`) /*not found*/) 
