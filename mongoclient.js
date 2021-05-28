@@ -3,7 +3,7 @@ const tls = require('tls');
 const fs = require('fs');
 
 // File system folder
-const logFile = process.env.DEAFAULT_LOGS_PATH || `${process.cwd}/securesocket.log`;
+const logFile = process.env.DEAFAULT_LOGS_PATH || `${process.cwd()}/mongoclient.log`;
 
 // create a log file and append its writer on console
 console.logFile = fs.createWriteStream(`${logFile}`, {flags:'a'}).write;
@@ -75,4 +75,4 @@ secureSocket.on('OCSP',(response)=>{
 
 //secureSocket.connect({hostname: localhost, port: 27017}); // open the connection
 
-module.exports = {mongoclient = secureSocket};
+module.exports = {MongoClient: secureSocket};
