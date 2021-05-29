@@ -33,9 +33,11 @@ const logFile = process.env.DEAFAULT_LOGS_PATH || `${process.cwd()}/mongoclient.
 
 // create a log file and append new data
 exportList.logFile = (data)=>{
-	fs.appendFile(logFile,`${new Date()}: ${data}\n`,(error)=>{
+	try {
+		fs.appendFileSync(logFile,`${(new Date()).toISOString()}: ${data}\n`);
+	} catch(error){
 		console.log(`${logFile} error: ${error}`);
-	});
+	}
 };
 exportList.logFile(`Mongo client logging`);
 
