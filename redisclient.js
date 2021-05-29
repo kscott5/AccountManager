@@ -40,12 +40,13 @@ const logFile = process.env.DEAFAULT_LOGS_PATH || `${process.cwd()}/redisclient.
 
 // create a log file and append new data
 console.logFile = (data)=>{
-	fs.appendFile(logFile,`${new Date()}: ${data}\n`,(error)=>{
+	try {
+		fs.appendFileSync(logFile,`${(new Date()).toISOString()}: ${data}\n`);
+	} catch(error) {
 		console.log(`${logFile} error: ${error}`);
-	});
+	}
 };
 
-fs.createWriteStream(`${logFile}`, {flags:'a'}).write;
 console.logFile(`Redis client logging`);
 
 /**
