@@ -105,7 +105,7 @@ if(exportList.certPEMFile && exportList.keyPEMFile) {
 		exportList.secureSocket.on('data',(data)=>{
 			exportList.logFile(`secure socket.on data: ${data}`);
 		});
-		secureSocket.on('error',(error)=>{
+		exportList.secureSocket.on('error',(error)=>{
 			exportList.logFile(`secure socket.on error: ${error}`);
 		});
 	} catch(error) {
