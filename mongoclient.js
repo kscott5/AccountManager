@@ -70,11 +70,11 @@ if(exportList.certPEMFile && exportList.keyPEMFile) {
 		delete exportList.certPEMFile;
  
 		// private certificate PEM key
-		exportlist.key = fs.readFileSync(`${path.resolve(exportList.keyPEMFile)}`);
+		exportList.key = fs.readFileSync(`${path.resolve(exportList.keyPEMFile)}`);
 		delete exportList.keyPEMFile;
 
 		// Make the client socket more secure with TLS/SSL encryption
-		exportList.secureSocket = new tls.TLSSocket(socket, {
+		exportList.secureSocket = new tls.TLSSocket(exportList.socket, {
 			enableTrace: true,
 			isServer: false,
 			requestCert: false,
@@ -111,7 +111,7 @@ if(exportList.certPEMFile && exportList.keyPEMFile) {
 
 		exportList.secureSocket = secureSocket;
 	} catch(error) {
-		console.logFile(error);
+		exportList.logFile(error);
 
 		delete exportList.ca;
 		delete exportList.key
