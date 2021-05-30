@@ -44,7 +44,7 @@ exportList.logFile(`Mongo client logging`);
 // Create a new client socket
 exportList.socket = new net.Socket({
 	allowHalfOpen: true,
-	readable: false,
+	readable: true,
 	writable: true
 });
 exportList.socket.on('connect',()=>{
