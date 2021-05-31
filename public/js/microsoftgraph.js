@@ -19,7 +19,7 @@ MicrosoftGraph.prototype.accesstoken = function(){
 /**
  * Login with application conscent from person on website.
  */
-MicrosoftGraph.prototype.login = function() {
+MicrosoftGraph.prototype.login = function(target) {
 	let responseType = 'token';
 	let responseMode = 'form_post';
 	let scopes = encodeURIComponent('openid offline_access user.read https://graph.microsoft.com/mail.read');
