@@ -2,16 +2,29 @@ window.manager = {
 	activeApi: 'Select',
 	apis: {},
 	activateSelection: function() {
+		console.clear();
+
 		if(window.activeDialog)
 			window.activeDialog.close();
-
+		let main = document.querySelector('#main');
+		
 		let api = window.manager.apis[window.manager.activeApi];
-		api.mail((data)=>{
-			let html = parseData(data);
+		api.me((data)=>{
+			console.log("Profile data:");
+			console.log(data);
 
-			let main = document.querySelector('#main');
+			let html = parseData(data);
+			main.appendChild(html);
+		});			
+		api.mail((data)=>{
+			console.log("Mail folders:");
+			console.log(data);
+
+			let html = parseData(data);
 			main.appendChild(html);
 		});
+		
+		alert("Detail api JSON view in developer console press F12 key.");
 	}
 };
 
@@ -20,6 +33,7 @@ function parseData(data) {
 
 	for(var key in data) {
 		let label = document.createElement('label');
+		
 		label.textContent = key.concat(':');
 
 		let html
