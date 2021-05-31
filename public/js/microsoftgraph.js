@@ -95,3 +95,27 @@ MicrosoftGraph.prototype.me = function(ajaxToolkitCallback) {
 	client.setRequestHeader('Content-Type', 'application/json');
 	client.send();
 }
+
+MicrosoftGraph.prototype.mail = function(options, ajaxToolkitCallback) {
+	if(options instanceof Function) {
+		ajaxToolkitCallback = options;
+		options = {};
+	}
+	
+	let client = new XMLHttpRequest();
+	client.onreadystatechange = () => {
+		if(client.readyState == XMLHttpRequest.DONE && client.status == 200) {
+			let data = JSON.parse(client.responseText);
+
+			(ajaxToolkitCallback instanceof Function)? 
+				ajaxToolkitCallback(data): 	console.log(data);
+		}
+	};
+
+	let filters = options || {};
+	let url = `${this.resourceUrl}/me/mailFolders`;
+	client.open('GET', url);
+	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken()}`);
+	client.setRequestHeader('Content-Type', 'application/json');
+	client.send();
+}
