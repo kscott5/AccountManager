@@ -23,7 +23,7 @@ const pagecallback = `
 <head>
 <script language='javascript'>
 	(function(){
-		opener.window.manager.activeSelection();
+		opener.window.manager.activateSelection();
 	})();
 </script>
 </head>

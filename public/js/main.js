@@ -1,14 +1,20 @@
 window.manager = {
 	activeApi: 'Select',
-	apis: {}
+	apis: {},
+	activateSelection: function() {
+		window.activeDialog.close();
+
+		let api = window.manager.apis[window.manager.activeApi];
+		api.me((data)=>{
+
+			let main = document.querySelector('#main');
+			let el = document.createElement('div');
+
+			el.innerHTML = JSON.stringify(data);
+			main.appendChild(el);
+		});
+	}
 };
-
-function activateSelection() {
-	window.activeDialog.close();
-
-	let api = window.manager.apis[window.manager.activeApi];
-	api.me();
-}
 
 // This script block called after the DOM load is complete.
 window.onload = function() {
@@ -22,7 +28,7 @@ window.onload = function() {
 		let clientName = selection[0], clientId = selection[1];
 
 		if(clientName == 'Microsoft') {
-			window.manager.activeLibrary = clientName ;
+			window.manager.activeApi = clientName ;
 
 			window.manager.apis[clientName] = 
 				window.manager.apis[clientName] || 
@@ -30,7 +36,7 @@ window.onload = function() {
 		}
 		
 		let api = window.manager.apis[window.manager.activeApi];
-		if(!api.ready) {
+		if(!api.ready()) {
 			api.login();
 		}
 	};
