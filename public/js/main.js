@@ -11,7 +11,7 @@ function activateSelection() {
 }
 
 // This script block called after the DOM load is complete.
-(function() {
+window.onload = function() {
 	let appName = document.querySelector('#appName');
 	let library = document.querySelector('#library');
 	let access = document.querySelector('#access');
@@ -29,9 +29,9 @@ function activateSelection() {
 				new MicrosoftGraph(appName.textContent,clientId);
 		}
 		
-		let api = window.manger.apis[window.manager.activeApi];
+		let api = window.manager.apis[window.manager.activeApi];
 		if(!api.ready) {
 			api.login();
 		}
 	};
-})();
+}
