@@ -16,10 +16,10 @@ MicrosoftGraph.prototype.accesstoken = function(){
 	return (this.ready)? document.cookie.split("=")[1]:'';
 }
 
-/*
+/**
  * Login with application conscent from person on website.
  */
-MicrosoftGraph.prototype.login = function(target) {
+MicrosoftGraph.prototype.login = function() {
 	let responseType = 'token';
 	let responseMode = 'form_post';
 	let scopes = encodeURIComponent('openid offline_access user.read https://graph.microsoft.com/mail.read');
@@ -34,17 +34,19 @@ MicrosoftGraph.prototype.login = function(target) {
 	window.activeDialog = window.open(url,target || this.appName, features);
 }
 
-/*
+/**
  * Logout revokes the login session.
  *
  * https://bit.ly/3hMzv0F
  */
-MicrosoftGraph.prototype.logout = function() {
+MicrosoftGraph.prototype.logout = function(ajaxToolkitCallback) {
 	let client = new XMLHttpRequest();
 	client.onreadystatechange = () => {
 		if(client.readyState = XMLHttpRequest.DONE && client.status == 204) {
 			let data = client.responseText;
-			console.log(`${data} on ${this.appName}`);
+	
+			(ajaxToolkitCallback instanceof Function)? 
+				ajaxToolkitCallback(data): console.log(`${data} on ${this.appName}`);
 		}
 	};
 
@@ -54,17 +56,19 @@ MicrosoftGraph.prototype.logout = function() {
 	client.send();
 }
 
-/*
+/**
  * Deletes all user application permissions.
  *
  * https://bit.ly/3ugekGL
  */
-MicrosoftGraph.prototype.deletePermissions = function() {
+MicrosoftGraph.prototype.deletePermissions = function(ajaxToolkitCallback) {
 	let client = new XMLHttpRequest();
 	client.onreadystatechange = () => {
 		if(client.readyState = XMLHttpRequest.DONE && client.status == 204) {
 			let data = client.responseText;
-			console.log(`${data} on ${this.appName}`);
+
+			(ajaxToolkitCallback instanceof Function)? 
+				ajaxToolkitCallback(data): console.log(`${data} on ${this.appName}`);
 		}
 	};
 
@@ -74,12 +78,14 @@ MicrosoftGraph.prototype.deletePermissions = function() {
 	client.send();
 }
 
-MicrosoftGraph.prototype.me = function() {
+MicrosoftGraph.prototype.me = function(ajaxToolkitCallback) {
 	let client = new XMLHttpRequest();
 	client.onreadystatechange = () => {
 		if(client.readyState == XMLHttpRequest.DONE && client.status == 200) {
 			let data = JSON.parse(client.responseText);
-			console.log(data);
+
+			(ajaxToolkitCallback instanceof Function)? 
+				ajaxToolkitCallback(data): 	console.log(data);
 		}
 	};
 
