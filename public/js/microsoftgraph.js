@@ -8,9 +8,13 @@ function MicrosoftGraph(appName,clientId) {
 	this.resourceUrl = 'https://graph.microsoft.com/v1.0';
 }
 
-MicrosoftGraph.prototype.ready = (document.cookie.split("=")[0] || '') == 'access_token';
-MicrosoftGraph.prototype.accesstoken = (this.ready)? document.cookie.split("=")[1]:'';
+MicrosoftGraph.prototype.ready = function() { 
+	return (document.cookie.split("=")[0] || '') == 'access_token';
+}
 
+MicrosoftGraph.prototype.accesstoken = function(){
+	return (this.ready)? document.cookie.split("=")[1]:'';
+}
 
 /*
  * Login with application conscent from person on website.
@@ -66,7 +70,7 @@ MicrosoftGraph.prototype.deletePermissions = function() {
 
 	let url = `${this.resourceUrl}/oauth2PermissionGrant/user.read`;
 	client.open('DELETE', url);
-	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken}`);
+	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken()}`);
 	client.send();
 }
 
@@ -81,7 +85,7 @@ MicrosoftGraph.prototype.me = function() {
 
 	let url = `${this.resourceUrl}/me`;
 	client.open('GET', url);
-	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken}`);
+	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken()}`);
 	client.setRequestHeader('Content-Type', 'application/json');
 	client.send();
 }
