@@ -1,4 +1,5 @@
 console.debugger = (console.debugger instanceof Function)? console.debugger: (data)=>console.debug(data);
+var pattern = /[(^(\{\{)\w+.?(\}\})$)]+/;
 
 window.manager = {
 	activeApi: 'Select',
