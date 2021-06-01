@@ -84,6 +84,12 @@ MicrosoftGraph.prototype.deletePermissions = function(options) {
 	client.send();
 }
 
+function listProfileOfMe(data) {
+	let container = document.createElement('div');
+	
+	return container;
+}
+
 MicrosoftGraph.prototype.me = function(options) {
 	options = (typeof options != "object") || {};
 
@@ -103,6 +109,37 @@ MicrosoftGraph.prototype.me = function(options) {
 	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken()}`);
 	client.setRequestHeader('Content-Type', 'application/json');
 	client.send();
+}
+
+function listMailFolders(data) {
+	document.cookie = `mailFolders=${data.['@odata.context']}`;
+
+	let container = document.createElement('div');
+	for(let folder in data.value) {
+		let anchor = document.createElement('a');
+		anchor.href = `${folder.id}`;
+		anchor.textContent = `${folder.displayName} ${forlder.unreadItemCount}`;
+		container.appendChild(anchor);
+	}
+
+	return container;
+}
+
+function listMailFolderItems(folder, data) {
+	document.cookie = `maildFolders:${folder}=${data.['@odata.content']}`;
+
+	let container = document.createElement('div');
+	for(let item in data.value) {
+		let anchor = document.createElement('a');
+
+		anchor.href = `${item.id}`;
+		anchor.setAttribute('itemid',item['@odata.etag']);
+
+		anchor.textContent = item.subject;
+		container.appendChild(anchor);
+	}
+
+	return container;
 }
 
 MicrosoftGraph.prototype.mail = function(options) {
