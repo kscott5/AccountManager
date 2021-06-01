@@ -166,6 +166,7 @@ MicrosoftGraph.prototype.mail = function(options) {
 			} else {
 				let main = document.querySelector('#main');
 				main.appendChild(listMailFolders(data));
+			}
 		}
 	};
 
