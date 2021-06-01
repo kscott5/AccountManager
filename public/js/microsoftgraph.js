@@ -19,7 +19,7 @@ MicrosoftGraph.prototype.accesstoken = function(){
 }
 
 MicrosoftGraph.prototype.activateSelection = function() {
-		if(window.manager,activeDialog)
+		if(window.manager.activeDialog)
 			window.manager.activeDialog.close();
 
 		this.me().mail();
