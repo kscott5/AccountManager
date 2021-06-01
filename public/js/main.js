@@ -2,16 +2,19 @@ console.debugger = (console.debugger instanceof Function)? console.debugger: (da
 
 window.manager = {
 	template: function(text) {
-		let pattern = /(\{\{)([a-zA-Z0-9._]+)(\}\})/g // template. use a combination of string.match(pattern), string.replace() and eval()
-		let items = text.match(pattern);
+		let pattern = /*this regular expression*/  /(\{\{)([a-zA-Z0-9._]+)(\}\})/g;
+		let items = /*the array from */ text.match(pattern);
+
 		for(let index=0; index<items.length; index++) {
-			let variable = items[index];
-			let expression = variable.replace(`{{`,``).replace(`}}`,``);
+			let variable = items[index]; // an inline {{template}} 
+			let expression = variable.replace(/*open token*/ `{{`, /*with empty string*/ `}}`)
+					.replace(/*close token*/ `}}`, /*with empty string*/ ``);
 			
-			text = text.replace(variable, eval(expression));
+			// NOTE: Expects the variable template between `{{` and `}}` is within block scope, var or let.
+			text = text.replace(/*inline {{template}}*/ variable, /*with*/ eval(/*of*/ expression /*. example: 2 = eval(``)*/));
 		}
 
-		return text;
+		return text /*with updates*/;
 	},
 
 	activeApi: 'Select',
