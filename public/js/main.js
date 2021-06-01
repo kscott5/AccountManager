@@ -9,23 +9,11 @@ window.manager = {
 
 		if(window.activeDialog)
 			window.activeDialog.close();
-		let main = document.querySelector('#main');
-		
+
+		let main = document.querySelector('#main');		
 		let api = window.manager.apis[window.manager.activeApi];
-		api.me((data)=>{
-			console.log("Profile data:");
-			console.log(data);
-
-			let html = parseData(data);
-			main.appendChild(html);
-		});			
-		api.mail((data)=>{
-			console.log("Mail folders:");
-			console.log(data);
-
-			let html = parseData(data);
-			main.appendChild(html);
-		});
+		api.me();			
+		api.mail();
 		
 		alert("Detail api JSON view in developer console press F12 key.");
 	}
@@ -39,7 +27,7 @@ function parseData(data) {
 		
 		label.textContent = key.concat(':');
 
-		let html
+		let html;
 		if(data[key] instanceof Object) {
 			html = parseData(data[key]);
 		} else {
