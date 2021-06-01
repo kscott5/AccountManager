@@ -1,5 +1,5 @@
 console.debugger = (console.debugger instanceof Function)? console.debugger: (data)=>console.debug(data);
-var pattern = /[(^(\{\{)\w+.?(\}\})$)]+/;
+var pattern = /[(^(\{\{)\w+.?(\}\})$)]+/; // template. use a combination of string.match(pattern), string.replace() and eval()
 
 window.manager = {
 	activeApi: 'Select',
