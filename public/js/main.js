@@ -4,19 +4,6 @@ var pattern = /[(^(\{\{)\w+.?(\}\})$)]+/; // template. use a combination of stri
 window.manager = {
 	activeApi: 'Select',
 	apis: {},
-	activateSelection: function() {
-		console.clear();
-
-		if(window.activeDialog)
-			window.activeDialog.close();
-
-		let main = document.querySelector('#main');		
-		let api = window.manager.apis[window.manager.activeApi];
-		api.me();			
-		api.mail();
-		
-		alert("Detail api JSON view in developer console press F12 key.");
-	}
 };
 
 function parseData(data) {
