@@ -85,6 +85,7 @@ MicrosoftGraph.prototype.deletePermissions = function(options) {
 }
 
 function listProfileOfMe(data) {
+	console.debugger(`listProfileOfMe: ${JSON.stringify(data)}`);
 	document.cookie = `microsoft:profile:me=${data['@odata.context']}`;
 
 	let container = document.createElement('div');
@@ -99,6 +100,7 @@ function listProfileOfMe(data) {
 }
 
 MicrosoftGraph.prototype.me = function(options) {
+	console.debugger(`graph me`);
 	options = (typeof options != "object") || {};
 
 	let client = new XMLHttpRequest();
@@ -123,13 +125,18 @@ MicrosoftGraph.prototype.me = function(options) {
 }
 
 function listMailFolders(data) {
+	console.debugger(`listMailFolderis`);
+
 	document.cookie = `microsoft:mail:folders=${data['@odata.context']}`;
 
 	let container = document.createElement('div');
-	for(let folder in data.value) {
+	for(let index=0; index<data.value.length; index++) {
+		let folder = data.value[index];
+		console.debugger(folder);
+
 		let anchor = document.createElement('a');
 		anchor.href = `${folder.id}`;
-		anchor.textContent = `${folder.displayName} ${forlder.unreadItemCount}`;
+		anchor.textContent = `${folder.displayName} ${folder.unreadItemCount}`;
 		container.appendChild(anchor);
 	}
 
@@ -137,10 +144,14 @@ function listMailFolders(data) {
 }
 
 function listMailFolderItems(folder, data) {
+	console.debugger(`listMailFolderItems: ${folder}`);
 	document.cookie = `microsoft:mail:${folder}=${data['@odata.content']}`;
-
+	
 	let container = document.createElement('div');
-	for(let item in data.value) {
+	for(let index=0; index<data.value.length; index++) {
+		console.debugger(data.value[item]);
+
+		let item = data.value[index];
 		let anchor = document.createElement('a');
 
 		anchor.href = `${item.id}`;
@@ -154,6 +165,7 @@ function listMailFolderItems(folder, data) {
 }
 
 MicrosoftGraph.prototype.mail = function(options) {
+	console.debugger(`graph mail`);
 	options = (typeof options != "object") || {};
 
 	let client = new XMLHttpRequest();
