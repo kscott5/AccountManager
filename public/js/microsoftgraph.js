@@ -19,7 +19,9 @@ MicrosoftGraph.prototype.accesstoken = function(){
 /**
  * Login with application conscent from person on website.
  */
-MicrosoftGraph.prototype.login = function(target) {
+MicrosoftGraph.prototype.login = function(options) {
+	options = (typeof options != "object") || {};
+
 	let responseType = 'token';
 	let responseMode = 'form_post';
 	let scopes = encodeURIComponent('openid offline_access user.read https://graph.microsoft.com/mail.read');
@@ -31,7 +33,7 @@ MicrosoftGraph.prototype.login = function(target) {
 			scope=${scopes}&state=12345`;
 
 	let features = "menubar=no,location=yes,resizable=no,scrollbars=yes,status=yes";
-	window.activeDialog = window.open(url,target || this.appName, features);
+	window.activeDialog = window.open(url, options.title || this.appName, features);
 }
 
 /**
@@ -39,14 +41,16 @@ MicrosoftGraph.prototype.login = function(target) {
  *
  * https://bit.ly/3hMzv0F
  */
-MicrosoftGraph.prototype.logout = function(ajaxToolkitCallback) {
+MicrosoftGraph.prototype.logout = function(options) {
+	options = (typeof options != "object") || {};
+	
 	let client = new XMLHttpRequest();
 	client.onreadystatechange = () => {
 		if(client.readyState = XMLHttpRequest.DONE && client.status == 204) {
 			let data = client.responseText;
 	
-			(ajaxToolkitCallback instanceof Function)? 
-				ajaxToolkitCallback(data): console.log(`${data} on ${this.appName}`);
+			(options.target instanceof Function)? 
+				options.target(data): console.log(`${data} on ${this.appName}`);
 		}
 	};
 
@@ -61,14 +65,16 @@ MicrosoftGraph.prototype.logout = function(ajaxToolkitCallback) {
  *
  * https://bit.ly/3ugekGL
  */
-MicrosoftGraph.prototype.deletePermissions = function(ajaxToolkitCallback) {
+MicrosoftGraph.prototype.deletePermissions = function(options) {
+	options = (typeof options != "object") || {};
+
 	let client = new XMLHttpRequest();
 	client.onreadystatechange = () => {
 		if(client.readyState = XMLHttpRequest.DONE && client.status == 204) {
 			let data = client.responseText;
 
-			(ajaxToolkitCallback instanceof Function)? 
-				ajaxToolkitCallback(data): console.log(`${data} on ${this.appName}`);
+			(options.target instanceof Function)? 
+				options.target(data): console.log(`${data} on ${this.appName}`);
 		}
 	};
 
@@ -78,14 +84,17 @@ MicrosoftGraph.prototype.deletePermissions = function(ajaxToolkitCallback) {
 	client.send();
 }
 
-MicrosoftGraph.prototype.me = function(ajaxToolkitCallback) {
+MicrosoftGraph.prototype.me = function(options) {
+	options = (typeof options != "object") || {};
+
 	let client = new XMLHttpRequest();
 	client.onreadystatechange = () => {
 		if(client.readyState == XMLHttpRequest.DONE && client.status == 200) {
 			let data = JSON.parse(client.responseText);
 
-			(ajaxToolkitCallback instanceof Function)? 
-				ajaxToolkitCallback(data): 	console.log(data);
+			(options.target instanceof Function)? 
+				options.target(data): 	console.log(data);
+
 		}
 	};
 
@@ -96,23 +105,20 @@ MicrosoftGraph.prototype.me = function(ajaxToolkitCallback) {
 	client.send();
 }
 
-MicrosoftGraph.prototype.mail = function(options, ajaxToolkitCallback) {
-	if(options instanceof Function) {
-		ajaxToolkitCallback = options;
-		options = {};
-	}
-	
+MicrosoftGraph.prototype.mail = function(options) {
+	options = (typeof options != "object") || {};
+
 	let client = new XMLHttpRequest();
 	client.onreadystatechange = () => {
 		if(client.readyState == XMLHttpRequest.DONE && client.status == 200) {
 			let data = JSON.parse(client.responseText);
 
-			(ajaxToolkitCallback instanceof Function)? 
-				ajaxToolkitCallback(data): 	console.log(data);
+			(options.target instanceof Function)?
+				options.target(data): 	console.log(data);
 		}
 	};
 
-	let filters = options || {};
+	let filters = options.filters || {};
 	let url = `${this.resourceUrl}/me/mailFolders`;
 	client.open('GET', url);
 	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken()}`);
