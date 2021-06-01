@@ -1,4 +1,4 @@
-var cookieOptions = `;domain=${document.location.hostname};path=/;samesite=strict;secure=false;httponly=false;max-age=600`; 
+var cookieOptions = `;path=/;samesite=strict;max-age=600`; 
 
 function MicrosoftGraph(appName,clientId) {
 	if(!this instanceof MicrosoftGraph) {
@@ -15,14 +15,15 @@ MicrosoftGraph.prototype.ready = function() {
 }
 
 MicrosoftGraph.prototype.accesstoken = function(){
-	return (this.ready)? document.cookie.split("=")[1]:'';
+	return (this.ready())? document.cookie.split("=")[1]:'';
 }
 
 MicrosoftGraph.prototype.activateSelection = function() {
 		if(window.manager.activeDialog)
 			window.manager.activeDialog.close();
 
-		this.me().mail();
+		this.me();
+		this.mail();
 		
 		alert("Detail api JSON view in developer console press F12 key.");
 	}

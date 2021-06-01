@@ -113,7 +113,7 @@ httpRequest.body = [];
 		httpRequest.body = Buffer.concat(httpRequest.body).toString();
 		httpRequest.body = querystring.parse(httpRequest.body);
 		
-		httpResponse.setHeader('set-cookie',[`access_token=${httpRequest.body.access_token}; Path=/; SameSite=Strict; HttpOnly=false; Secure=false; Max-Age=600;`]);
+		httpResponse.setHeader('set-cookie',[`access_token=${httpRequest.body.access_token}; Path=/; SameSite=Strict; Max-Age=600;`]);
 		httpResponse.end(pagecallback);
 
 	});
