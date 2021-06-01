@@ -85,8 +85,16 @@ MicrosoftGraph.prototype.deletePermissions = function(options) {
 }
 
 function listProfileOfMe(data) {
+	document.cookie = `microsoft:profile:me=${data['@odata.context']}`;
+
 	let container = document.createElement('div');
+	let anchor = document.createElement('a');
+
+	anchor.href = `${data.id}`;
+	anchor.setAttribute('email', data.mail);
+	anchor.textContent = `Hello ${data.givename || data.displayName || data.mail}`;
 	
+	container.appendChild(anchor);
 	return container;
 }
 
@@ -98,9 +106,12 @@ MicrosoftGraph.prototype.me = function(options) {
 		if(client.readyState == XMLHttpRequest.DONE && client.status == 200) {
 			let data = JSON.parse(client.responseText);
 
-			(options.target instanceof Function)? 
-				options.target(data): 	console.log(data);
-
+			if(options.target instanceof Function) {
+				options.target(data);
+			} else {
+				let main = document.querySelector('#main');
+				main.appendChild(listProfileOfMe(data));
+			}
 		}
 	};
 
@@ -112,7 +123,7 @@ MicrosoftGraph.prototype.me = function(options) {
 }
 
 function listMailFolders(data) {
-	document.cookie = `mailFolders=${data.['@odata.context']}`;
+	document.cookie = `microsoft:mail:folders=${data['@odata.context']}`;
 
 	let container = document.createElement('div');
 	for(let folder in data.value) {
@@ -126,7 +137,7 @@ function listMailFolders(data) {
 }
 
 function listMailFolderItems(folder, data) {
-	document.cookie = `maildFolders:${folder}=${data.['@odata.content']}`;
+	document.cookie = `microsoft:mail:${folder}=${data['@odata.content']}`;
 
 	let container = document.createElement('div');
 	for(let item in data.value) {
@@ -150,8 +161,11 @@ MicrosoftGraph.prototype.mail = function(options) {
 		if(client.readyState == XMLHttpRequest.DONE && client.status == 200) {
 			let data = JSON.parse(client.responseText);
 
-			(options.target instanceof Function)?
-				options.target(data): 	console.log(data);
+			if(options.target instanceof Function) {
+				options.target(data);
+			} else {
+				let main = document.querySelector('#main');
+				main.appendChild(listMailFolders(data));
 		}
 	};
 
