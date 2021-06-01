@@ -1,12 +1,12 @@
 console.debugger = (console.debugger instanceof Function)? console.debugger: (data)=>console.debug(data);
-var pattern = /(\{\{)([a-zA-Z0-9._]+)(\}\})/g // template. use a combination of string.match(pattern), string.replace() and eval()
 
 window.manager = {
 	template: function(text) {
+		let pattern = /(\{\{)([a-zA-Z0-9._]+)(\}\})/g // template. use a combination of string.match(pattern), string.replace() and eval()
 		let items = text.match(pattern);
 		for(let index=0; index<items.length; index++) {
 			let variable = items[index];
-			let expression = variable.replace(`{{`).replace(`}}`);
+			let expression = variable.replace(`{{`,``).replace(`}}`,``);
 			
 			text = text.replace(variable, eval(expression));
 		}
