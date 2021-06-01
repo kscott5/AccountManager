@@ -18,6 +18,14 @@ MicrosoftGraph.prototype.accesstoken = function(){
 	return (this.ready)? document.cookie.split("=")[1]:'';
 }
 
+MicrosoftGraph.prototype.activateSelection = function() {
+		if(window.activeDialog)
+			window.activeDialog.close();
+
+		this.me().mail();
+		
+		alert("Detail api JSON view in developer console press F12 key.");
+	}
 /**
  * Login with application conscent from person on website.
  */
