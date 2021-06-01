@@ -162,19 +162,30 @@ function listMailFolders(data) {
 	return container;
 }
 
-function listMailFolderItems(folder, data) {
+function listMailFolderItems(folder,data) {
 	console.debugger(`listMailFolderItems: ${folder}`);
 	document.cookie = `microsoft:mail:${folder}=${data['@odata.content']}${cookieOptions}`;
 	
 	let container = document.createElement('div');
 	for(let index=0; index<data.value.length; index++) {
-		console.debugger(data.value[item]);
+		console.debugger(data.value[index]);
 
 		let item = data.value[index];
 		let anchor = document.createElement('a');
 
 		anchor.href = `${item.id}`;
 		anchor.setAttribute('itemid',item['@odata.etag']);
+
+		item.body;
+		item.preview;
+		item.content;
+		item.contentType;
+		item.importance;
+		item.isRead;
+		item.sender;
+		item.from;
+		item.toRecipients;
+		item.recievedDateTime;
 
 		anchor.textContent = item.subject;
 		container.appendChild(anchor);
@@ -187,6 +198,9 @@ MicrosoftGraph.prototype.mail = function(options) {
 	console.debugger(`graph mail`);
 	options = options || {};
 
+	let filters = options.filters || {};
+	let folder = filters.folder || '';
+
 	let client = new XMLHttpRequest();
 	client.onreadystatechange = () => {
 		if(client.readyState == XMLHttpRequest.DONE && client.status == 200) {
@@ -196,13 +210,15 @@ MicrosoftGraph.prototype.mail = function(options) {
 				options.target(data);
 			} else {
 				let main = document.querySelector('#main');
-				main.appendChild(listMailFolders(data));
+				let content = (folder != '')? listMailFolderItems(folder,data) : 
+					listMailFolders(data);
+
+				main.appendChild(content);
 			}
 		}
 	};
 
-	let filters = options.filters || {};
-	let url = `${this.resourceUrl}/me/mailFolders/${(filters.folder||'')}`;
+	let url = `${this.resourceUrl}/me/mailFolders/${folder}`;
 	client.open('GET', url);
 	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken()}`);
 	client.setRequestHeader('Content-Type', 'application/json');
