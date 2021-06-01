@@ -6,29 +6,6 @@ window.manager = {
 	apis: {},
 };
 
-function parseData(data) {
-	let div = document.createElement('div');
-
-	for(var key in data) {
-		let label = document.createElement('label');
-		
-		label.textContent = key.concat(':');
-
-		let html;
-		if(data[key] instanceof Object) {
-			html = parseData(data[key]);
-		} else {
-			html = document.createElement('span');
-			html.textContent = data[key];
-		}
-
-		div.appendChild(label);
-		div.appendChild(html);
-	}
-
-	return div;
-}
-
 // This script block called after the DOM load is complete.
 window.onload = function() {
 	let appName = document.querySelector('#appName');
