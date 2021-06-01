@@ -4,7 +4,7 @@ window.manager = {
 	activeApi: 'Select',
 	apis: {},
 	activateSelection: function() {
-		clear();
+		console.clear();
 
 		if(window.activeDialog)
 			window.activeDialog.close();
