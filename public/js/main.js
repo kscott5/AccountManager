@@ -1,8 +1,10 @@
+console.debugger = (console.debugger instanceof Function)? console.debugger: (data)=>console.log(data);
+
 window.manager = {
 	activeApi: 'Select',
 	apis: {},
 	activateSelection: function() {
-		console.clear();
+		clear();
 
 		if(window.activeDialog)
 			window.activeDialog.close();
