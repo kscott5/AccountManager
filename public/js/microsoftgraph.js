@@ -185,7 +185,7 @@ function listMailFolderItems(folder, data) {
 
 MicrosoftGraph.prototype.mail = function(options) {
 	console.debugger(`graph mail`);
-	options = (typeof options != "object") || {};
+	options = options || {};
 
 	let client = new XMLHttpRequest();
 	client.onreadystatechange = () => {
@@ -202,7 +202,7 @@ MicrosoftGraph.prototype.mail = function(options) {
 	};
 
 	let filters = options.filters || {};
-	let url = `${this.resourceUrl}/me/mailFolders`;
+	let url = `${this.resourceUrl}/me/mailFolders/${(filters.folder||'')}`;
 	client.open('GET', url);
 	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken()}`);
 	client.setRequestHeader('Content-Type', 'application/json');
