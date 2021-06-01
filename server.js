@@ -23,7 +23,7 @@ const pagecallback = `
 <head>
 <script language='javascript'>
 	(function(){
-		opener.window.manager.activateSelection();
+		opener.window.manager.apis.Microsoft.activateSelection();
 	})();
 </script>
 </head>
@@ -113,7 +113,7 @@ httpRequest.body = [];
 		httpRequest.body = Buffer.concat(httpRequest.body).toString();
 		httpRequest.body = querystring.parse(httpRequest.body);
 		
-		httpResponse.setHeader('set-cookie',[`access_token=${httpRequest.body.access_token}; Path=/; SameSite=Strict;`]);
+		httpResponse.setHeader('set-cookie',[`access_token=${httpRequest.body.access_token}; Path=/; SameSite=Strict; HttpOnly=false; Secure=false; Max-Age=600;`]);
 		httpResponse.end(pagecallback);
 
 	});
