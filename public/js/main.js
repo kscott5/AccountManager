@@ -1,4 +1,4 @@
-console.debugger = (console.debugger instanceof Function)? console.debugger: (data)=>console.log(data);
+console.debugger = (console.debugger instanceof Function)? console.debugger: (data)=>console.debug(data);
 
 window.manager = {
 	activeApi: 'Select',
