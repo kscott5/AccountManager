@@ -19,8 +19,8 @@ MicrosoftGraph.prototype.accesstoken = function(){
 }
 
 MicrosoftGraph.prototype.activateSelection = function() {
-		if(window.activeDialog)
-			window.activeDialog.close();
+		if(window.manager,activeDialog)
+			window.manager.activeDialog.close();
 
 		this.me().mail();
 		
@@ -43,7 +43,7 @@ MicrosoftGraph.prototype.login = function(options) {
 			scope=${scopes}&state=12345`;
 
 	let features = "menubar=no,location=yes,resizable=no,scrollbars=yes,status=yes";
-	window.activeDialog = window.open(url, options.title || this.appName, features);
+	window.manager.activeDialog = window.open(url, options.title || this.appName, features);
 
 	return this;
 }
