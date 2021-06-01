@@ -50,7 +50,7 @@ window.onload = function() {
 		
 		let api = window.manager.apis[window.manager.activeApi];
 		if(api.ready()) 
-			window.manager.activateSelection();
+			api.activateSelection();
 		else
 			api.login();
 	};
