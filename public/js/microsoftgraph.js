@@ -1,3 +1,5 @@
+var cookieOptions = `;domain=${document.location.hostname};path=/;samesite=strict;secure=false;httponly=false;max-age=600`; 
+
 function MicrosoftGraph(appName,clientId) {
 	if(!this instanceof MicrosoftGraph) {
 		return new MicrosoftGraph(name,clientId);
@@ -92,7 +94,7 @@ MicrosoftGraph.prototype.deletePermissions = function(options) {
 
 function listProfileOfMe(data) {
 	console.debugger(`listProfileOfMe: ${JSON.stringify(data)}`);
-	document.cookie = `microsoft:profile:me=${data['@odata.context']}`;
+	document.cookie = `microsoft:profile:me=${data['@odata.context']}${cookieOptions}`;
 
 	let container = document.createElement('div');
 	let anchor = document.createElement('a');
@@ -135,7 +137,7 @@ MicrosoftGraph.prototype.me = function(options) {
 function listMailFolders(data) {
 	console.debugger(`listMailFolderis`);
 
-	document.cookie = `microsoft:mail:folders=${data['@odata.context']}`;
+	document.cookie = `microsoft:mail:folders=${data['@odata.context']}${cookieOptions}`;
 
 	let container = document.createElement('div');
 	for(let index=0; index<data.value.length; index++) {
@@ -153,7 +155,7 @@ function listMailFolders(data) {
 
 function listMailFolderItems(folder, data) {
 	console.debugger(`listMailFolderItems: ${folder}`);
-	document.cookie = `microsoft:mail:${folder}=${data['@odata.content']}`;
+	document.cookie = `microsoft:mail:${folder}=${data['@odata.content']}${cookieOptions}`;
 	
 	let container = document.createElement('div');
 	for(let index=0; index<data.value.length; index++) {
