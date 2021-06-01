@@ -19,14 +19,15 @@ MicrosoftGraph.prototype.accesstoken = function(){
 }
 
 MicrosoftGraph.prototype.activateSelection = function() {
-		if(window.manager.activeDialog)
-			window.manager.activeDialog.close();
+	if(window.manager.activeDialog)
+		window.manager.activeDialog.close();
 
-		this.me();
-		this.mail();
+	this.me();
+	this.mail();
 		
-		alert("Detail api JSON view in developer console press F12 key.");
-	}
+	alert("Detail api JSON view in developer console press F12 key.");
+}
+
 /**
  * Login with application conscent from person on website.
  */
@@ -143,9 +144,12 @@ MicrosoftGraph.prototype.me = function(options) {
 	return this;
 }
 
+let mailFoldersInnerHTML = 
+`<div>
+	<a href='{{folder.id}}'>{{folder.id}} {{folder.unreadItemCount}}</a>
+</div>`;
 function listMailFolders(data) {
 	console.debugger(`listMailFolderis`);
-
 	document.cookie = `microsoft:mail:folders=${data['@odata.context']}${cookieOptions}`;
 
 	let container = document.createElement('div');
@@ -153,10 +157,7 @@ function listMailFolders(data) {
 		let folder = data.value[index];
 		console.debugger(folder);
 
-		let anchor = document.createElement('a');
-		anchor.href = `${folder.id}`;
-		anchor.textContent = `${folder.displayName} ${folder.unreadItemCount}`;
-		container.appendChild(anchor);
+		container.innerHTML.concat(window.manager.template(mailFoldersInnerHTML));
 	}
 
 	return container;

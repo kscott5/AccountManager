@@ -7,7 +7,7 @@ window.manager = {
 
 		for(let index=0; index<items.length; index++) {
 			let variable = items[index]; // an inline {{template}} 
-			let expression = variable.replace(/*open token*/ `{{`, /*with empty string*/ `}}`)
+			let expression = variable.replace(/*open token*/ `{{`, /*with empty string*/ `}`)
 					.replace(/*close token*/ `}}`, /*with empty string*/ ``);
 			
 			// NOTE: Expects the variable template between `{{` and `}}` is within block scope, var or let.
