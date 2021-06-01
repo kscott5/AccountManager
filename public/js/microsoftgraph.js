@@ -34,6 +34,8 @@ MicrosoftGraph.prototype.login = function(options) {
 
 	let features = "menubar=no,location=yes,resizable=no,scrollbars=yes,status=yes";
 	window.activeDialog = window.open(url, options.title || this.appName, features);
+
+	return this;
 }
 
 /**
@@ -58,6 +60,8 @@ MicrosoftGraph.prototype.logout = function(options) {
 	client.open('POST', url);
 	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken()}`);
 	client.send();
+
+	return this;
 }
 
 /**
@@ -82,6 +86,8 @@ MicrosoftGraph.prototype.deletePermissions = function(options) {
 	client.open('DELETE', url);
 	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken()}`);
 	client.send();
+
+	return this;
 }
 
 function listProfileOfMe(data) {
@@ -122,6 +128,8 @@ MicrosoftGraph.prototype.me = function(options) {
 	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken()}`);
 	client.setRequestHeader('Content-Type', 'application/json');
 	client.send();
+
+	return this;
 }
 
 function listMailFolders(data) {
@@ -188,4 +196,6 @@ MicrosoftGraph.prototype.mail = function(options) {
 	client.setRequestHeader('Authorization', `Bearer ${this.accesstoken()}`);
 	client.setRequestHeader('Content-Type', 'application/json');
 	client.send();
+
+	return this;
 }
