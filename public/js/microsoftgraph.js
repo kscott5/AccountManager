@@ -130,7 +130,7 @@ MicrosoftGraph.prototype.me = function(options) {
 				options.target(data);
 			} else {
 				let main = document.querySelector('#main');
-				main.appendChild(listProfileOfMe(data));
+				main.innerHTML = main.innerHTML.concat(listProfileOfMe(data).innerHTML);
 			}
 		}
 	};
@@ -144,20 +144,21 @@ MicrosoftGraph.prototype.me = function(options) {
 	return this;
 }
 
-let mailFoldersInnerHTML = 
-`<div>
-	<a href='{{folder.id}}'>{{folder.id}} {{folder.unreadItemCount}}</a>
-</div>`;
-function listMailFolders(data) {
+MicrosoftGraph.prototype.listMailFolders = function(data) {
 	console.debugger(`listMailFolderis`);
 	document.cookie = `microsoft:mail:folders=${data['@odata.context']}${cookieOptions}`;
 
 	let container = document.createElement('div');
 	for(let index=0; index<data.value.length; index++) {
-		let folder = data.value[index];
+		var folder = data.value[index];
 		console.debugger(folder);
 
-		container.innerHTML.concat(window.manager.template(mailFoldersInnerHTML));
+		// NOTE: closure and scope variable makes this method difficult.
+		// example: variable 'folder' is not available template().
+
+		//window.manager.template(mailFolderInnerHTML);
+		let html = `<div> <a href='${folder.id}'>${folder.displayName} ${folder.unreadItemCount}</a></div>`;
+		container.innerHTML = container.innerHTML.concat(html);
 	}
 
 	return container;
@@ -212,9 +213,9 @@ MicrosoftGraph.prototype.mail = function(options) {
 			} else {
 				let main = document.querySelector('#main');
 				let content = (folder != '')? listMailFolderItems(folder,data) : 
-					listMailFolders(data);
+					this.listMailFolders(data);
 
-				main.appendChild(content);
+				main.innerHTML = main.innerHTML.concat(content.innerHTML);
 			}
 		}
 	};
