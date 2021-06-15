@@ -76,6 +76,11 @@ function crossSiteService(httpRequest,httpResponse) {
 	httpResponse.setHeader('Access-Control-Allow-Origin', origin);
 }
 
+function contentSecurityPolicy(httpRequest,httpResponse) {
+	// More security options available that prevent ethical hacks
+	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+}
+
 /*
  * Callback service used with Microsoft Graph API. 
  *
