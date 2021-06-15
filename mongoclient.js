@@ -11,6 +11,7 @@ exportList.handshake =
 {
     hello: 1,
     helloOk: true,
+	isMaster: 0,
     client: {
         application: {
             name: 'Mongo Client Karega Scott'
@@ -116,14 +117,14 @@ if(exportList.certPEMFile && exportList.keyPEMFile) {
 		delete exportList.ca;
 		delete exportList.key
 		delete exportList.cert;
-		delete exportList.handshake;
+//		delete exportList.handshake;
 		delete exportList.secureSocket;
 	}
 } else {
 	delete exportList.ca;
 	delete exportList.keyPEMFile;
 	delete exportList.certPEMFile;
-	delete exportList.handshake;
+//	delete exportList.handshake;
 }
 
 //socket.connect({hostname: localhost, port: 27017}); // open the connection
